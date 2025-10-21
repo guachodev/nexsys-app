@@ -117,6 +117,23 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
     }
   }
 
+  void loadNewLectura(Lectura nuevaLectura) {
+    state = LecturaFormState(
+      id: nuevaLectura.id,
+      isPosting: false,
+      lecturaAnterior: nuevaLectura.lecturaAnterior,
+      medidor: nuevaLectura.medidor,
+      catastro: nuevaLectura.catastro,
+      propietario: nuevaLectura.propietario,
+      cedula: nuevaLectura.cedula,
+      periodo: nuevaLectura.periodo,
+      lecturaActual: LecturaActual.pure(
+        lecturaAnterior: nuevaLectura.lecturaAnterior,
+      ),
+      novedadId: Novedad.pure(),
+    );
+  }
+
   void onDescriptionChanged(String description) {
     state = state.copyWith(observacion: description);
   }

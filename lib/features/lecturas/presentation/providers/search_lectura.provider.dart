@@ -11,14 +11,17 @@ final searchLecturaProvider =
     StateNotifierProvider<SearchLecturaNotifier, SearchLecturaState>((ref) {
       final lecturasRepository = LecturasRepositoryImpl();
       final authState = ref.watch(authProvider);
-      return SearchLecturaNotifier(lecturasRepository: lecturasRepository, token: authState.user!.token);
+      return SearchLecturaNotifier(
+        lecturasRepository: lecturasRepository,
+        token: authState.user!.token,
+      );
     });
 
 class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
   final LecturasRepository lecturasRepository;
-   final String token;
+  final String token;
   Timer? _debounceTimer;
-  SearchLecturaNotifier( {required this.lecturasRepository,required this.token})
+  SearchLecturaNotifier({required this.lecturasRepository, required this.token})
     : super(SearchLecturaState());
 
   reset() {
@@ -43,6 +46,18 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
     );
   }
 
+  Lectura? nextLectura(int id) {
+    final remainingLecturas = state.lecturas
+        .where((element) => element.id != id)
+        .toList();
+
+    final next = remainingLecturas.isNotEmpty ? remainingLecturas.first : null;
+
+    state = state.copyWith(lecturas: remainingLecturas, errorMessage: null);
+
+    return next;
+  }
+
   void updateQuery(String value) {
     if (value.isEmpty) {
       state = state.copyWith(query: value, status: SearchStatus.initial);
@@ -60,7 +75,7 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
     try {
       state = state.copyWith(status: SearchStatus.loading, query: query);
 
-      final lecturas = await lecturasRepository.searchLecturas(query,token);
+      final lecturas = await lecturasRepository.searchLecturas(query, token);
 
       if (lecturas.isEmpty) {
         state = state.copyWith(status: SearchStatus.empty, lecturas: []);

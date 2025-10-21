@@ -392,7 +392,7 @@ class _SearchBarSection extends StatelessWidget {
             ),
             padding: const EdgeInsets.all(8),
             child: const Icon(
-              Icons.qr_code_scanner,
+              Icons.barcode_reader,
               color: Colors.white,
               size: 30,
             ),

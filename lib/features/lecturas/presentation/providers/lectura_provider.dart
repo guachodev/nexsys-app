@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
+final currentLecturaProvider = StateProvider<Lectura?>((ref) => null);
+
 final lecturaProvider = StateNotifierProvider.autoDispose
     .family<LecturaNotifier, LecturaState, Lectura>((ref, lectura) {
       return LecturaNotifier(lectura);

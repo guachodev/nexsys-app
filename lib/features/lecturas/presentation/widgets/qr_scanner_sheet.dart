@@ -68,7 +68,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
     } else if (state.status == SearchLecturaQrStatus.error) {
       Notifications.error(context, state.message);
       _isProcessing = false;
-      _controller.start();
+      _controller.pause();
     }
   }
 
