@@ -40,7 +40,7 @@ final goRouterProvider = Provider((ref) {
         path: '/lecturas/detalle', // /product/new
         builder: (context, state) {
           final lectura = state.extra as Lectura;
-          return LecturaScreen(lectura: lectura);
+          return LecturaScreen(lecturaInicial: lectura);
         },
       ),
     ],

@@ -15,6 +15,7 @@ class CustomTextFormField extends StatelessWidget {
   final Widget? suffixIcon;
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
+  final bool autofocus;
 
   const CustomTextFormField({
     super.key,
@@ -31,6 +32,7 @@ class CustomTextFormField extends StatelessWidget {
     this.suffixIcon,
     this.maxLength,
     this.inputFormatters,
+    this.autofocus = false,
   });
 
   @override
@@ -41,6 +43,7 @@ class CustomTextFormField extends StatelessWidget {
       onChanged: onChanged,
       onFieldSubmitted: onFieldSubmitted,
       validator: validator,
+      autofocus: autofocus,
       obscureText: obscureText,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
