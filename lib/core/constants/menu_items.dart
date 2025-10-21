@@ -18,6 +18,7 @@ class MenuItem {
 
 const appMenuItems = <MenuItem>[
   MenuItem(title: 'Home', link: '/', icon: Icons.home),
+/*   MenuItem(title: 'Meter', link: '/test', icon: Icons.water), */
   MenuItem(
     title: 'Registrar lecturas',
     link: '/lecturas',
