@@ -45,7 +45,7 @@ class _PurpleBox extends StatelessWidget {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Colors.indigo.shade500, Colors.indigo.shade600],
+      colors: [Colors.indigo, Colors.indigo.shade600],
       stops: [0.0, 1.0],
     ),
   );

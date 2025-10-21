@@ -1,5 +1,6 @@
 class User {
   final int id;
+  final int empleadoId;
   final String email;
   final String fullName;
   final String rol;
@@ -8,6 +9,7 @@ class User {
 
   User({
     required this.id,
+    required this.empleadoId,
     required this.email,
     required this.fullName,
     required this.rol,

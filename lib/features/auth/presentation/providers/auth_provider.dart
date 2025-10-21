@@ -37,7 +37,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void checkAuthStatus() async {
     final token = await preferencesStorageService.getValue<String>('token');
-    final offline = await preferencesStorageService.getValue<bool>('offline');
+    final offline =
+        await preferencesStorageService.getValue<bool>('offline') ?? true;
 
     if (token == null) return logout();
 
@@ -49,10 +50,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
-  void _setLoggedUser(User? user, bool? offline) async {
+  void _setLoggedUser(User? user, bool offline) async {
     if (user != null) {
       await preferencesStorageService.setKeyValue('token', user.token);
-      await preferencesStorageService.setKeyValue<bool>('offline', offline!);
+      await preferencesStorageService.setKeyValue<bool>('offline', offline);
     }
 
     state = state.copyWith(
@@ -65,7 +66,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> logout([String? errorMessage]) async {
     await preferencesStorageService.removeKey('token');
-    await preferencesStorageService.removeKey('offline');
+    await preferencesStorageService.removeKey('online');
 
     state = state.copyWith(
       authStatus: AuthStatus.notAuthenticated,
@@ -80,13 +81,15 @@ class AuthState {
   final AuthStatus authStatus;
   final User? user;
   final String errorMessage;
-  final bool? offline;
+  final bool offline;
+  final bool isLoading;
 
   AuthState({
     this.authStatus = AuthStatus.checking,
     this.user,
     this.errorMessage = '',
     this.offline = false,
+    this.isLoading = false
   });
 
   AuthState copyWith({
@@ -94,10 +97,12 @@ class AuthState {
     User? user,
     String? errorMessage,
     bool? offline,
+    bool? isLoading
   }) => AuthState(
     authStatus: authStatus ?? this.authStatus,
     user: user ?? this.user,
     errorMessage: errorMessage ?? this.errorMessage,
     offline: offline ?? this.offline,
+    isLoading: isLoading ?? this.isLoading
   );
 }

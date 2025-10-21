@@ -2,18 +2,18 @@ import 'package:nexsys_app/features/auth/data/data.dart';
 import 'package:nexsys_app/features/auth/domain/domain.dart';
 
 class AuthRepositoryImpl extends AuthRepository {
-  final AuthDataSource dataSource;
+  final AuthDataSource datasource;
 
-  AuthRepositoryImpl({AuthDataSource? dataSource})
-    : dataSource = dataSource ?? AuthDataSourceImpl();
+  AuthRepositoryImpl({AuthDataSource? datasource})
+    : datasource = datasource ?? AuthDataSourceImpl();
 
   @override
   Future<User> checkAuthStatus(String token) {
-    return dataSource.checkAuthStatus(token);
+    return datasource.checkAuthStatus(token);
   }
 
   @override
   Future<User> login(String username, String password) {
-    return dataSource.login(username, password);
+    return datasource.login(username, password);
   }
 }

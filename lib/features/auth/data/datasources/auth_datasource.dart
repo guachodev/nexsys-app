@@ -34,6 +34,9 @@ class AuthDataSourceImpl extends AuthDataSource {
         data: {'username': username, 'password': password},
       );
 
+print('Response status: ${response.statusCode}');
+print('Response body: ${response.data}');
+
       final user = UserMapper.userJsonToEntity(response.data);
       return user;
     } on DioException catch (e) {
