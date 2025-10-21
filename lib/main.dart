@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/core/router/router.dart';
+import 'package:nexsys_app/core/theme/app_theme.dart';
 
 Future<void> main() async {
   await Environment.initEnvironment();
@@ -18,19 +19,56 @@ class MyApp extends ConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    /* return ChangeNotifierProvider(
+      create: (_) => AssignedMetersProvider(),
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: const DashboardScreen(),
+      ),
+    ); */
     final appRouter = ref.watch(goRouterProvider);
     return MaterialApp.router(
       title: Environment.appName,
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
-      theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(backgroundColor: Colors.white,),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        //colorScheme: ColorScheme.fromSeed(seedColor: Color(0xFF1153dc)),
-      ),
+      theme: AppTheme.lightTheme,
+     /* theme: ThemeData(
+        //scaffoldBackgroundColor: Colors.white,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Color(0xff000000),
+        ),
+        /* colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
+        
+        inputDecorationTheme: InputDecorationThemeData(
+          floatingLabelStyle: const TextStyle(
+            fontSize: 18,
+            color: Colors.black54,
+            fontWeight: FontWeight.w700, 
+          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(8),
+            borderSide: const BorderSide(width: 1.5, color: Colors.indigo),
+          ),
+          hintStyle: TextStyle(color: Colors.black45),
+          labelStyle: TextStyle(color: Colors.black45),
 
-      //home: const MyHomePage(title: 'Flutter Demo Home Page'),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 14,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.grey.shade400, width: 1.2),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        ), */
+
+        scaffoldBackgroundColor: kBackgroundColor,
+        // primaryColor: kPrimaryColor,
+      ),*/
     );
   }
 }
