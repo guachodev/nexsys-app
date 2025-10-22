@@ -30,6 +30,7 @@ environment:
 dependencies:
   animate_do: ^4.2.0
   audioplayers: ^6.5.1
+  connectivity_plus: ^7.0.0
   cupertino_icons: ^1.0.8
   dio: ^5.9.0
   flutter:
@@ -45,6 +46,7 @@ dependencies:
   intl: ^0.20.2
   lottie: ^3.3.2
   mobile_scanner: ^7.1.2
+  permission_handler: ^12.0.1
   shared_preferences: ^2.5.3
   shimmer: ^3.0.0
 
