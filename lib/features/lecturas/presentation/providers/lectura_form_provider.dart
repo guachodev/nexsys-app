@@ -99,12 +99,11 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
       // 🔍 Obtener geolocalización actual
       final position = await LocationService.getCurrentPosition();
 
-
       final lecturaLike = {
         'id': state.id,
         'lectura_actual': state.lecturaActual.value,
         'descripcion': state.observacion,
-        'image': state.image,
+        'imagenes': state.images,
         'consumo': state.consumo,
         'novedad_id': state.novedadId?.value,
         'fecha_lectura': DateTime.now().toString(),
@@ -144,12 +143,18 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
     state = state.copyWith(observacion: description);
   }
 
-  void updateLecturaImage(String path) {
-    state = state.copyWith(image: path);
+  void addLecturaImage(String path) {
+    final updatedList = [...state.images, path];
+    state = state.copyWith(images: updatedList);
   }
 
-  void cleanLecturaImage() {
-    state = state.copyWith(image: '');
+  void removeLecturaImage(String path) {
+    final updatedList = state.images.where((img) => img != path).toList();
+    state = state.copyWith(images: updatedList);
+  }
+
+  void clearAllImages() {
+    state = state.copyWith(images: []);
   }
 }
 
@@ -166,7 +171,7 @@ class LecturaFormState {
   final String? observacion;
   final int consumo;
   final Novedad? novedadId;
-  final String? image;
+  final List<String> images;
   final bool isPosting;
 
   LecturaFormState({
@@ -182,7 +187,7 @@ class LecturaFormState {
     this.novedadId,
     this.observacion,
     this.consumo = 0,
-    this.image,
+    this.images = const [],
     this.isPosting = false,
   }) {
     //lecturaActual = LecturaActual.pure();
@@ -201,7 +206,7 @@ class LecturaFormState {
     String? observacion,
     int? consumo,
     Novedad? novedadId,
-    String? image,
+    List<String>? images,
     bool? isPosting,
   }) {
     return LecturaFormState(
@@ -217,7 +222,7 @@ class LecturaFormState {
       observacion: observacion ?? this.observacion,
       consumo: consumo ?? this.consumo,
       novedadId: novedadId ?? this.novedadId,
-      image: image ?? this.image,
+      images: images ?? this.images,
       isPosting: isPosting ?? this.isPosting,
     );
   }
