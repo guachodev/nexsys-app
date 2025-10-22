@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/core/utils/utils.dart';
@@ -39,6 +42,9 @@ class _LecturaScreenState extends ConsumerState<LecturaScreen> {
   @override
   Widget build(BuildContext context) {
     final lecturaActual = ref.watch(currentLecturaProvider);
+    final isConnected = ref.watch(connectivityProvider);
+
+    print("Estado conexion $isConnected");
 
     // Si no hay más lecturas, mostramos mensaje en lugar del formulario
     if (lecturaActual == null) {
@@ -93,14 +99,31 @@ class _LecturaScreenState extends ConsumerState<LecturaScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(title: const Text('Registrar lectura')),
+
+        /* appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 300),
+            color: isConnected ? Colors.green : Colors.red,
+            child: AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              title: Text(isConnected ? 'Registrar lectura' : 'Sin conexión'),
+            ),
+          ),
+        ), */
         body: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 AlertBanner(),
+                SizedBox(height: 6),
                 _InfoMedidor(lectura: lecturaState.lectura!),
-                _FormView(lecturaState: lecturaState),
+                _FormView(
+                  key: ValueKey(lecturaState.lectura!.id),
+                  lecturaState: lecturaState,
+                ),
               ],
             ),
           ),
@@ -151,7 +174,8 @@ class _InfoMedidor extends StatelessWidget {
 
 class _FormView extends ConsumerWidget {
   final LecturaState lecturaState;
-  const _FormView({required this.lecturaState});
+  //const _FormView({required this.lecturaState});
+  const _FormView({super.key, required this.lecturaState});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -167,6 +191,17 @@ class _FormView extends ConsumerWidget {
       {"id": 7, "name": "REUBICAR MEDIDOR", "default": false},
       {"id": 5, "name": "SIN NOVEDAD", "default": true},
     ].map((e) => NovedadMapper.jsonToEntity(e)).toList();
+
+    final defaultNovedad = novedades.firstWhere((m) => m.isDefault == true);
+
+    // 🔹 Si el formulario no tiene novedad aún, aplicamos la por defecto
+    if (lecturaForm.novedadId?.value == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref
+            .read(lecturaFormProvider(lecturaState.lectura!).notifier)
+            .onNovedadChanged(defaultNovedad.id);
+      });
+    }
 
     return Column(
       children: [
@@ -198,6 +233,9 @@ class _FormView extends ConsumerWidget {
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           initialValue: lecturaForm.lecturaActual.value?.toString() ?? '',
+          onFieldSubmitted: (_) => ref
+              .read(lecturaFormProvider(lecturaState.lectura!).notifier)
+              .onFormSubmit(),
           onChanged: (value) {
             ref
                 .read(lecturaFormProvider(lecturaState.lectura!).notifier)
@@ -222,14 +260,14 @@ class _FormView extends ConsumerWidget {
           hintText: 'Seleccionar novedad..',
           items: novedades,
           errorText: lecturaForm.novedadId?.errorMessage,
-          initialValue: novedades.firstWhere((m) => m.isDefault == true),
+          initialValue: defaultNovedad,
           onChanged: (novedad) {
             ref
                 .read(lecturaFormProvider(lecturaState.lectura!).notifier)
                 .onNovedadChanged(novedad.id);
           },
         ),
-        const SizedBox(height: AppDesignTokens.spacingL),
+        const SizedBox(height: 10),
         CustomTextFormField(
           label: 'Observaciones',
           hintText: '...',
@@ -240,9 +278,12 @@ class _FormView extends ConsumerWidget {
               .read(lecturaFormProvider(lecturaState.lectura!).notifier)
               .onDescriptionChanged,
         ),
-        const SizedBox(height: AppDesignTokens.spacingL),
+        const SizedBox(height: 10),
+        _ImagenLectura(lectura: lecturaState.lectura!),
+        const SizedBox(height: 16),
         FilledButton(
           onPressed: () async {
+            final currentContext = context;
             final lecturaActual = lecturaState.lectura;
             if (lecturaActual == null) return;
 
@@ -252,8 +293,14 @@ class _FormView extends ConsumerWidget {
 
             final success = await formNotifier.onFormSubmit();
 
+            // Verificar si el widget sigue montado antes de usar context
+            if (!currentContext.mounted) return;
+
             if (!success) {
-              SnackbarService.error(context, "Error al registrar lectura");
+              SnackbarService.error(
+                currentContext,
+                "Por favor ingrese todos los campos del formulario.",
+              );
               return;
             }
 
@@ -269,7 +316,7 @@ class _FormView extends ConsumerWidget {
 
             if (next == null) {
               SnackbarService.show(
-                context,
+                currentContext,
                 message: "No hay más lecturas pendientes.",
               );
 
@@ -281,7 +328,7 @@ class _FormView extends ConsumerWidget {
             }
 
             ref.read(currentLecturaProvider.notifier).state = next;
-            formNotifier.loadNewLectura(next);
+            formNotifier.loadNewLectura(next, defaultNovedad.id);
 
             SnackbarService.success(
               context,
@@ -307,6 +354,151 @@ class _FormView extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 40),
+      ],
+    );
+  }
+}
+
+class _ImagenLectura extends ConsumerWidget {
+  final Lectura lectura;
+  const _ImagenLectura({required this.lectura});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final lecturaForm = ref.watch(lecturaFormProvider(lectura));
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Foto del medidor (opcional)",
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 10),
+
+        GestureDetector(
+          onTap: () async {
+            final picker = ImagePicker();
+            //final source = ImageSource.camera;
+            /* await showModalBottomSheet<ImageSource>(
+              context: context,
+              builder: (ctx) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.camera_alt_outlined),
+                      title: const Text('Tomar foto'),
+                      onTap: () => Navigator.pop(ctx, ImageSource.camera),
+                    ),
+                    ListTile(
+                      leading: const Icon(Icons.photo_library_outlined),
+                      title: const Text('Elegir de galería'),
+                      onTap: () => Navigator.pop(ctx, ImageSource.gallery),
+                    ),
+                  ],
+                ),
+              ),
+            );*/
+
+            final image = await picker.pickImage(
+              source: ImageSource.camera,
+              imageQuality: 80,
+            );
+
+            if (image != null) {
+              ref
+                  .read(lecturaFormProvider(lectura).notifier)
+                  .updateLecturaImage(image.path);
+            }
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+            width: double.infinity,
+            height: 220,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Colors.grey.shade400,
+                style: lecturaForm.image == null || lecturaForm.image!.isEmpty
+                    ? BorderStyle.solid
+                    : BorderStyle.none,
+              ),
+              boxShadow: [
+                if (lecturaForm.image != null && lecturaForm.image!.isNotEmpty)
+                  const BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+              ],
+            ),
+
+            // 👇 Si hay imagen, usa FadeInImage
+            child: lecturaForm.image != null && lecturaForm.image!.isNotEmpty
+                ? Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: FadeInImage(
+                          placeholder: const AssetImage(
+                            'assets/images/loading-image.webp',
+                          ),
+                          image: FileImage(File(lecturaForm.image!)),
+                          fit: BoxFit.cover,
+                          fadeInDuration: const Duration(milliseconds: 300),
+                          fadeOutDuration: const Duration(milliseconds: 150),
+                          placeholderFit: BoxFit.cover,
+                        ),
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: CircleAvatar(
+                          backgroundColor: Colors.black45,
+                          radius: 20,
+                          child: IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
+                              size: 20,
+                            ),
+                            onPressed: () {
+                              ref
+                                  .read(lecturaFormProvider(lectura).notifier)
+                                  .cleanLecturaImage();
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.camera_alt_rounded,
+                          size: 70,
+                          color: Colors.grey.shade500,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          "Tomar o adjuntar foto",
+                          style: TextStyle(
+                            color: Colors.grey.shade700,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+          ),
+        ),
       ],
     );
   }

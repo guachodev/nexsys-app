@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
+import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart' hide Novedad;
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
@@ -93,21 +94,26 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
     if (!state.isFormValid) return false;
     if (onSubmitCallback == null) return false;
 
-    final lecturaLike = {
-      'id': state.id,
-      'lectura_actual': state.lecturaActual.value,
-      'descripcion': state.observacion,
-      'image': state.image,
-      'consumo': state.consumo,
-      'novedad_id': state.novedadId?.value,
-      'fecha_lectura': DateTime.now().toString(),
-      'empleado_id': userId,
-    };
-
     try {
       state = state.copyWith(isPosting: true);
-      print(lecturaLike);
-      //await Future.delayed(Duration(seconds: 10));
+      // 🔍 Obtener geolocalización actual
+      final position = await LocationService.getCurrentPosition();
+
+
+      final lecturaLike = {
+        'id': state.id,
+        'lectura_actual': state.lecturaActual.value,
+        'descripcion': state.observacion,
+        'image': state.image,
+        'consumo': state.consumo,
+        'novedad_id': state.novedadId?.value,
+        'fecha_lectura': DateTime.now().toString(),
+        'empleado_id': userId,
+        'latitud': position?.latitude,
+        'longitud': position?.longitude,
+      };
+
+      print("📍 Lectura con ubicación: $lecturaLike");
       await onSubmitCallback!(lecturaLike);
       state = state.copyWith(isPosting: false);
       return true;
@@ -117,7 +123,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
     }
   }
 
-  void loadNewLectura(Lectura nuevaLectura) {
+  void loadNewLectura(Lectura nuevaLectura, int? novedadId) {
     state = LecturaFormState(
       id: nuevaLectura.id,
       isPosting: false,
@@ -130,7 +136,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
       lecturaActual: LecturaActual.pure(
         lecturaAnterior: nuevaLectura.lecturaAnterior,
       ),
-      novedadId: Novedad.pure(),
+      novedadId: Novedad.dirty(novedadId),
     );
   }
 
