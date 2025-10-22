@@ -5,10 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/core/router/router.dart';
+import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/core/theme/app_theme.dart';
 
 Future<void> main() async {
   await Environment.initEnvironment();
+  WidgetsFlutterBinding.ensureInitialized();
+  final permissionService = PermissionService();
+  await permissionService.requestInitialPermissions();
 
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -33,7 +37,7 @@ class MyApp extends ConsumerWidget {
       debugShowCheckedModeBanner: false,
       routerConfig: appRouter,
       theme: AppTheme.lightTheme,
-     /* theme: ThemeData(
+      /* theme: ThemeData(
         //scaffoldBackgroundColor: Colors.white,
         appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
