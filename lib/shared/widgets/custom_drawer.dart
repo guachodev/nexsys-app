@@ -16,12 +16,12 @@ class CustomDrawer extends ConsumerWidget {
     final currentRoute = ModalRoute.of(context)?.settings.name;
 
     final List<MenuItem> preferenceItems = [
-      MenuItem(
+      /* MenuItem(
         icon: Icons.wifi,
         title: "Estás en modo:",
         trailing: _OnlineChip(authState.offline),
         link: '',
-      ),
+      ), */
       MenuItem(icon: Icons.info, title: "Acerca de", link: ''),
     ];
 

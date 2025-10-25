@@ -1,4 +1,4 @@
-import 'dart:async';
+/* import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -43,5 +43,16 @@ class ConnectivityNotifier extends StateNotifier<bool> {
   void dispose() {
     _subscription.cancel();
     super.dispose();
+  }
+}
+ */
+
+
+import 'package:connectivity_plus/connectivity_plus.dart';
+
+class ConnectivityService {
+  static Future<bool> hasConnection() async {
+    final result = await Connectivity().checkConnectivity();
+    return result.first != ConnectivityResult.none;
   }
 }

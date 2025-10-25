@@ -7,25 +7,28 @@ import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 final periodoProvider =
     StateNotifierProvider.autoDispose<PeriodoNotifier, PeriodoState>((ref) {
       final lecturasRepository = LecturasRepositoryImpl();
-       final authState = ref.watch(authProvider);
-      return PeriodoNotifier(lecturasRepository: lecturasRepository, token: authState.user!.token);
+      final authState = ref.watch(authProvider);
+      return PeriodoNotifier(
+        lecturasRepository: lecturasRepository,
+        token: authState.user!.token,
+      );
     });
 
 class PeriodoNotifier extends StateNotifier<PeriodoState> {
   final LecturasRepositoryImpl lecturasRepository;
- final String token;
-  PeriodoNotifier( {required this.lecturasRepository,required this.token,}) : super(PeriodoState()) {
+  final String token;
+  PeriodoNotifier({required this.lecturasRepository, required this.token})
+    : super(PeriodoState()) {
     loadPeriodo();
   }
 
   Future<void> loadPeriodo() async {
     try {
-      state = state.copyWith( status: SearchStatus.loading);
+      state = state.copyWith(status: SearchStatus.loading);
       final periodo = await lecturasRepository.getPeriodoActivo(token);
-      
+
       if (periodo == null || periodo.total <= 0) {
         state = state.copyWith(
-        
           periodo: null,
           status: SearchStatus.empty,
           pendientes: 0,
@@ -41,14 +44,12 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
         progreso: (periodo.totalLectura / periodo.total).isNaN
             ? 0
             : periodo.totalLectura / periodo.total,
-        
       );
     } catch (e) {
       state = state.copyWith(
         periodo: null,
         status: SearchStatus.error,
         errorMessage: e.toString(),
-        
       );
     }
   }

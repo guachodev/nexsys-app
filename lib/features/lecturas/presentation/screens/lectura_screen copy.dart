@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -96,57 +94,33 @@ class _LecturaScreenState extends ConsumerState<LecturaScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(title: const Text('Registrar lectura')),
+
         body: SafeArea(
-          child: Stack(
-            children: [
-              SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const SizedBox(height: 6),
-                    _InfoMedidor(lectura: lecturaState.lectura!),
-                    _FormView(
-                      key: ValueKey(lecturaState.lectura!.id),
-                      lecturaState: lecturaState,
-                    ),
-                    const SizedBox(
-                      height: 100,
-                    ), // espacio para que no lo tape el botón
-                  ],
-                ),
-              ),
-              Positioned(
-                bottom: 20,
-                left: 16,
-                right: 16,
-                child: FilledButton(
-                  onPressed: () async {
-                    // tu lógica de submit
-                  },
-                  style: FilledButton.styleFrom(
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: AppDesignTokens.borderRadiusMedium,
-                    ),
-                    elevation: 4,
-                  ),
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'REGISTRAR LECTURA',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          //const AlertBanner(),
+                          const SizedBox(height: 6),
+                          _InfoMedidor(lectura: lecturaState.lectura!),
+                          _FormView(
+                            key: ValueKey(lecturaState.lectura!.id),
+                            lecturaState: lecturaState,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -393,7 +367,7 @@ class _ImagenesLectura extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lecturaForm = ref.watch(lecturaFormProvider(lectura));
+    //final lecturaForm = ref.watch(lecturaFormProvider(lectura));
     final notifier = ref.read(lecturaFormProvider(lectura).notifier);
 
     return Column(
@@ -433,7 +407,7 @@ class _ImagenesLectura extends ConsumerWidget {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        /* const SizedBox(height: 16),
         lecturaForm.images.isEmpty
             ? Container(
                 height: 160,
@@ -464,29 +438,23 @@ class _ImagenesLectura extends ConsumerWidget {
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   shrinkWrap: true, // 👈 importante
-                  // physics: const NeverScrollableScrollPhysics(),
+                  physics: const NeverScrollableScrollPhysics(),
                   itemCount: lecturaForm.images.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 10),
                   itemBuilder: (context, index) {
                     final path = lecturaForm.images[index];
                     return Stack(
                       children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.black12),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: FadeInImage(
-                              placeholder: const AssetImage(
-                                'assets/images/loading-image.webp',
-                              ),
-                              image: FileImage(File(path)),
-                              fit: BoxFit.cover,
-                              width: 200,
-                              height: 160,
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: FadeInImage(
+                            placeholder: const AssetImage(
+                              'assets/placeholder.png',
                             ),
+                            image: FileImage(File(path)),
+                            fit: BoxFit.cover,
+                            width: 200,
+                            height: 160,
                           ),
                         ),
                         Positioned(
@@ -512,7 +480,7 @@ class _ImagenesLectura extends ConsumerWidget {
                   },
                 ),
               ),
-      ],
+       */],
     );
   }
 }

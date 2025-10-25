@@ -144,7 +144,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
   }
 
   void addLecturaImage(String path) {
-    final updatedList = [...state.images, path];
+    final updatedList = [ path, ...state.images,];
     state = state.copyWith(images: updatedList);
   }
 

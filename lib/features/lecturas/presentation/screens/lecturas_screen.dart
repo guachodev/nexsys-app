@@ -1,6 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
@@ -20,11 +21,13 @@ class LecturasScreen extends ConsumerWidget {
     final total = periodoState.periodo?.total ?? 0;
     final leidos = periodoState.periodo?.totalLectura ?? 0;
 
+    print('Periodo => ${periodoState.periodo?.periodo}');
+
     final isCompleted = total == leidos;
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        backgroundColor: Color(0xFFF8F7F7),
+        //backgroundColor: Color(0xFFF8F7F7),
         drawer: const CustomDrawer(),
         appBar: AppBar(
           title: const Text("Lecturas de Consumo"),
@@ -32,12 +35,13 @@ class LecturasScreen extends ConsumerWidget {
             IconButton(
               icon: const Icon(Icons.search_rounded),
               onPressed: () {
-                if (isCompleted) {
+                if (!isCompleted) {
                   return Notifications.show(
                     context,
                     icon: Icons.check_circle,
                     title: '¡Lectura registrada con éxito!',
-                    message: 'Todas las lecturas asignadas han sido completadas y registradas correctamente. No hay tareas pendientes.',
+                    message:
+                        'Todas las lecturas asignadas han sido completadas y registradas correctamente. No hay tareas pendientes.',
                   );
                 }
 
@@ -47,10 +51,108 @@ class LecturasScreen extends ConsumerWidget {
             ),
           ],
         ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 400),
-          child: _buildBody(periodoState.status, periodoState, ref),
-        ),
+        body: _buildBody(periodoState.status, periodoState, ref),
+        //body: 
+        /* body: Column(
+          children: [
+            Text(
+              'Bienvenido 👋',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Verifica si tienes medidores asignados para comenzar.',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+
+            const Spacer(),
+
+            //Center(child: CircularProgressIndicator()),
+            ElevatedButton.icon(
+              icon: Icon(Icons.download),
+              label: Text('Descargar medidores'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {},
+            ),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.info_outline, color: Colors.grey),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'No tienes medidores asignados o el periodo está inactivo.',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // const SizedBox(height: 24),
+            TextFormField(
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(
+                labelText: 'Lectura actual',
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text('No se ha tomado foto'),
+            Container(
+              decoration: BoxDecoration(
+                boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 6)],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                // child: Image.file(File(_fotoPath!), height: 150),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              icon: Icon(Icons.camera_alt),
+              label: Text('Tomar foto'),
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {},
+            ),
+            //const Spacer(),
+            ElevatedButton.icon(
+              icon: Icon(Icons.save),
+              label: Text('Guardar lectura'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 48),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: () {},
+            ),
+
+            FilledButton.icon(
+              icon: const Icon(Icons.download),
+              label: const Text('Descargar Medidores'),
+              onPressed: () {}, 
+            ),
+             LinearProgressIndicator(),
+            //if (downloadState.hasError) ErrorText(error: downloadState.error),
+          ],
+        ), */
       ),
     );
   }
@@ -61,9 +163,13 @@ Widget _buildBody(
   PeriodoState periodoState,
   WidgetRef ref,
 ) {
+
   switch (status) {
+    /* case SearchStatus.loading:
+      return _Loading(); */ // Key única
+
     case SearchStatus.loading:
-      return _Loading(); // Key única
+      return _LoadingScreen(periodoState: periodoState);
 
     case SearchStatus.initial:
       return _Loading();
@@ -206,6 +312,8 @@ class _ContenidoPrincipal extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         child: Column(
           children: [
+            _DescargaIncompletaIndicator(),
+            //_SyncPendingIndicator(pendingCount: 50),
             _PeriodoCard(periodoActivo: periodoActivo),
             const SizedBox(height: 20),
             _SearchBarSection(
@@ -213,6 +321,8 @@ class _ContenidoPrincipal extends StatelessWidget {
               sheetContext: context,
               isCompleted: isCompleted,
             ),
+
+            _OfflineIndicator(pendingSyncs: 10),
             const SizedBox(height: 20),
             _ResumenCard(
               total: total,
@@ -227,6 +337,39 @@ class _ContenidoPrincipal extends StatelessWidget {
             const AyudaLecturaSteps(),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _OfflineIndicator extends StatelessWidget {
+  final int pendingSyncs;
+
+  const _OfflineIndicator({required this.pendingSyncs});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.amber[50],
+        border: Border.all(color: Colors.amber),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.cloud_off, color: Colors.amber[700]),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              pendingSyncs > 0
+                  ? 'Modo offline - $pendingSyncs lecturas pendientes de sync'
+                  : 'Modo offline - Trabajando localmente',
+              style: TextStyle(color: Colors.amber[800]),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -310,7 +453,8 @@ class _SearchBarSection extends StatelessWidget {
         sheetContext,
         icon: Icons.check_circle,
         title: '¡Lectura registrada con éxito!',
-        message: 'Todas las lecturas asignadas han sido completadas y registradas correctamente. No hay tareas pendientes.',
+        message:
+            'Todas las lecturas asignadas han sido completadas y registradas correctamente. No hay tareas pendientes.',
       );
     }
 
@@ -337,7 +481,8 @@ class _SearchBarSection extends StatelessWidget {
                   context,
                   icon: Icons.check_circle,
                   title: '¡Lectura registrada con éxito!',
-                  message: 'Todas las lecturas asignadas han sido completadas y registradas correctamente. No hay tareas pendientes.',
+                  message:
+                      'Todas las lecturas asignadas han sido completadas y registradas correctamente. No hay tareas pendientes.',
                 );
               }
 
@@ -496,7 +641,78 @@ class _AlertaSinAsignaciones extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+          child: Center(
+            child: Padding(
+              
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // SVG ilustración
+                  SvgPicture.asset(
+                    'assets/svg/addUsers.svg', // Asegúrate de colocar el SVG en assets
+                    height: 200,
+                  ),
+                  const SizedBox(height: 32),
+      
+                  // Título
+                  const Text(
+                    "Sin periodo de lectura activo",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1A2E45),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+      
+                  // Subtítulo
+                  const Text(
+                    "No tienes asignaciones disponibles actualmente. Espera a que el administrador habilite un nuevo periodo o asignación.",
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFF1A2E45),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+      
+                  // Botón
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        // Acción para revisar el formulario
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Colors.indigo),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      child: const Text(
+                        'Revisar formulario',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold
+                          //color: Color(0xFF1A2E45),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+    );
+    
+    /* return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(20),
@@ -594,7 +810,7 @@ class _AlertaSinAsignaciones extends StatelessWidget {
           ),
         ),
       ],
-    );
+    ); */
   }
 }
 
@@ -879,6 +1095,67 @@ class _Error extends StatelessWidget {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _LoadingScreen extends StatelessWidget {
+  final PeriodoState periodoState;
+
+  const _LoadingScreen({required this.periodoState});
+
+  @override
+  Widget build(BuildContext context) {
+    final tienePeriodo = periodoState.periodo != null;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Lottie.asset('assets/animations/loading.json', height: 200),
+        Text(
+          tienePeriodo
+              ? '📥 Descargando lecturas asignadas...'
+              : 'Buscando periodo activo...',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        if (tienePeriodo) ...[
+          SizedBox(height: 10),
+          Text(
+            'Periodo: ${periodoState.periodo!.periodo}',
+            style: TextStyle(color: Colors.grey),
+          ),
+          SizedBox(height: 20),
+          LinearProgressIndicator(),
+        ],
+      ],
+    );
+  }
+}
+
+// NUEVO: INDICADOR DE DESCARGA INCOMPLETA
+class _DescargaIncompletaIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      margin: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.orange[50],
+        border: Border.all(color: Colors.orange),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.warning_amber, color: Colors.orange[700]),
+          SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Descarga incompleta. Algunos datos pueden faltar.',
+              style: TextStyle(color: Colors.orange[800]),
+            ),
+          ),
+        ],
       ),
     );
   }

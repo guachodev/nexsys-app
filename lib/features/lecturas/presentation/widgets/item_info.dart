@@ -44,7 +44,7 @@ class ItemInfo extends StatelessWidget {
                 color: accentColor,
                  borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, color: Colors.white, size: 30),
+              child: Icon(icon, color: Colors.white, size: 20),
             ),
             const SizedBox(width: 10),
             Expanded(
