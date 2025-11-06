@@ -50,6 +50,7 @@ print('Response body: ${response.data}');
       }
       throw Exception();
     } catch (e) {
+      print('Error: $e');
       throw Exception();
     }
   }

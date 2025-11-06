@@ -116,7 +116,7 @@ class _LecturaScreenState extends ConsumerState<LecturaScreen> {
                   ],
                 ),
               ),
-              Positioned(
+              /* Positioned(
                 bottom: 20,
                 left: 16,
                 right: 16,
@@ -146,6 +146,7 @@ class _LecturaScreenState extends ConsumerState<LecturaScreen> {
                   ),
                 ),
               ),
+             */
             ],
           ),
         ),

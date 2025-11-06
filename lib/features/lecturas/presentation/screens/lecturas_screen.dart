@@ -52,7 +52,7 @@ class LecturasScreen extends ConsumerWidget {
           ],
         ),
         body: _buildBody(periodoState.status, periodoState, ref),
-        //body: 
+        //body:
         /* body: Column(
           children: [
             Text(
@@ -163,7 +163,6 @@ Widget _buildBody(
   PeriodoState periodoState,
   WidgetRef ref,
 ) {
-
   switch (status) {
     /* case SearchStatus.loading:
       return _Loading(); */ // Key única
@@ -312,7 +311,7 @@ class _ContenidoPrincipal extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         child: Column(
           children: [
-            _DescargaIncompletaIndicator(),
+            //_DescargaIncompletaIndicator(),
             //_SyncPendingIndicator(pendingCount: 50),
             _PeriodoCard(periodoActivo: periodoActivo),
             const SizedBox(height: 20),
@@ -322,7 +321,7 @@ class _ContenidoPrincipal extends StatelessWidget {
               isCompleted: isCompleted,
             ),
 
-            _OfflineIndicator(pendingSyncs: 10),
+            //_OfflineIndicator(pendingSyncs: 10),
             const SizedBox(height: 20),
             _ResumenCard(
               total: total,
@@ -644,74 +643,70 @@ class _AlertaSinAsignaciones extends StatelessWidget {
     return Container(
       color: Colors.white,
       child: SafeArea(
-          child: Center(
-            child: Padding(
-              
-              padding: const EdgeInsets.symmetric(horizontal: 24.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  // SVG ilustración
-                  SvgPicture.asset(
-                    'assets/svg/addUsers.svg', // Asegúrate de colocar el SVG en assets
-                    height: 200,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // SVG ilustración
+                SvgPicture.asset(
+                  'assets/svg/addUsers.svg', // Asegúrate de colocar el SVG en assets
+                  height: 200,
+                ),
+                const SizedBox(height: 32),
+
+                // Título
+                const Text(
+                  "Sin periodo de lectura activo",
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A2E45),
                   ),
-                  const SizedBox(height: 32),
-      
-                  // Título
-                  const Text(
-                    "Sin periodo de lectura activo",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1A2E45),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-      
-                  // Subtítulo
-                  const Text(
-                    "No tienes asignaciones disponibles actualmente. Espera a que el administrador habilite un nuevo periodo o asignación.",
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF1A2E45),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 32),
-      
-                  // Botón
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () {
-                        // Acción para revisar el formulario
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Colors.indigo),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+
+                // Subtítulo
+                const Text(
+                  "No tienes asignaciones disponibles actualmente. Espera a que el administrador habilite un nuevo periodo o asignación.",
+                  style: TextStyle(fontSize: 16, color: Color(0xFF1A2E45)),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+
+                // Botón
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      // Acción para revisar el formulario
+                    },
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Colors.indigo),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'Revisar formulario',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold
-                          //color: Color(0xFF1A2E45),
-                        ),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text(
+                      'Revisar formulario',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        //color: Color(0xFF1A2E45),
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
     );
-    
+
     /* return Column(
       children: [
         Padding(
