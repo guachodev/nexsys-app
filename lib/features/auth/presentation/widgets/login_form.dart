@@ -97,8 +97,10 @@ class LoginForm extends ConsumerWidget {
                   : null,
             ),
           ),
+
+          /*
           const SizedBox(height: 15),
-          /* Container(
+           Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
               color: Colors.grey.shade200,
@@ -124,12 +126,13 @@ class LoginForm extends ConsumerWidget {
               ],
             ),
           ),
-           */const SizedBox(height: 20),
+           */
+          const SizedBox(height: 15),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
-            //width: double.infinity,
             child: SizedBox(
               width: double.infinity,
+              height: 55,
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,

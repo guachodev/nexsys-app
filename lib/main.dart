@@ -1,17 +1,15 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/core/router/router.dart';
-import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/core/theme/app_theme.dart';
 
 Future<void> main() async {
   await Environment.initEnvironment();
-  WidgetsFlutterBinding.ensureInitialized();
+  /*WidgetsFlutterBinding.ensureInitialized();
   final permissionService = PermissionService();
   await permissionService.requestInitialPermissions();
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -19,7 +17,7 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   Future.delayed(const Duration(seconds: 5), () {
     FlutterNativeSplash.remove();
-  });
+  });*/
   runApp(const ProviderScope(child: MyApp()));
 }
 
