@@ -23,17 +23,14 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
     detectionSpeed: DetectionSpeed.noDuplicates,
   );
   final AudioPlayer _audioPlayer = AudioPlayer();
+
   bool _isProcessing = false;
   bool _flashOn = false;
-  late AnimationController _laserController;
+  bool _qrNotFound = false;
 
   @override
   void initState() {
     super.initState();
-    _laserController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
     _audioPlayer.setSourceAsset('sounds/beep.mp3');
   }
 
@@ -41,12 +38,12 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
   void dispose() {
     _controller.dispose();
     _audioPlayer.dispose();
-    _laserController.dispose();
     super.dispose();
   }
 
   Future<void> _onDetect(BarcodeCapture capture) async {
-    if (_isProcessing) return;
+    if (_isProcessing || _qrNotFound) return;
+
     final barcode = capture.barcodes.first;
     if (barcode.rawValue == null) return;
 
@@ -63,78 +60,56 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
 
     if (state.status == SearchLecturaQrStatus.success) {
       Navigator.pop(context);
-      Notifications.success(context, 'Medidor encontrado: ${state.lectura!.id}');
-       context.push('/lecturas/detalle', extra: state.lectura);
+      Notifications.success(
+        context,
+        'Medidor encontrado: ${state.lectura!.id}',
+      );
+      context.push('/lecturas/detalle', extra: state.lectura);
     } else if (state.status == SearchLecturaQrStatus.error) {
       Notifications.error(context, state.message);
-      _isProcessing = false;
-      _controller.pause();
+
+      setState(() {
+        _qrNotFound = true; // ⬅ ACTIVAR PANEL DE ERROR
+        _isProcessing = false;
+      });
     }
+  }
+
+  Future<void> _retry() async {
+    setState(() {
+      _qrNotFound = false;
+      _isProcessing = false;
+    });
+
+    await _controller.start();
   }
 
   @override
   Widget build(BuildContext context) {
     final qrState = ref.watch(searchLecturaQrProvider);
-   // final scanArea = MediaQuery.of(context).size.width * 0.7;
 
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          /// Cámara
+          /// Cámara activa (si NO hay error)
           MobileScanner(
             controller: _controller,
-            onDetect: _onDetect,
+            onDetect: _qrNotFound ? null : _onDetect,
           ),
 
-          /// Capa semitransparente con recorte del área central
-          /* CustomPaint(
-            painter: OverlayMaskPainter(scanArea: scanArea),
-            child: Container(),
-          ), */
-
-          /// Efecto de línea láser animada
-          /* Center(
-            child: AnimatedBuilder(
-              animation: _laserController,
-              builder: (context, _) {
-                final y = (scanArea - 6) * _laserController.value;
-                return Transform.translate(
-                  offset: Offset(0, -scanArea / 2 + y),
-                  child: Container(
-                    width: scanArea * 0.9,
-                    height: 3,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [Colors.indigo, Colors.blueAccent],
-                      ),
-                      borderRadius: BorderRadius.circular(2),
-                      
-                    ),
-                  ),
-                );
-              },
-            ),
-          ), */
-
-          /// Borde del escáner
-         /*  Center(
-            child: CustomPaint(
-              size: Size(scanArea, scanArea),
-              painter: FuturisticBorderPainter(),
-            ),
-          ), */
-
-          /// Barra superior personalizada (sin AppBar)
+          /// Barra superior
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // Botón volver
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.white,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                   const Text(
@@ -145,13 +120,14 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  // Botón linterna
+
                   IconButton(
                     icon: Icon(
                       _flashOn ? Icons.flash_on : Icons.flash_off,
                       color: _flashOn ? Colors.yellowAccent : Colors.white,
                     ),
                     onPressed: () {
+                      if (_qrNotFound) return;
                       setState(() => _flashOn = !_flashOn);
                       _controller.toggleTorch();
                     },
@@ -161,7 +137,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
             ),
           ),
 
-          /// Panel inferior de ayuda (Glassmorphism)
+          /// Panel inferior dinámico
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -171,41 +147,89 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: Container(
-                    color: Colors.black.withValues(alpha: 0.5),
+                    color: _qrNotFound ? Colors.grey.withValues(alpha: .2) : Colors.black.withValues(alpha: .5),
                     padding: const EdgeInsets.all(16),
-                    child: const Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Enfoca el código de barras",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          "Mantén el dispositivo firme y asegúrate de que el código esté dentro del recuadro.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.white70, fontSize: 13),
-                        ),
-                      ],
-                    ),
+                    child: _qrNotFound
+                        /// ❌ Panel de error
+                        ? Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                "Medidor no encontrado",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              const Text(
+                                "No se encontró un medidor con este código. Intenta nuevamente.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _retry,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.red,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 22,
+                                      vertical: 12,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                  child: const Text("Reintentar"),
+                                ),
+                              ),
+                            ],
+                          )
+                        /// 📷 Modo normal
+                        : const Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                "Enfoca el código de barras",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                "Mantén el dispositivo firme y asegúrate de que el código esté dentro del recuadro.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
                   ),
                 ),
               ),
             ),
           ),
 
-          /// Loader
+          /// Loader mientras busca
           if (qrState.status == SearchLecturaQrStatus.loading)
             Container(
-              color: Colors.black.withValues(alpha: .7),
+              color: Colors.black.withValues(alpha: 0.7),
               child: const Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: Colors.indigoAccent),
+                    CircularProgressIndicator(color: Colors.white),
                     SizedBox(height: 16),
                     Text(
                       'Cargando datos del medidor...',
@@ -219,67 +243,4 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
       ),
     );
   }
-}
-
-/// 🎨 Dibuja el área transparente central sin ColorFiltered
-class OverlayMaskPainter extends CustomPainter {
-  final double scanArea;
-  OverlayMaskPainter({required this.scanArea});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final overlayPaint = Paint()
-      ..color = Colors.indigo.withValues(alpha: 0.6)
-      ..style = PaintingStyle.fill;
-
-    final rect = Rect.fromLTWH(
-      (size.width - scanArea) / 2,
-      (size.height - scanArea) / 2,
-      scanArea,
-      scanArea,
-    );
-
-    final path = Path.combine(
-      PathOperation.difference,
-      Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height)),
-      Path()..addRRect(RRect.fromRectXY(rect, 24, 24)),
-    );
-
-    canvas.drawPath(path, overlayPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-/// 🎨 Bordes tipo futurista
-class FuturisticBorderPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..strokeWidth = 4
-      ..style = PaintingStyle.stroke
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 0);
-
-    const corner = 30.0;
-    final path = Path()
-      ..moveTo(0, corner)
-      ..lineTo(0, 0)
-      ..lineTo(corner, 0)
-      ..moveTo(size.width - corner, 0)
-      ..lineTo(size.width, 0)
-      ..lineTo(size.width, corner)
-      ..moveTo(size.width, size.height - corner)
-      ..lineTo(size.width, size.height)
-      ..lineTo(size.width - corner, size.height)
-      ..moveTo(corner, size.height)
-      ..lineTo(0, size.height)
-      ..lineTo(0, size.height - corner);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

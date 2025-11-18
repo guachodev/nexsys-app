@@ -23,4 +23,12 @@ class LecturasLocalDatasource {
   Future<List<Lectura>> getPendingSync() async {
     return await LocalDatabaseService.getPendingSync();
   }
+
+  Future<Map<String, Object?>?> getPeriodo() async {
+    return await LocalDatabaseService.getPeriodo();
+  }
+
+   Future<void> savePeriodo(Periodo periodo) async {
+    await LocalDatabaseService.insertOrUpdatePeriodo(periodo);
+  }
 }

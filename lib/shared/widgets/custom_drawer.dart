@@ -44,10 +44,14 @@ class CustomDrawer extends ConsumerWidget {
                 _buildSectionDivider("Preferencias"),
 
                 ...preferenceItems.map((item) => _MenuItem(item, currentRoute)),
+
+                // 🔥 NUEVA SECCIÓN: Cuenta
+                _buildSectionDivider("Cuenta"),
+                _LogoutButton(),
               ],
             ),
           ),
-          _LogoutButton(),
+          //_LogoutButton(),
         ],
       ),
     );
@@ -71,73 +75,144 @@ class CustomDrawer extends ConsumerWidget {
 
 class _LogoutButton extends ConsumerWidget {
   const _LogoutButton();
+  void _mostrarDialogoLogout(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierColor: Color.fromARGB(255, 10, 10, 10).withValues(alpha: .8),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.white,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 32),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(22),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Ícono redondeado elegante
+                Container(
+                  padding: const EdgeInsets.all(18),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    Icons.logout_rounded,
+                    color: Colors.red.shade600,
+                    size: 42,
+                  ),
+                ),
+
+                const SizedBox(height: 22),
+                const Text(
+                  "Cerrar sesión",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+
+                const SizedBox(height: 10),
+                Text(
+                  "¿Estás seguro de que deseas cerrar sesión?",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+                ),
+
+                const SizedBox(height: 28),
+
+                // Botones modernos M3
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          "Cancelar",
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          elevation: 0,
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          ref.read(authProvider.notifier).logout();
+                        },
+                        child: const Text(
+                          "Cerrar sesión",
+                          style: TextStyle(fontSize: 15),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Column(
         children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leading: SizedBox(
-              width: 36,
-              height: 36,
-
-              child: Icon(
-                Icons.logout_outlined,
-                size: 18,
-                color: Colors.red.shade700,
-              ),
-            ),
-            title: Text(
-              "Cerrar sesión",
-              style: TextStyle(
-                color: Colors.red.shade800,
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-              ),
-            ),
-            trailing: Icon(
-              Icons.chevron_right,
-              size: 18,
-              color: Colors.red.shade700,
-            ),
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
             onTap: () {
-              //Navigator.pop(context); // Cierra el drawer
-              //_showLogoutConfirmation(context)
-
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    title: const Text("Cerrar sesión"),
-                    content: const Text(
-                      "¿Estás seguro de que quieres cerrar sesión?",
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancelar"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context); // Cierra el dialog
-                          // Aquí iría la lógica real de cierre de sesión
-                          //context.pushReplacement('/login');
-                          ref.read(authProvider.notifier).logout();
-                        },
-                        child: const Text("Cerrar sesión"),
-                      ),
-                    ],
-                  );
-                },
-              );
+              _mostrarDialogoLogout(context, ref);
             },
+            splashColor: Colors.red.withValues(alpha: .1),
+            highlightColor: Colors.red.withValues(alpha: .05),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  // Ícono moderno dentro de un Chip
+                  Icon(
+                    Icons.logout_rounded,
+                    size: 20,
+                    color: Colors.red.shade700,
+                  ),
+
+                  const SizedBox(width: 14),
+
+                  // Texto principal
+                  Text(
+                    "Cerrar sesión",
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.red.shade900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -289,44 +364,6 @@ class _Header extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _OnlineChip extends StatelessWidget {
-  final bool offline;
-  const _OnlineChip(this.offline);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: offline ? Colors.deepOrange.shade500 : Colors.green.shade500,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            offline ? 'Offline' : "Online",
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
       ),
     );
   }

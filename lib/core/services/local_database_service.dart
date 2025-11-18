@@ -20,6 +20,14 @@ class LocalDatabaseService {
       version: 1,
       onCreate: (db, version) async {
         await db.execute('''
+          CREATE TABLE periodo (
+            id INTEGER PRIMARY KEY,
+            nombre TEXT,
+            descargado INTEGER,
+            fecha TEXT
+          )
+        ''');
+        await db.execute('''
         CREATE TABLE lecturas (
           id INTEGER PRIMARY KEY,
           medidor TEXT,
@@ -62,6 +70,17 @@ class LocalDatabaseService {
         });
   }
 
+  static Future<void> insertOrUpdatePeriodo(Periodo periodo) async {
+    final db = await database;
+
+    await db
+        .insert('periodo', {
+          'id': periodo.id,
+          'nombre': periodo.name,
+          'descargado': periodo.dowload
+        }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
   static Future<List<Lectura>> getAllLecturas() async {
     final db = await database;
     final result = await db.query('lecturas');
@@ -87,5 +106,21 @@ class LocalDatabaseService {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+
+  /// Periodo
+  static Future<Map<String, Object?>?> getPeriodo() async {
+    final db = await database;
+    final result = await db.query('periodo', limit: 1);
+
+    if (result.isEmpty) return null;
+
+    return result.first;
+  }
+
+  static Future<void> clearPeriodo() async {
+    final db = await database;
+    await db.delete('periodo');
   }
 }

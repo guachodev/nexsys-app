@@ -2,6 +2,8 @@ import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
+import '../mappers/periodo_mapper.dart';
+
 class LecturasRepositoryImpl extends LecturasRepository {
   final LecturasDatasourceImpl remote;
   final LecturasLocalDatasource local;
@@ -49,23 +51,37 @@ class LecturasRepositoryImpl extends LecturasRepository {
   @override
   Future<List<Lectura>> searchLecturas(String query, String token) async {
     final hasNet = await ConnectivityService.hasConnection();
-    print('hasNet $hasNet');
+
     if (hasNet) {
       final lecturas = await remote.searchLecturas(query, token);
       await local.saveLecturas(lecturas);
       //final all = await local.getLecturas();
-      //print('all $all');
       return lecturas;
     } else {
       final all = await local.getLecturas();
-      print(all);
+      //print(all);
       return all.where((l) => l.medidor.contains(query)).toList();
     }
   }
 
   @override
-  Future<Periodo?> getPeriodoActivo(String token) {
-    return remote.getPeriodoActivo(token);
+  Future<Periodo?> getPeriodoActivo(String token) async {
+    final hasNet = await ConnectivityService.hasConnection();
+    if (hasNet) {
+      final periodo = await remote.getPeriodoActivo(token);
+      if (periodo != null) {
+        await local.savePeriodo(periodo);
+      } else {
+        // periodo remoto NO existe → limpiamos base
+        // await local.clearPeriodo();
+        return null;
+      }
+    }
+    final data = await local.getPeriodo();
+    //print(data);
+    if (data == null) return null;
+
+    return PeriodoMapper.jsonTodb(data);
   }
 
   @override

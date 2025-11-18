@@ -4,6 +4,7 @@ import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
+
 final periodoProvider =
     StateNotifierProvider.autoDispose<PeriodoNotifier, PeriodoState>((ref) {
       final lecturasRepository = LecturasRepositoryImpl();
@@ -26,8 +27,7 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
     try {
       state = state.copyWith(status: SearchStatus.loading);
       final periodo = await lecturasRepository.getPeriodoActivo(token);
-
-      if (periodo == null || periodo.total <= 0) {
+      if (periodo == null) {
         state = state.copyWith(
           periodo: null,
           status: SearchStatus.empty,
@@ -40,10 +40,10 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
       state = state.copyWith(
         periodo: periodo,
         status: SearchStatus.loaded,
-        pendientes: periodo.total - periodo.totalLectura,
-        progreso: (periodo.totalLectura / periodo.total).isNaN
+        //pendientes: periodo.total - periodo.totalLectura,
+        /*progreso: (periodo.totalLectura / periodo.total).isNaN
             ? 0
-            : periodo.totalLectura / periodo.total,
+            : periodo.totalLectura / periodo.total,*/
       );
     } catch (e) {
       state = state.copyWith(
@@ -52,6 +52,24 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
         errorMessage: e.toString(),
       );
     }
+  }
+
+  Future<void> updateDowload() async {
+    final periodoActual = state.periodo;
+
+    if (periodoActual == null) return;
+
+    final periodoActualizado = periodoActual.copyWith(dowload: true);
+
+    // Actualizar estado en Riverpod
+    state = state.copyWith(
+      periodo: periodoActualizado,
+      pendientes: 0,
+      progreso: 0.0,
+    );
+
+    // También actualiza SQLite
+    //await local.updatePeriodo(periodoActualizado);
   }
 }
 
