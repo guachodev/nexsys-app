@@ -11,9 +11,11 @@ class LecturasLocalDatasource {
   }
 
   Future<void> saveLecturas(List<Lectura> lecturas) async {
-    for (var l in lecturas) {
+    /* for (var l in lecturas) {
       await LocalDatabaseService.insertOrUpdateLectura(l);
-    }
+    } */
+
+    await LocalDatabaseService.insertOrUpdateLecturas(lecturas);
   }
 
   Future<void> markAsSynced(int id) async {
@@ -30,5 +32,24 @@ class LecturasLocalDatasource {
 
    Future<void> savePeriodo(Periodo periodo) async {
     await LocalDatabaseService.insertOrUpdatePeriodo(periodo);
+  }
+
+
+   // ─── RUTAS ────────────────────────────────────────────────────────────────
+  Future<void> saveRutas(List<Ruta> rutas) async {
+    await LocalDatabaseService.insertOrUpdateRutas(rutas);
+  }
+
+  Future<void> saveRuta(Ruta ruta) async {
+    await LocalDatabaseService.insertOrUpdateRuta(ruta);
+  }
+
+  // ─── NOVEDADES ─────────────────────────────────────────────────────────────
+  Future<void> saveNovedades(List<Novedad> novedades) async {
+    await LocalDatabaseService.insertOrUpdateNovedades(novedades);
+  }
+
+  Future<void> saveNovedad(Novedad novedad) async {
+    await LocalDatabaseService.insertOrUpdateNovedad(novedad);
   }
 }

@@ -6,12 +6,12 @@ class LecturaMapper {
       id: json["id"],
       // clienteId: json["cliente_id"],
       medidor: json["medidor"],
-      catastro: json["catastro"]!,
+      cuenta: json["cuenta"]!,
       propietario: json["propietario"],
       cedula: json["cedula"],
       lecturaAnterior: json["lectura_anterior"],
       observacion: '',
-      periodo: json["periodo"],
+      //periodo: json["periodo"],
     );
   }
 }

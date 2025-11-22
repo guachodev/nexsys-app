@@ -33,10 +33,9 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
            isPosting: false,
            lecturaAnterior: lectura.lecturaAnterior,
            medidor: lectura.medidor,
-           catastro: lectura.catastro,
+           catastro: lectura.cuenta.toString(),
            propietario: lectura.propietario,
            cedula: lectura.cedula,
-           periodo: lectura.periodo,
            lecturaActual: LecturaActual.pure(
              lecturaAnterior: lectura.lecturaAnterior,
            ),
@@ -128,10 +127,9 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
       isPosting: false,
       lecturaAnterior: nuevaLectura.lecturaAnterior,
       medidor: nuevaLectura.medidor,
-      catastro: nuevaLectura.catastro,
+      catastro: nuevaLectura.cuenta.toString(),
       propietario: nuevaLectura.propietario,
       cedula: nuevaLectura.cedula,
-      periodo: nuevaLectura.periodo,
       lecturaActual: LecturaActual.pure(
         lecturaAnterior: nuevaLectura.lecturaAnterior,
       ),
@@ -165,7 +163,6 @@ class LecturaFormState {
   final String catastro;
   final String propietario;
   final String cedula;
-  final String periodo;
   final int lecturaAnterior;
   final LecturaActual lecturaActual;
   final String? observacion;
@@ -181,7 +178,6 @@ class LecturaFormState {
     required this.catastro,
     required this.propietario,
     required this.cedula,
-    required this.periodo,
     required this.lecturaAnterior,
     this.lecturaActual = const LecturaActual.pure(),
     this.novedadId,
@@ -200,7 +196,6 @@ class LecturaFormState {
     String? catastro,
     String? propietario,
     String? cedula,
-    String? periodo,
     int? lecturaAnterior,
     LecturaActual? lecturaActual,
     String? observacion,
@@ -216,7 +211,6 @@ class LecturaFormState {
       catastro: catastro ?? this.catastro,
       propietario: propietario ?? this.propietario,
       cedula: cedula ?? this.cedula,
-      periodo: periodo ?? this.periodo,
       lecturaAnterior: lecturaAnterior ?? this.lecturaAnterior,
       lecturaActual: lecturaActual ?? this.lecturaActual,
       observacion: observacion ?? this.observacion,

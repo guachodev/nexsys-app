@@ -1,3 +1,4 @@
+export 'providers/descarga_lecturas_provider.dart';
 export 'providers/lectura_form_provider.dart';
 export 'providers/lectura_provider.dart';
 export 'providers/lecturas_provider.dart';

@@ -36,7 +36,7 @@ class MotivoSelectorState extends State<NovedadSelector> {
     // Inicializa el valor seleccionado
     motivoSeleccionado = widget.initialValue;
 
-    _controller = TextEditingController(text: widget.initialValue?.name ?? '');
+    _controller = TextEditingController(text: widget.initialValue?.detalle ?? '');
   }
 
   @override
@@ -63,7 +63,7 @@ class MotivoSelectorState extends State<NovedadSelector> {
           builder: (context, setModalState) {
             // Filtrar motivos según la búsqueda
             final motivosFiltrados = widget.items.where((m) {
-              return m.name.toLowerCase().contains(_searchQuery.toLowerCase());
+              return m.detalle.toLowerCase().contains(_searchQuery.toLowerCase());
             }).toList();
 
             return Container(
@@ -171,7 +171,7 @@ class MotivoSelectorState extends State<NovedadSelector> {
                                     contentPadding: EdgeInsets.zero,
                                     minVerticalPadding: 0,
                                     title: Text(
-                                      motivo.name,
+                                      motivo.detalle,
                                       style: TextStyle(fontSize: 15),
                                     ),
                                     trailing: isSelected
@@ -186,7 +186,7 @@ class MotivoSelectorState extends State<NovedadSelector> {
                                     onTap: () {
                                       setState(() {
                                         motivoSeleccionado = motivo;
-                                        _controller.text = motivo.name;
+                                        _controller.text = motivo.detalle;
                                       });
                                       widget.onChanged?.call(motivo);
                                       Navigator.pop(context);

@@ -100,4 +100,25 @@ class LecturasRepositoryImpl extends LecturasRepository {
       }
     }
   }
+
+  @override
+  Future<DescargaResponse> descargarLecturasAsignadas(
+    String periodoId,
+    String token,
+  ) async {
+    final data = await remote.descargarLecturasAsignadas(periodoId, token);
+    //print(data);
+    final response = DescargaResponse.fromJson(data);
+
+    await local.saveRutas(response.rutas);
+    await local.saveNovedades(response.novedades);
+    await local.saveLecturas(response.lecturas);
+
+    final todas = await local.getLecturas();
+    print("LECTURAS GUARDADAS:");
+    for (var l in todas) {
+      print("${l.id} - ${l.medidor} - ${l.lecturaAnterior}");
+    }
+    return response;
+  }
 }

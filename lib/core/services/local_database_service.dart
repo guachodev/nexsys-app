@@ -28,19 +28,35 @@ class LocalDatabaseService {
           )
         ''');
         await db.execute('''
-        CREATE TABLE lecturas (
+          CREATE TABLE novedad (
+            id INTEGER PRIMARY KEY,
+            detallle TEXT,
+            defecto INTEGER
+          );
+        ''');
+        await db.execute('''
+          CREATE TABLE ruta (
           id INTEGER PRIMARY KEY,
-          medidor TEXT,
-          catastro TEXT,
-          propietario TEXT,
-          lecturaAnterior INTEGER,
-          lecturaActual INTEGER,
-          consumo INTEGER,
-          observacion TEXT,
-          imagenes TEXT,
-          latitud REAL,
-          longitud REAL,
-          synced INTEGER DEFAULT 0
+          sector_id INTEGER,
+          detalle TEXT
+        );
+        ''');
+        await db.execute('''
+        CREATE TABLE lecturas (
+        id INTEGER PRIMARY KEY,
+        medidor TEXT,
+        cuenta INTEGER,
+        propietario TEXT,
+        cedula TEXT,
+        lecturaAnterior INTEGER,
+        lecturaActual INTEGER,
+        consumo INTEGER,
+        observacion TEXT,
+        novedadId INTEGER,
+        imagenes TEXT,
+        latitud REAL,
+        longitud REAL,
+        synced INTEGER DEFAULT 0
         );
         ''');
       },
@@ -54,7 +70,7 @@ class LocalDatabaseService {
         .insert('lecturas', {
           'id': lectura.id,
           'medidor': lectura.medidor,
-          'catastro': lectura.catastro,
+          'cuenta': lectura.cuenta,
           'propietario': lectura.propietario,
           'lecturaAnterior': lectura.lecturaAnterior,
           'lecturaActual': lectura.lecturaActual,
@@ -73,12 +89,11 @@ class LocalDatabaseService {
   static Future<void> insertOrUpdatePeriodo(Periodo periodo) async {
     final db = await database;
 
-    await db
-        .insert('periodo', {
-          'id': periodo.id,
-          'nombre': periodo.name,
-          'descargado': periodo.dowload
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db.insert('periodo', {
+      'id': periodo.id,
+      'nombre': periodo.name,
+      'descargado': periodo.dowload! ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   static Future<List<Lectura>> getAllLecturas() async {
@@ -108,6 +123,29 @@ class LocalDatabaseService {
     );
   }
 
+  static Future<void> insertOrUpdateLecturas(List<Lectura> lecturas) async {
+    final db = await database;
+    final batch = db.batch();
+
+    for (var lectura in lecturas) {
+      batch.insert('lecturas', {
+        'id': lectura.id,
+        'medidor': lectura.medidor,
+        'cuenta': lectura.cuenta,
+        'propietario': lectura.propietario,
+        'lecturaAnterior': lectura.lecturaAnterior,
+        'lecturaActual': lectura.lecturaActual,
+        'consumo': lectura.consumo,
+        'observacion': lectura.observacion,
+        'imagenes': lectura.imagenes.join(','), // guardado en CSV
+        'latitud': lectura.latitud,
+        'longitud': lectura.longitud,
+        'synced': 0,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+
+    await batch.commit(noResult: true);
+  }
 
   /// Periodo
   static Future<Map<String, Object?>?> getPeriodo() async {
@@ -122,5 +160,57 @@ class LocalDatabaseService {
   static Future<void> clearPeriodo() async {
     final db = await database;
     await db.delete('periodo');
+  }
+
+  /// novedad
+  static Future<void> insertOrUpdateNovedades(List<Novedad> novedades) async {
+    final db = await database;
+    final batch = db.batch();
+
+    for (var n in novedades) {
+      batch.insert('novedad', {
+        'id': n.id,
+        'detallle': n.detalle,
+        'defecto': n.isDefault ? 1 : 0,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+
+    await batch.commit();
+  }
+
+  static Future<void> insertOrUpdateNovedad(Novedad novedad) async {
+    final db = await database;
+
+    await db.insert('novedad', {
+      'id': novedad.id,
+      'detallle': novedad.detalle,
+      'defecto': novedad.isDefault ? 1 : 0,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  /// ruta
+  static Future<void> insertOrUpdateRutas(List<Ruta> rutas) async {
+    final db = await database;
+    final batch = db.batch();
+
+    for (var r in rutas) {
+      batch.insert('ruta', {
+        'id': r.id,
+        'sector_id': r.sectorId,
+        'detalle': r.detalle,
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+
+    await batch.commit();
+  }
+
+  static Future<void> insertOrUpdateRuta(Ruta ruta) async {
+    final db = await database;
+
+    await db.insert('ruta', {
+      'id': ruta.id,
+      'sector_id': ruta.sectorId,
+      'detalle': ruta.detalle,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 }

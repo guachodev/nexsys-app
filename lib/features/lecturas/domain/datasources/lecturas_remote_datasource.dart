@@ -12,4 +12,6 @@ abstract class LecturasDatasource {
   Future<void> updateLectura(Map<String, dynamic> lecturaLike, String token);
   Future<List<Lectura>> searchLecturas(String query,String token);
   Future<Lectura?> searchLecturasByMedidor(String medidor,String token);
+
+  Future<Map<String, dynamic>> descargarLecturasAsignadas(String periodoId,String token);
 }

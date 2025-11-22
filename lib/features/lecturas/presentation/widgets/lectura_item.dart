@@ -74,7 +74,7 @@ class LecturaItem extends ConsumerWidget {
                             ),
                           ],
                         ),
-                        _buildStatusBadge(lectura.periodo),
+                        _buildStatusBadge(lectura.cuenta.toString()),
                       ],
                     ),
                     SizedBox(height: 6),
@@ -113,7 +113,7 @@ class LecturaItem extends ConsumerWidget {
                         _BuildInfoItem(title: 'Cedula', value: lectura.cedula),
                         _BuildInfoItem(
                           title: 'Catastro',
-                          value: lectura.catastro,
+                          value: lectura.cuenta.toString(),
                         ),
                       ],
                     ),

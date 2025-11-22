@@ -25,15 +25,20 @@ class LecturasDatasourceImpl extends LecturasDatasource {
   }
 
   @override
-  Future<void> updateLectura(Map<String, dynamic> lecturaLike,String token) async {
+  Future<void> updateLectura(
+    Map<String, dynamic> lecturaLike,
+    String token,
+  ) async {
     try {
       final int? lecturaId = lecturaLike['id'];
 
-       await dio.request(
+      await dio.request(
         '/lectura/$lecturaId',
         data: lecturaLike,
-        options: Options(method: 'PATCH',headers: {'Authorization': 'Bearer $token'}),
-     
+        options: Options(
+          method: 'PATCH',
+          headers: {'Authorization': 'Bearer $token'},
+        ),
       );
 
       //final product = ProductMapper.jsonToEntity(response.data);
@@ -66,14 +71,17 @@ class LecturasDatasourceImpl extends LecturasDatasource {
 
   @override
   Future<Periodo?> getPeriodoActivo(String token) async {
-    final response = await dio.get('/lectura/periodo',options: Options(headers: {'Authorization': 'Bearer $token'}),);
- 
+    final response = await dio.get(
+      '/lectura/periodo',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+
     if (response.data.toString().isEmpty) return null;
 
     final periodo = PeriodoMapper.jsonToEntity(response.data);
     return periodo;
   }
-  
+
   @override
   Future<Lectura?> searchLecturasByMedidor(String medidor, String token) async {
     if (medidor.isEmpty) return null;
@@ -90,5 +98,17 @@ class LecturasDatasourceImpl extends LecturasDatasource {
     }
 
     return lecturas.first;
+  }
+
+  @override
+  Future<Map<String, dynamic>> descargarLecturasAsignadas(
+    String periodoId,
+    String token,
+  ) async {
+    final response = await dio.get(
+      '/lectura/descargar/$periodoId',
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
+    );
+    return response.data;
   }
 }

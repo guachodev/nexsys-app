@@ -133,7 +133,6 @@ class _LoadingScreen extends StatelessWidget {
   }
 }
 
-
 class _ContenidoPrincipal extends ConsumerWidget {
   const _ContenidoPrincipal();
 
@@ -154,11 +153,11 @@ class _ContenidoPrincipal extends ConsumerWidget {
 
             _PeriodoCard(nombre: periodoState.periodo!.name),
             const SizedBox(height: 10),
-          if (!dowload) _buildDownloadCard(context, ref),
+            if (!dowload) _buildDownloadCard(context, ref),
 
             if (dowload) ...[
               _buildDownloadedInfo(),
-              _SearchBarSection(ref: ref, isCompleted: true),
+              _SearchBarSection(ref: ref, isCompleted: false),
               const SizedBox(height: 10),
               _ResumenCard(
                 total: 40,
@@ -226,15 +225,43 @@ class _ContenidoPrincipal extends ConsumerWidget {
               icon: const Icon(Icons.download),
               label: const Text("Descargar"),
               onPressed: () async {
+                //final periodo = ref.read(periodoProvider).periodo;
+
+                /*if (periodo == null) {
+                  Notifications.error(context, 'No existe un periodo activo');
+                  return;
+                }*/
+
+                // Abrir loader animado
                 Loader.openDowloadLecturas(context);
-                await Future.delayed(const Duration(seconds: 2));
-                ref.read(periodoProvider.notifier).updateDowload();
+                await ref
+                    .read(descargaLecturasProvider.notifier)
+                    .descargarLecturas("171");
+
                 Loader.stopLoading(context);
-                Notifications.info(context, 'Se descargaron los medidores correctamente.');
+                await ref.read(periodoProvider.notifier).updateDowload();
+                Notifications.info(context, 'Se descargaron correctamente.');
               },
             ),
           ),
-        ],
+
+          /* SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.download),
+              label: const Text("Descargar"),
+              onPressed: () async {
+                /*Loader.openDowloadLecturas(context);
+                ref.read(lecturasProvider.notifier).des
+                await Future.delayed(const Duration(seconds: 2));
+                ref.read(periodoProvider.notifier).updateDowload();
+                Loader.stopLoading(context);
+                Notifications.info(context, 'Se descargaron los medidores correctamente.');*/
+              },
+            ),
+          ),
+         */],
       ),
     );
   }

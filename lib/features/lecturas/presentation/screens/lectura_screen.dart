@@ -179,7 +179,7 @@ class _InfoMedidor extends StatelessWidget {
         ItemInfo(
           icon: Icons.key,
           label: 'Dirección',
-          value: lectura.catastro,
+          value: lectura.cuenta.toString(),
           color: Colors.green.shade600,
         ),
         ItemInfo(

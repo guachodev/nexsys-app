@@ -186,9 +186,9 @@ class _SearchBarWithFiltersState extends ConsumerState<_SearchBarWithFilters> {
                 ),
               ),
             ),
-          //  const SizedBox(width: 8),
+          const SizedBox(width: 8),
             // Botón de filtro
-            /* PopupMenuButton<FilterType>(
+            PopupMenuButton<FilterType>(
               initialValue: selectedFilter,
               color: Colors.white,
               onSelected: (value) {
@@ -219,7 +219,7 @@ class _SearchBarWithFiltersState extends ConsumerState<_SearchBarWithFilters> {
                 child: const Icon(Icons.tune, color: Colors.white),
               ),
             ),
-           */],
+          ],
         ),
         // const SizedBox(height: 8),
         //Text('Filtro: ${_filterName(selectedFilter)}'),

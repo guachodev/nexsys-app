@@ -3,10 +3,9 @@ import 'dart:convert';
 class Lectura {
   final int id;
   final String medidor;
-  final String catastro;
+  final int cuenta;
   final String propietario;
   final String cedula;
-  final String periodo;
   final int lecturaAnterior;
   final int? lecturaActual;
   final String? observacion;
@@ -20,10 +19,9 @@ class Lectura {
   Lectura({
     required this.id,
     required this.medidor,
-    required this.catastro,
+    required this.cuenta,
     required this.propietario,
     required this.cedula,
-    required this.periodo,
     required this.lecturaAnterior,
     this.lecturaActual,
     this.observacion,
@@ -38,10 +36,9 @@ class Lectura {
   Lectura copyWith({
     int? id,
     String? medidor,
-    String? catastro,
+    int? cuenta,
     String? propietario,
     String? cedula,
-    String? periodo,
     int? lecturaAnterior,
     int? lecturaActual,
     String? observacion,
@@ -55,10 +52,9 @@ class Lectura {
     return Lectura(
       id: id ?? this.id,
       medidor: medidor ?? this.medidor,
-      catastro: catastro ?? this.catastro,
+      cuenta: cuenta ?? this.cuenta,
       propietario: propietario ?? this.propietario,
       cedula: cedula ?? this.cedula,
-      periodo: periodo ?? this.periodo,
       lecturaAnterior: lecturaAnterior ?? this.lecturaAnterior,
       lecturaActual: lecturaActual ?? this.lecturaActual,
       observacion: observacion ?? this.observacion,
@@ -76,10 +72,9 @@ class Lectura {
     return {
       'id': id,
       'medidor': medidor,
-      'catastro': catastro,
+      'cuenta': cuenta,
       'propietario': propietario,
       'cedula': cedula,
-      'periodo': periodo,
       'lectura_anterior': lecturaAnterior,
       'lectura_actual': lecturaActual,
       'observacion': observacion,
@@ -99,6 +94,7 @@ class Lectura {
       'lectura_actual': lecturaActual,
       'descripcion': observacion,
       'consumo': consumo,
+      'cedula': cedula,
       'novedad_id': novedadId,
       'fecha_lectura': DateTime.now().toIso8601String(),
       'latitud': latitud,
@@ -111,10 +107,9 @@ class Lectura {
     return Lectura(
       id: map['id'],
       medidor: map['medidor'],
-      catastro: map['catastro'],
+      cuenta: map['cuenta'],
       propietario: map['propietario'],
       cedula: map['cedula'],
-      periodo: map['periodo'],
       lecturaAnterior: map['lectura_anterior'],
       lecturaActual: map['lectura_actual'],
       observacion: map['observacion'],
@@ -126,6 +121,17 @@ class Lectura {
           ? List<String>.from(jsonDecode(map['imagenes']))
           : [],
       synced: map['synced'] == 1,
+    );
+  }
+
+  factory Lectura.fromJson(Map<String, dynamic> json) {
+    return Lectura(
+      id: json['id'],
+      medidor: json['medidor'],
+      cuenta: json['cuenta'],
+      propietario: json['propietario'],
+      cedula: json['cedula'],
+      lecturaAnterior: json['lectura_anterior']
     );
   }
 }

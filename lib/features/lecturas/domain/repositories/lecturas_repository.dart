@@ -1,3 +1,4 @@
+import '../entities/descarga_response.dart';
 import '../entities/lectura.dart';
 import '../entities/periodo.dart';
 
@@ -10,4 +11,9 @@ abstract class LecturasRepository {
   Future<void> updateLectura(Map<String, dynamic> lecturaLike, String token);
   Future<List<Lectura>> searchLecturas(String query, String token);
   Future<Lectura?> searchLecturasByMedidor(String medidor, String token);
+
+  Future<DescargaResponse> descargarLecturasAsignadas(
+    String periodoId,
+    String token,
+  );
 }
