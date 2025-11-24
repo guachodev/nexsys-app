@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../core/theme/theme.dart';
+
 class BlankMessageScreen extends StatelessWidget {
   final String title, description;
   final IconData icon;
-  final Function? callback;
+  final VoidCallback? callback;
   final String? buttonTitle;
-  final double? height;
 
   const BlankMessageScreen({
     super.key,
@@ -14,101 +15,97 @@ class BlankMessageScreen extends StatelessWidget {
     required this.description,
     this.callback,
     this.buttonTitle,
-    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 40),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
         child: Column(
-          /* 
-          crossAxisAlignment: CrossAxisAlignment.center,
-          */
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 150,
-              height: 150,
-              margin: const EdgeInsets.only(bottom: 50),
-              decoration: BoxDecoration(
-                color: Colors.indigo,
-                borderRadius: BorderRadius.circular(100),
-              ),
-              //color: Colors.indigo,
-              child: Center(child: Icon(icon, size: 100, color: Colors.white)),
-            ),
-            ?(title.isEmpty)
-                ? null
-                : _CustomTextLabel(
-                    text: title,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.headlineSmall!.merge(
-                      TextStyle(
-                        color: Colors.indigo,
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ),
-
-            SizedBox(height: 10),
-            _CustomTextLabel(
-              text: description,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleMedium!.merge(
-                TextStyle(letterSpacing: 0.5, color: Color(0xde000000)),
-              ),
-            ),
-
-            if (callback != null && buttonTitle != null)
-              const SizedBox(height: 20),
-            if (callback != null && buttonTitle != null)
-              GestureDetector(
-                onTap: () {
-                  callback!();
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.indigo,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(10),
-                      topRight: Radius.circular(10),
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10),
-                    ),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                  child: _CustomTextLabel(
-                    text: buttonTitle!,
-                    //softWrap: true,
-                    style: TextStyle(color: Colors.white),
-                  ),
-                ),
-              ),
+            //SvgPicture.asset('assets/svg/search.svg', height: 200),
+            _buildIconContainer(),
+            const SizedBox(height: 30),
+            if (title.isNotEmpty) _buildTitle(context),
+            const SizedBox(height: 12),
+            _buildDescription(context),
+            const SizedBox(height: 30),
+            if (callback != null && buttonTitle != null) _buildButton(),
           ],
         ),
       ),
     );
   }
-}
 
-class _CustomTextLabel extends StatelessWidget {
-  final String text;
-  final TextStyle? style;
-  final TextAlign? textAlign;
+  Widget _buildIconContainer() {
+    return Container(
+      width: 130,
+      height: 130,
+      decoration: BoxDecoration(
+        color: AppColors.primary.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Icon(icon, size: 70, color: AppColors.primary),
+    );
+  }
 
-  const _CustomTextLabel({required this.text, this.style, this.textAlign});
-
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTitle(BuildContext context) {
     return Text(
-      text,
-      style: style ?? TextStyle(color: Color(0xde000000)),
-      textAlign: textAlign,
-      //maxLines: maxLines,
-      //overflow: overflow,
-      softWrap: true,
+      title,
+      textAlign: TextAlign.center,
+      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+        color: Colors.black87,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
+      ),
+    );
+  }
+
+  Widget _buildDescription(BuildContext context) {
+    return Text(
+      description,
+      textAlign: TextAlign.center,
+      style: Theme.of(
+        context,
+      ).textTheme.bodyLarge?.copyWith(color: Colors.black87, height: 1.4),
+    );
+  }
+
+  Widget _buildButton() {
+    return GestureDetector(
+      onTap: callback,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: .85),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.15),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Text(
+          buttonTitle!,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.3,
+            fontSize: 16,
+          ),
+        ),
+      ),
     );
   }
 }

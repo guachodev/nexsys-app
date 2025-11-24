@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 
 class CheckScreen extends StatelessWidget {
   const CheckScreen({super.key});
@@ -30,9 +31,9 @@ class CheckScreen extends StatelessWidget {
                       child: CircularProgressIndicator(
                         strokeWidth: 4,
                         valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.indigo,
+                          AppColors.primary,
                         ),
-                        backgroundColor: Colors.indigo.shade100,
+                        backgroundColor: AppColors.primary.shade100,
                       ),
                     ),
 
@@ -72,7 +73,7 @@ class CheckScreen extends StatelessWidget {
                       width: 150,
                       height: 150,
                       decoration: BoxDecoration(
-                        color: Colors.indigo,
+                        color: AppColors.primary,
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: Colors.grey.shade200,
@@ -122,7 +123,7 @@ class CheckScreen extends StatelessWidget {
                             alignment: AlignmentDirectional(0, 0),
                             child: LinearProgressIndicator(
                               minHeight: 6,
-                              color: Colors.indigo,
+                              color: AppColors.primary,
                               borderRadius: BorderRadius.circular(8),
                             ),
                           ),

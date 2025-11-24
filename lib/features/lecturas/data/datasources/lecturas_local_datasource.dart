@@ -1,55 +1,144 @@
-import 'package:nexsys_app/core/services/services.dart';
+import 'dart:io';
+
+import 'package:nexsys_app/features/lecturas/data/data.dart';
+import 'package:nexsys_app/features/lecturas/data/repositories/ruta_dao.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class LecturasLocalDatasource {
-  Future<List<Lectura>> getLecturas() async {
-    return await LocalDatabaseService.getAllLecturas();
+class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
+  Future<bool> _solicitarPermisoStorage() async {
+    if (Platform.isAndroid) {
+      // Android 11+ (API 30+) requiere MANAGE_EXTERNAL_STORAGE
+      if (await Permission.manageExternalStorage.isDenied) {
+        final status = await Permission.manageExternalStorage.request();
+        if (!status.isGranted) return false;
+      }
+
+      // Android 10 o inferior (WRITE/READ)
+      final storageStatus = await Permission.storage.request();
+      if (!storageStatus.isGranted) return false;
+
+      return true;
+    }
+
+    // iOS no necesita permisos para escribir
+    return true;
   }
 
-  Future<void> saveLectura(Lectura lectura) async {
-    await LocalDatabaseService.insertOrUpdateLectura(lectura);
+  Future<Directory> _getDownloadsDirectory() async {
+    if (Platform.isAndroid) {
+      // Carpeta pública de descargas
+      return Directory('/storage/emulated/0/Download');
+    }
+
+    // iOS/macOS
+    return await getDownloadsDirectory() ??
+        await getApplicationDocumentsDirectory();
   }
 
-  Future<void> saveLecturas(List<Lectura> lecturas) async {
-    /* for (var l in lecturas) {
-      await LocalDatabaseService.insertOrUpdateLectura(l);
-    } */
-
-    await LocalDatabaseService.insertOrUpdateLecturas(lecturas);
+  @override
+  Future<void> savePeriodo(Periodo periodo) async {
+    await PeriodoDao.insertOrUpdatePeriodo(periodo);
   }
 
-  Future<void> markAsSynced(int id) async {
-    await LocalDatabaseService.markAsSynced(id);
+  @override
+  Future<Periodo?> getPeriodo() async {
+    return await PeriodoDao.getPeriodo();
   }
 
-  Future<List<Lectura>> getPendingSync() async {
-    return await LocalDatabaseService.getPendingSync();
+  @override
+  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta) async {
+    return await LecturaDao.buscarPorCuenta(numeroCuenta);
   }
 
-  Future<Map<String, Object?>?> getPeriodo() async {
-    return await LocalDatabaseService.getPeriodo();
-  }
-
-   Future<void> savePeriodo(Periodo periodo) async {
-    await LocalDatabaseService.insertOrUpdatePeriodo(periodo);
-  }
-
-
-   // ─── RUTAS ────────────────────────────────────────────────────────────────
+  // ─── RUTAS ────────────────────────────────────────────────────────────────
+  @override
   Future<void> saveRutas(List<Ruta> rutas) async {
-    await LocalDatabaseService.insertOrUpdateRutas(rutas);
+    await RutaDao.insertOrUpdateRutas(rutas);
   }
 
-  Future<void> saveRuta(Ruta ruta) async {
-    await LocalDatabaseService.insertOrUpdateRuta(ruta);
-  }
-
-  // ─── NOVEDADES ─────────────────────────────────────────────────────────────
+  // ─── NOVEDADES ────────────────────────────────────────────────────────────
+  @override
   Future<void> saveNovedades(List<Novedad> novedades) async {
-    await LocalDatabaseService.insertOrUpdateNovedades(novedades);
+    await NovedadDao.insertOrUpdateNovedades(novedades);
   }
 
-  Future<void> saveNovedad(Novedad novedad) async {
-    await LocalDatabaseService.insertOrUpdateNovedad(novedad);
+  // ─── LECTURAS ────────────────────────────────────────────────────────────────
+  @override
+  Future<void> saveLecturas(List<Lectura> lecturas) async {
+    await LecturaDao.insertOrUpdateLecturas(lecturas);
+  }
+
+  @override
+  Future<Lectura?> lecturaById(int id) async {
+    return await LecturaDao.getById(id);
+  }
+
+  @override
+  Future<void> updateLectura(
+    Map<String, dynamic> lecturaLike,
+    int lecturaId,
+  ) async {
+    await LecturaDao.updateLectura(lecturaLike, lecturaId);
+  }
+
+  Future<List<Lectura>> getLecturasPendientes() async {
+    return await LecturaDao.getPendingSync();
+  }
+
+  Future<int> countTotal() async {
+    return await LecturaDao.getTotalMedidores();
+  }
+
+  Future<int> countLeidos() async {
+    return await LecturaDao.getMedidoresLeidos();
+  }
+
+  @override
+  Future<List<Lectura>> getLect() async {
+    return await LecturaDao.getPendingSync();
+  }
+
+  @override
+  Future<List<Lectura>> getLecturasPendiente() async {
+    return await LecturaDao.getPendingSync();
+  }
+
+  @override
+  Future<List<Lectura>> getLecturasRegistradas() async {
+    return await LecturaDao.getRegistrados();
+  }
+
+  Future<void> resetearLEcturas() async {
+    return await LecturaDao.resetLecturas();
+  }
+
+  Future<void> lecturaSincronizada(int lecturaId) async {
+    return await LecturaDao.marcarSincronizada(lecturaId);
+  }
+
+  Future<String> exportLecturasToJson() async {
+    return await LecturaDao.exportLecturasToJson();
+  }
+
+  Future<void> eliminarData() async {
+    return await LecturaDao.clearData();
+  }
+
+  Future<String> saveJsonFileInDownloads(String jsonString) async {
+    final permitido = await _solicitarPermisoStorage();
+    if (!permitido) throw Exception("Permiso de almacenamiento denegado");
+
+    final dir = await _getDownloadsDirectory();
+
+    final String filename =
+        "lecturas_${DateTime.now().millisecondsSinceEpoch}.json";
+
+    final file = File("${dir.path}/$filename");
+
+    await file.writeAsString(jsonString);
+
+    return file.path;
   }
 }

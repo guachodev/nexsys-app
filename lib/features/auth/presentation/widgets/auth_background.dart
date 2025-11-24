@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 
 class AuthBackground extends StatelessWidget {
   final Widget child;
@@ -45,7 +46,7 @@ class _PurpleBox extends StatelessWidget {
     gradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
-      colors: [Colors.indigo, Colors.indigo.shade600],
+      colors: [AppColors.primary, AppColors.primary.shade600],
       stops: [0.0, 1.0],
     ),
   );

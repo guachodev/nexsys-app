@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:nexsys_app/core/constants/menu_items.dart';
+import 'package:nexsys_app/core/constants/constants.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 
 class CustomDrawer extends ConsumerWidget {
@@ -9,19 +10,10 @@ class CustomDrawer extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    /* final double statusBarHeight = MediaQuery.paddingOf(context).top;
-    final double kDrawerHeaderHeight = 120.0 + 1.0;
-     */
     final authState = ref.watch(authProvider);
     final currentRoute = ModalRoute.of(context)?.settings.name;
 
     final List<MenuItem> preferenceItems = [
-      /* MenuItem(
-        icon: Icons.wifi,
-        title: "Estás en modo:",
-        trailing: _OnlineChip(authState.offline),
-        link: '',
-      ), */
       MenuItem(icon: Icons.info, title: "Acerca de", link: ''),
     ];
 
@@ -85,10 +77,10 @@ class _LogoutButton extends ConsumerWidget {
           backgroundColor: Colors.white,
           insetPadding: const EdgeInsets.symmetric(horizontal: 32),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(22),
+            borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -179,24 +171,22 @@ class _LogoutButton extends ConsumerWidget {
         children: [
           InkWell(
             borderRadius: BorderRadius.circular(16),
-            onTap: () {
-              _mostrarDialogoLogout(context, ref);
-            },
+            onTap: () => _mostrarDialogoLogout(context, ref),
             splashColor: Colors.red.withValues(alpha: .1),
             highlightColor: Colors.red.withValues(alpha: .05),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.05),
-                borderRadius: BorderRadius.circular(16),
+                color: Colors.red,
+                borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
                   // Ícono moderno dentro de un Chip
                   Icon(
                     Icons.logout_rounded,
-                    size: 20,
-                    color: Colors.red.shade700,
+                    size: 22,
+                    color: Colors.white,
                   ),
 
                   const SizedBox(width: 14),
@@ -206,8 +196,8 @@ class _LogoutButton extends ConsumerWidget {
                     "Cerrar sesión",
                     style: TextStyle(
                       fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.red.shade900,
+                      fontWeight: FontWeight.w800,
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -232,8 +222,8 @@ class _MenuItem extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: Material(
-        color: isSelected ? Colors.indigo.shade50 : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
+        color: isSelected ? AppColors.primary.shade50 : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
         child: InkWell(
           onTap: () {
             if (item.link.isNotEmpty) {
@@ -250,8 +240,8 @@ class _MenuItem extends StatelessWidget {
                   item.icon,
                   size: 30,
                   color: isSelected
-                      ? Colors.indigo.shade700
-                      : Colors.grey.shade700,
+                      ? AppColors.primary.shade700
+                      : Colors.grey.shade800,
                 ),
                 const SizedBox(width: 12),
                 // Título
@@ -264,8 +254,8 @@ class _MenuItem extends StatelessWidget {
                           ? FontWeight.w900
                           : FontWeight.normal,
                       color: isSelected
-                          ? Colors.indigo.shade700
-                          : Colors.grey.shade800,
+                          ? AppColors.primary.shade700
+                          : Colors.grey.shade900,
                     ),
                   ),
                 ),
@@ -303,7 +293,7 @@ class _Header extends StatelessWidget {
           16.0,
           8.0,
         ).add(EdgeInsets.only(top: statusBarHeight)),
-        decoration: BoxDecoration(color: Colors.indigo),
+        decoration: BoxDecoration(color: AppColors.primary),
         curve: Curves.fastOutSlowIn,
         duration: Duration(milliseconds: 250),
         child: Stack(

@@ -1,5 +1,5 @@
 
-import 'package:nexsys_app/features/auth/domain/domain.dart';
+import '../entities/user.dart';
 
 abstract class AuthRepository {
   Future<User> login(String username, String password);

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/core/constants/enums.dart';
 import 'package:nexsys_app/core/errors/errors.dart';
@@ -31,22 +33,50 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final user = await authRepository.login(email, password);
       _setLoggedUser(user, offline);
     } on CustomError catch (e) {
-      logout(e.message);
+      logout(errorMessage: e.message, clearUserData: true);
     }
   }
 
   void checkAuthStatus() async {
     final token = await preferencesStorageService.getValue<String>('token');
-    final offline =
-        await preferencesStorageService.getValue<bool>('offline') ?? true;
 
-    if (token == null) return logout();
+    final userJsonString = await preferencesStorageService.getValue<String>(
+      'user',
+    );
+    User? user;
+    if (userJsonString != null) {
+      final Map<String, dynamic> userMap = jsonDecode(userJsonString);
+      user = User.fromJson(userMap);
+    }
 
+    final hasInternet = await ConnectivityService.hasConnection();
+
+    if (!hasInternet && user != null) {
+      // Usuario existente y offline
+      state = state.copyWith(
+        authStatus: AuthStatus.authenticated,
+        offline: true,
+        user: user,
+        errorMessage: '',
+      );
+      return;
+    }
+
+    // Si hay internet → validar token con backend
     try {
-      final user = await authRepository.checkAuthStatus(token);
-      _setLoggedUser(user, offline);
+      final onlineUser = await authRepository.checkAuthStatus(token!);
+      _setLoggedUser(onlineUser, false);
     } catch (e) {
-      logout();
+      if (user != null) {
+        // Modo offline fallback
+        state = state.copyWith(
+          authStatus: AuthStatus.authenticated,
+          offline: true,
+          user: user,
+        );
+      } else {
+        logout();
+      }
     }
   }
 
@@ -54,6 +84,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     if (user != null) {
       await preferencesStorageService.setKeyValue('token', user.token);
       await preferencesStorageService.setKeyValue<bool>('offline', offline);
+      await preferencesStorageService.setKeyValue(
+        'user',
+        jsonEncode(user.toJson()),
+      );
     }
 
     state = state.copyWith(
@@ -64,15 +98,22 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
-  Future<void> logout([String? errorMessage]) async {
+  Future<void> logout({
+    String? errorMessage,
+    bool clearUserData = false,
+  }) async {
     await preferencesStorageService.removeKey('token');
-    await preferencesStorageService.removeKey('online');
+    await preferencesStorageService.removeKey('offline');
+
+    if (clearUserData) {
+      await preferencesStorageService.removeKey('user');
+    }
 
     state = state.copyWith(
       authStatus: AuthStatus.notAuthenticated,
-      user: null,
-      errorMessage: errorMessage,
+      user: clearUserData ? null : state.user,
       offline: false,
+      errorMessage: errorMessage ?? '',
     );
   }
 }
@@ -89,7 +130,7 @@ class AuthState {
     this.user,
     this.errorMessage = '',
     this.offline = false,
-    this.isLoading = false
+    this.isLoading = false,
   });
 
   AuthState copyWith({
@@ -97,12 +138,12 @@ class AuthState {
     User? user,
     String? errorMessage,
     bool? offline,
-    bool? isLoading
+    bool? isLoading,
   }) => AuthState(
     authStatus: authStatus ?? this.authStatus,
     user: user ?? this.user,
     errorMessage: errorMessage ?? this.errorMessage,
     offline: offline ?? this.offline,
-    isLoading: isLoading ?? this.isLoading
+    isLoading: isLoading ?? this.isLoading,
   );
 }

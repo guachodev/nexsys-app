@@ -13,9 +13,11 @@ class CustomTextFormField extends StatelessWidget {
   final Function(String)? onFieldSubmitted;
   final String? Function(String?)? validator;
   final Widget? suffixIcon;
+  final Widget? prefixIcon;
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatters;
   final bool autofocus;
+  final bool? floating;
 
   const CustomTextFormField({
     super.key,
@@ -30,9 +32,11 @@ class CustomTextFormField extends StatelessWidget {
     this.onFieldSubmitted,
     this.validator,
     this.suffixIcon,
+    this.prefixIcon,
     this.maxLength,
     this.inputFormatters,
     this.autofocus = false,
+    this.floating=false,
   });
 
   @override
@@ -52,7 +56,7 @@ class CustomTextFormField extends StatelessWidget {
       maxLines: maxLines,
       initialValue: initialValue,
       decoration: InputDecoration(
-        floatingLabelBehavior: maxLines > 1
+        floatingLabelBehavior: maxLines > 1|| floating!
             ? FloatingLabelBehavior.always
             : FloatingLabelBehavior.auto,
         /* 
@@ -66,7 +70,7 @@ class CustomTextFormField extends StatelessWidget {
         errorText: errorMessage,
         focusColor: colors.primary,
         suffixIcon: suffixIcon,
-
+        prefixIcon: prefixIcon,
         // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
       ),
     );

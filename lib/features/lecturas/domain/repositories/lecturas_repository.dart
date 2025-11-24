@@ -1,19 +1,14 @@
-import '../entities/descarga_response.dart';
-import '../entities/lectura.dart';
-import '../entities/periodo.dart';
+import '../domain.dart';
 
 abstract class LecturasRepository {
-  Future<List<Lectura>> getLecturaAsignadasByPage({
-    int limit = 10,
-    int offset = 0,
-  });
   Future<Periodo?> getPeriodoActivo(String token);
-  Future<void> updateLectura(Map<String, dynamic> lecturaLike, String token);
-  Future<List<Lectura>> searchLecturas(String query, String token);
-  Future<Lectura?> searchLecturasByMedidor(String medidor, String token);
-
+  Future<List<Lectura>> searchLecturas(String query);
   Future<DescargaResponse> descargarLecturasAsignadas(
     String periodoId,
     String token,
   );
+  Future<Lectura?> getLecturaById(int id);
+  Future<void> updateLectura(Map<String, dynamic> lecturaLike, String token);
+  Future<List<Lectura>> getLecturasPendiente();
+  Future<List<Lectura>> getLecturasRegistradas();
 }

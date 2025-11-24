@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 
 class ModeButton extends StatelessWidget {
   final String text;
@@ -27,7 +28,7 @@ class ModeButton extends StatelessWidget {
           decoration: BoxDecoration(
             //borderRadius: BorderRadius.circular(6),
             borderRadius: _getBorderRadius(isFirst),
-            color: selected ? Colors.indigo : Colors.transparent,
+            color: selected ? AppColors.primary : Colors.transparent,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

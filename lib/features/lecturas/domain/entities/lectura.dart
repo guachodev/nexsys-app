@@ -9,12 +9,15 @@ class Lectura {
   final int lecturaAnterior;
   final int? lecturaActual;
   final String? observacion;
+  final String? fechaLectura;
+  final int? lectorId;
   final int? consumo;
   final int? novedadId;
   final double? latitud;
   final double? longitud;
   final List<String> imagenes;
-  final bool synced;
+  final bool sincronizado;
+  final bool registrado;
 
   Lectura({
     required this.id,
@@ -30,7 +33,10 @@ class Lectura {
     this.latitud,
     this.longitud,
     this.imagenes = const [],
-    this.synced = true,
+    this.sincronizado = true,
+    this.fechaLectura,
+    this.lectorId,
+    this.registrado = false,
   });
 
   Lectura copyWith({
@@ -47,7 +53,10 @@ class Lectura {
     double? latitud,
     double? longitud,
     List<String>? imagenes,
-    bool? synced,
+    bool? sincronizado,
+    bool? registrado,
+    String? fechaLectura,
+    int? lectorId,
   }) {
     return Lectura(
       id: id ?? this.id,
@@ -63,7 +72,10 @@ class Lectura {
       latitud: latitud ?? this.latitud,
       longitud: longitud ?? this.longitud,
       imagenes: imagenes ?? this.imagenes,
-      synced: synced ?? this.synced,
+      sincronizado: sincronizado ?? this.sincronizado,
+      registrado: registrado ?? this.registrado,
+      fechaLectura: fechaLectura ?? this.fechaLectura,
+      lectorId: lectorId ?? this.lectorId,
     );
   }
 
@@ -83,7 +95,10 @@ class Lectura {
       'latitud': latitud,
       'longitud': longitud,
       'imagenes': jsonEncode(imagenes),
-      'synced': synced ? 1 : 0,
+      'sincronizado': sincronizado ? 1 : 0,
+      'registrado': registrado ? 1 : 0,
+      'fechaLectura': fechaLectura,
+      'lectorId': lectorId,
     };
   }
 
@@ -110,17 +125,20 @@ class Lectura {
       cuenta: map['cuenta'],
       propietario: map['propietario'],
       cedula: map['cedula'],
-      lecturaAnterior: map['lectura_anterior'],
-      lecturaActual: map['lectura_actual'],
+      lecturaAnterior: map['lecturaAnterior'],
+      lecturaActual: map['lecturaActual'],
       observacion: map['observacion'],
       consumo: map['consumo'],
-      novedadId: map['novedad_id'],
+      novedadId: map['novedadId'],
       latitud: map['latitud']?.toDouble(),
       longitud: map['longitud']?.toDouble(),
       imagenes: map['imagenes'] != null
           ? List<String>.from(jsonDecode(map['imagenes']))
           : [],
-      synced: map['synced'] == 1,
+      sincronizado: map['sincronizado'] == 1,
+      registrado: map['registrado'] == 1,
+      fechaLectura: map['fechaLectura'],
+      lectorId: map['lectorId'],
     );
   }
 
@@ -131,7 +149,7 @@ class Lectura {
       cuenta: json['cuenta'],
       propietario: json['propietario'],
       cedula: json['cedula'],
-      lecturaAnterior: json['lectura_anterior']
+      lecturaAnterior: json['lectura_anterior'],
     );
   }
 }

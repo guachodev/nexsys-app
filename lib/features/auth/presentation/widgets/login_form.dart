@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 import 'package:nexsys_app/core/utils/utils.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 
@@ -136,7 +137,7 @@ class LoginForm extends ConsumerWidget {
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.white,
-                  backgroundColor: Colors.indigo,
+                  backgroundColor: AppColors.primary,
                   padding: EdgeInsets.all(12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -163,7 +164,7 @@ class LoginForm extends ConsumerWidget {
           const SizedBox(height: 20),
           TextButton(
             onPressed: () {},
-            child: Text("Scanear QR?", style: TextStyle(color: Colors.indigo)),
+            child: Text("Scanear QR?", style: TextStyle(color: AppColors.primary)),
           ), */
         ],
       ),

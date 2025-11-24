@@ -1,23 +1,14 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
+import 'package:nexsys_app/core/database/database.dart';
 import 'package:nexsys_app/core/router/router.dart';
-import 'package:nexsys_app/core/theme/app_theme.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 
 Future<void> main() async {
   await Environment.initEnvironment();
-  /*WidgetsFlutterBinding.ensureInitialized();
-  final permissionService = PermissionService();
-  await permissionService.requestInitialPermissions();
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  Future.delayed(const Duration(seconds: 5), () {
-    FlutterNativeSplash.remove();
-  });*/
+  // Inicializa la base de datos antes de correr la app
+  await DatabaseProvider.db;
   runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -27,197 +18,11 @@ class MyApp extends ConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    /* return ChangeNotifierProvider(
-      create: (_) => AssignedMetersProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: const DashboardScreen(),
-      ),
-    ); */
     final appRouter = ref.watch(goRouterProvider);
     return MaterialApp.router(
-      title: Environment.appName,
-      debugShowCheckedModeBanner: false,
+      title: 'Flutter Demo',
       routerConfig: appRouter,
       theme: AppTheme.lightTheme,
-      /* theme: ThemeData(
-        //scaffoldBackgroundColor: Colors.white,
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.white,
-          surfaceTintColor: Colors.transparent,
-          shadowColor: Color(0xff000000),
-        ),
-        /* colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
-        
-        inputDecorationTheme: InputDecorationThemeData(
-          floatingLabelStyle: const TextStyle(
-            fontSize: 18,
-            color: Colors.black54,
-            fontWeight: FontWeight.w700, 
-          ),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: const BorderSide(width: 1.5, color: Colors.indigo),
-          ),
-          hintStyle: TextStyle(color: Colors.black45),
-          labelStyle: TextStyle(color: Colors.black45),
-
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.grey.shade400, width: 1.2),
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ), */
-
-        scaffoldBackgroundColor: kBackgroundColor,
-        // primaryColor: kPrimaryColor,
-      ),*/
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _lecturaController = TextEditingController();
-  final TextEditingController _nombreClienteController =
-      TextEditingController();
-  File? _image;
-
-  final ImagePicker _picker = ImagePicker();
-
-  Future<void> _takePhoto() async {
-    final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
-    if (photo != null) {
-      setState(() {
-        _image = File(photo.path);
-      });
-    }
-  }
-
-  void _viewPhoto() {
-    if (_image != null) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          content: Image.file(_image!),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cerrar"),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Lectura de Agua Potable")),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Imagen del cliente o referencia
-              GestureDetector(
-                onTap: _image != null ? _viewPhoto : _takePhoto,
-                child: Container(
-                  width: double.infinity,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                    color: Colors.grey[200],
-                  ),
-                  child: _image != null
-                      ? Image.file(_image!, fit: BoxFit.cover)
-                      : Icon(
-                          Icons.camera_alt,
-                          size: 50,
-                          color: Colors.grey[700],
-                        ),
-                ),
-              ),
-              SizedBox(height: 16),
-              // Nombre del cliente
-              TextFormField(
-                controller: _nombreClienteController,
-                decoration: InputDecoration(
-                  labelText: "Nombre del Cliente",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Ingrese el nombre del cliente";
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              // Lectura actual
-              TextFormField(
-                controller: _lecturaController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  labelText: "Lectura Actual (m³)",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return "Ingrese la lectura";
-                  }
-                  return null;
-                },
-              ),
-              SizedBox(height: 16),
-              // Botón guardar
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      // Aquí puedes manejar el guardado de datos
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Lectura guardada')),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: Text("Guardar"),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }

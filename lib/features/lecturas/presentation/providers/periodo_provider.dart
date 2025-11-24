@@ -1,104 +1,89 @@
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:nexsys_app/core/constants/constants.dart';
+import 'package:nexsys_app/core/constants/enums.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
-
-final periodoProvider =
-    StateNotifierProvider.autoDispose<PeriodoNotifier, PeriodoState>((ref) {
-      final lecturasRepository = LecturasRepositoryImpl();
-      final authState = ref.watch(authProvider);
-      return PeriodoNotifier(
-        lecturasRepository: lecturasRepository,
-        token: authState.user!.token,
-      );
-    });
+final periodoProvider = StateNotifierProvider<PeriodoNotifier, PeriodoState>((
+  ref,
+) {
+  final lecturasRepository = LecturasRepositoryImpl();
+  final authState = ref.watch(authProvider);
+  return PeriodoNotifier(
+    lecturasRepository: lecturasRepository,
+    token: authState.user!.token,
+  );
+});
 
 class PeriodoNotifier extends StateNotifier<PeriodoState> {
   final LecturasRepositoryImpl lecturasRepository;
   final String token;
+
   PeriodoNotifier({required this.lecturasRepository, required this.token})
     : super(PeriodoState()) {
     loadPeriodo();
   }
 
   Future<void> loadPeriodo() async {
+    state = state.copyWith(status: SearchStatus.loading);
+
     try {
-      state = state.copyWith(status: SearchStatus.loading);
       final periodo = await lecturasRepository.getPeriodoActivo(token);
+
       if (periodo == null) {
-        state = state.copyWith(
-          periodo: null,
-          status: SearchStatus.empty,
-          pendientes: 0,
-          progreso: 0.0,
-        );
+        state = state.copyWith(status: SearchStatus.empty);
         return;
       }
 
-      state = state.copyWith(
-        periodo: periodo,
-        status: SearchStatus.loaded,
-        //pendientes: periodo.total - periodo.totalLectura,
-        /*progreso: (periodo.totalLectura / periodo.total).isNaN
-            ? 0
-            : periodo.totalLectura / periodo.total,*/
-      );
+      state = state.copyWith(status: SearchStatus.loaded, periodo: periodo);
     } catch (e) {
       state = state.copyWith(
-        periodo: null,
         status: SearchStatus.error,
         errorMessage: e.toString(),
       );
     }
   }
 
-  Future<void> updateDowload() async {
-    final periodoActual = state.periodo;
+  Future<void> marcarDescargado() async {
+    if (state.periodo == null) return;
 
+    final updated = state.periodo!.copyWith(descargado: true);
+    await lecturasRepository.updatePeriodo(updated);
+    state = state.copyWith(periodo: updated);
+    refreshAvance();
+  }
+
+  Future<void> refreshAvance() async {
+    final periodoActual = state.periodo;
     if (periodoActual == null) return;
 
-    final periodoActualizado = periodoActual.copyWith(dowload: true);
-
-    // Actualizar estado en Riverpod
-    state = state.copyWith(
-      periodo: periodoActualizado,
-      pendientes: 0,
-      progreso: 0.0,
+    // calcular avance usando el repo
+    final actualizado = await lecturasRepository.calcularAvancePeriodo(
+      periodoActual,
     );
 
-    // También actualiza SQLite
-    //await local.updatePeriodo(periodoActualizado);
+    state = state.copyWith(periodo: actualizado);
   }
 }
 
 class PeriodoState {
   final Periodo? periodo;
   final SearchStatus status;
-  final int? pendientes;
-  final double? progreso;
   final String? errorMessage;
 
   PeriodoState({
     this.periodo,
-    this.pendientes = 0,
-    this.progreso = 0.0,
     this.status = SearchStatus.initial,
     this.errorMessage = '',
   });
 
   PeriodoState copyWith({
     Periodo? periodo,
-    int? pendientes,
-    double? progreso,
     SearchStatus? status,
     String? errorMessage,
   }) => PeriodoState(
     periodo: periodo ?? this.periodo,
     status: status ?? this.status,
-    pendientes: pendientes ?? this.pendientes,
-    progreso: progreso ?? this.progreso,
     errorMessage: errorMessage ?? this.errorMessage,
   );
 }

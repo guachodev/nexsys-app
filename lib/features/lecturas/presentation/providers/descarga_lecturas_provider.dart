@@ -28,18 +28,18 @@ class DescargaLecturasNotifier extends StateNotifier<DescargaLecturasState> {
     try {
       state = state.copyWith(loading: true, error: null);
 
-      final data = await lecturasRepository.descargarLecturasAsignadas(
+      await lecturasRepository.descargarLecturasAsignadas(
         periodoId,
         token,
       );
 
-      print("RUTAS: ${data.rutas.length}");
+     /*  print("RUTAS: ${data.rutas.length}");
       print("NOVEDADES: ${data.novedades.length}");
-      print("LECTURAS DESCARGADAS: ${data.lecturas.length}");
+      print("LECTURAS DESCARGADAS: ${data.lecturas.length}"); */
 
       // ⬇ Aquí guardas en SQLite
       //await guardarEnDatabase(respuesta);
-
+      ///ref.read(periodoProvider.notifier).updateDowload();
       state = state.copyWith(loading: false);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());

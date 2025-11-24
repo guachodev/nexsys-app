@@ -8,11 +8,10 @@ class AppTheme {
     brightness: Brightness.light,
     scaffoldBackgroundColor: AppColors.backgroundLight,
     colorScheme: ColorScheme.fromSeed(
-      seedColor: Colors.indigo,
-      primary: Colors.indigo,
+      seedColor: AppColors.primary,
+      primary: AppColors.primary,
       //secondary: AppColors.secondary,
     ),
-
     appBarTheme: const AppBarTheme(
       backgroundColor: Colors.white,
       surfaceTintColor: Colors.transparent,
@@ -39,13 +38,13 @@ class AppTheme {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(8),
-        borderSide: const BorderSide(width: 1.5, color: Colors.indigo),
+        borderSide: const BorderSide(width: 1.5, color: AppColors.primary),
       ),
       
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.indigo,
+        backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         //minimumSize: const Size(double.infinity, 52),
@@ -54,8 +53,8 @@ class AppTheme {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: Colors.indigo,
-        side: BorderSide(color: Colors.indigo.shade200),
+        foregroundColor: AppColors.primary,
+        side: BorderSide(color: AppColors.primary.shade200),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     ),

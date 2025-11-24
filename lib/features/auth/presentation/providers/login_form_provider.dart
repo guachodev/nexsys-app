@@ -1,14 +1,12 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
-import 'package:nexsys_app/shared/shared.dart';
+import 'package:nexsys_app/shared/inputs/inputs.dart';
 
 import 'auth_provider.dart';
-
 
 final loginFormProvider =
     StateNotifierProvider.autoDispose<LoginFormNotifier, LoginFormState>((ref) {
       final loginUserCallback = ref.watch(authProvider.notifier).login;
-
       return LoginFormNotifier(loginUserCallback: loginUserCallback);
     });
 
@@ -18,7 +16,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
   LoginFormNotifier({required this.loginUserCallback})
     : super(LoginFormState());
 
-  onUsernameChange(String value) {
+  void onUsernameChange(String value) {
     final newUsername = Username.dirty(value);
     state = state.copyWith(
       username: newUsername,
@@ -26,7 +24,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     );
   }
 
-  onPasswordChanged(String value) {
+  void onPasswordChanged(String value) {
     final newPassword = Password.dirty(value);
     state = state.copyWith(
       password: newPassword,
@@ -34,26 +32,30 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     );
   }
 
-  onObscureText() {
+  void onObscureText() {
     state = state.copyWith(isObscureText: !state.isObscureText);
   }
 
-  onTapOffline() {
+  void onTapOffline() {
     state = state.copyWith(isOffline: !state.isOffline);
   }
 
-  onFormSubmit() async {
+  Future<void> onFormSubmit() async {
     _touchEveryField();
 
     if (!state.isValid) return;
     state = state.copyWith(isPosting: true);
 
-    await loginUserCallback(state.username.value, state.password.value,state.isOffline);
+    await loginUserCallback(
+      state.username.value,
+      state.password.value,
+      state.isOffline,
+    );
 
     state = state.copyWith(isPosting: false);
   }
 
-  _touchEveryField() {
+  void _touchEveryField() {
     final username = Username.dirty(state.username.value);
     final password = Password.dirty(state.password.value);
     state = state.copyWith(

@@ -12,7 +12,7 @@ class LoginScreen extends StatelessWidget {
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
-        backgroundColor: Color(0xFFF3F3F3),
+        //backgroundColor: Color(0xFFF3F3F3),
         body: AuthBackground(
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),

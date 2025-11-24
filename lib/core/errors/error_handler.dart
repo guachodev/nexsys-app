@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:nexsys_app/core/errors/errors.dart';
 
 Never handleDioError(DioException e) {
   final status = e.response?.statusCode;
@@ -23,4 +22,9 @@ Never handleDioError(DioException e) {
   }
 
   throw CustomError('Error inesperado');
+}
+
+class CustomError implements Exception {
+  final String message;
+  CustomError(this.message);
 }

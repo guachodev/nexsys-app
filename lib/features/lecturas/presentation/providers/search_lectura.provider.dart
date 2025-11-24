@@ -24,7 +24,13 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
   SearchLecturaNotifier({required this.lecturasRepository, required this.token})
     : super(SearchLecturaState());
 
-  reset() {
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void reset() {
     state = state.copyWith(
       status: SearchStatus.initial,
       lecturas: [],
@@ -33,7 +39,7 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
     );
   }
 
-  deleteById(int id) {
+  void deleteById(int id) {
     final newLecturas = state.lecturas
         .where((element) => element.id != id)
         .toList();
@@ -75,7 +81,7 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
     try {
       state = state.copyWith(status: SearchStatus.loading, query: query);
 
-      final lecturas = await lecturasRepository.searchLecturas(query, token);
+      final lecturas = await lecturasRepository.searchLecturas(query);
 
       if (lecturas.isEmpty) {
         state = state.copyWith(status: SearchStatus.empty, lecturas: []);

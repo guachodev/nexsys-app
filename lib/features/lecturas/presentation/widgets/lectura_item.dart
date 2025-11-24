@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:nexsys_app/core/theme/theme.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
 class LecturaItem extends ConsumerWidget {
@@ -19,13 +20,12 @@ class LecturaItem extends ConsumerWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () => context.push('/lecturas/detalle', extra: lectura),
+        onTap: () => context.push('/lecturas/detalle/${ lectura.id }'),
         child: Container(
-          // padding: EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200, width: 1.5),
+            border: Border.all(color: Colors.grey.shade400, width: 1.2),
           ),
           child: Column(
             children: [
@@ -42,12 +42,49 @@ class LecturaItem extends ConsumerWidget {
                             Container(
                               padding: EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: Colors.indigo.withValues(alpha: 0.1),
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(
+                                Icons.home_work,
+                                color: AppColors.primary.shade900,
+                                size: 25,
+                              ),
+                            ),
+                            SizedBox(width: 6),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "N° Cuenta",
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade800,
+                                  ),
+                                ),
+                                Text(
+                                  lectura.cuenta.toString(),
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.primary.shade700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.teal.withValues(alpha: 0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: Icon(
                                 Icons.speed,
-                                color: Colors.indigo,
+                                color: Colors.teal.shade900,
                                 size: 25,
                               ),
                             ),
@@ -58,8 +95,8 @@ class LecturaItem extends ConsumerWidget {
                                 Text(
                                   "Medidor",
                                   style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade600,
+                                    fontSize: 13,
+                                    color: Colors.grey.shade800,
                                   ),
                                 ),
                                 Text(
@@ -67,14 +104,13 @@ class LecturaItem extends ConsumerWidget {
                                   style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.indigo.shade700,
+                                    color: Colors.grey.shade800,
                                   ),
                                 ),
                               ],
                             ),
                           ],
                         ),
-                        _buildStatusBadge(lectura.cuenta.toString()),
                       ],
                     ),
                     SizedBox(height: 6),
@@ -87,8 +123,8 @@ class LecturaItem extends ConsumerWidget {
                               Text(
                                 "Propietario",
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600,
+                                  fontSize: 13,
+                                  color: Colors.grey.shade800,
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -130,7 +166,7 @@ class LecturaItem extends ConsumerWidget {
                     bottomLeft: Radius.circular(12),
                     bottomRight: Radius.circular(12),
                   ),
-                  color: Colors.indigo,
+                  color: AppColors.primary,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -154,31 +190,7 @@ class LecturaItem extends ConsumerWidget {
     );
   }
 
-  Widget _buildStatusBadge(String periodo) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Colors.teal.shade600,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.calendar_month_rounded, size: 14, color: Colors.white),
-          SizedBox(width: 4),
-          Text(
-            periodo,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
+ }
 
 class _BuildInfoItem extends StatelessWidget {
   final String title;
@@ -200,15 +212,15 @@ class _BuildInfoItem extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
                     overflow: TextOverflow.ellipsis,
                   ),
                   Text(
                     value,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 14,
                       fontWeight: FontWeight.w600,
-                      color: Colors.black54,
+                      color: Colors.grey.shade800,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),

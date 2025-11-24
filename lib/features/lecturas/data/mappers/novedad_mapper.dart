@@ -4,7 +4,7 @@ class NovedadMapper {
   static Novedad jsonToEntity(Map<String, dynamic> json) {
     return Novedad(
       id: json['id'],
-      detalle: json['detalle'],
+      detalle: json['name'],
       isDefault: json['default'],
     );
   }

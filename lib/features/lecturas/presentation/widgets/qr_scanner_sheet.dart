@@ -64,7 +64,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
         context,
         'Medidor encontrado: ${state.lectura!.id}',
       );
-      context.push('/lecturas/detalle', extra: state.lectura);
+      context.push('/lecturas/detalle/${state.lectura?.id}');
     } else if (state.status == SearchLecturaQrStatus.error) {
       Notifications.error(context, state.message);
 

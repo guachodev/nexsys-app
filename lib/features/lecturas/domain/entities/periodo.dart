@@ -1,25 +1,55 @@
 class Periodo {
   final int id;
   final String name;
-  final bool? dowload;
-  final String? date;
+  final bool cerrado;
+  final bool descargado;
+  final String? fecha;
 
-  Periodo({required this.id, required this.name, this.dowload, this.date});
+  final int totalMedidores;
+  final int medidoresLeidos;
+  final int pendientes;
+  final double porcentajeAvance;
 
-  Periodo copyWith({int? id, String? name, bool? dowload, String? date}) {
+  Periodo({
+    required this.id,
+    required this.name,
+    this.descargado = false,
+    this.cerrado = false,
+    this.fecha,
+    this.totalMedidores = 0,
+    this.medidoresLeidos = 0,
+    this.pendientes = 0,
+    this.porcentajeAvance = 0.0,
+  });
+
+  Periodo copyWith({
+    int? id,
+    String? name,
+    String? fecha,
+    bool? cerrado,
+    bool? descargado,
+    int? totalMedidores,
+    int? medidoresLeidos,
+    int? pendientes,
+    double? porcentajeAvance,
+  }) {
     return Periodo(
       id: id ?? this.id,
       name: name ?? this.name,
-      dowload: dowload ?? this.dowload,
-      date: date ?? this.date,
+      fecha: fecha ?? this.fecha,
+      cerrado: cerrado ?? this.cerrado,
+      descargado: descargado ?? this.descargado,
+      totalMedidores: totalMedidores ?? this.totalMedidores,
+      medidoresLeidos: medidoresLeidos ?? this.medidoresLeidos,
+      pendientes: pendientes ?? this.pendientes,
+      porcentajeAvance: porcentajeAvance ?? this.porcentajeAvance,
     );
   }
 
   factory Periodo.fromMap(Map<String, dynamic> map) => Periodo(
     id: map['id'],
     name: map['name'],
-    // estado: map['estado'],
-    dowload: map['dowload'],
-    // fechaSync: map['fechaSync'],
+    descargado: map['descargado'],
+    cerrado: map['cerrado'],
   );
 }

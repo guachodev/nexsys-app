@@ -2,103 +2,85 @@ import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
-import '../mappers/periodo_mapper.dart';
-
 class LecturasRepositoryImpl extends LecturasRepository {
   final LecturasDatasourceImpl remote;
-  final LecturasLocalDatasource local;
+  final LecturasLocalDatasourceImpl local;
 
   LecturasRepositoryImpl({
     LecturasDatasourceImpl? remote,
-    LecturasLocalDatasource? local,
+    LecturasLocalDatasourceImpl? local,
   }) : remote = remote ?? LecturasDatasourceImpl(),
-       local = local ?? LecturasLocalDatasource();
-
-  @override
-  Future<List<Lectura>> getLecturaAsignadasByPage({
-    int limit = 10,
-    int offset = 0,
-  }) async {
-    final hasNet = await ConnectivityService.hasConnection();
-    if (hasNet) {
-      final lecturas = await remote.getLecturaAsignadasByPage(
-        limit: limit,
-        offset: offset,
-      );
-      await local.saveLecturas(lecturas);
-      return lecturas;
-    } else {
-      return await local.getLecturas();
-    }
-  }
-
-  @override
-  Future<void> updateLectura(
-    Map<String, dynamic> lecturaLike,
-    String token,
-  ) async {
-    final hasNet = await ConnectivityService.hasConnection();
-    final lectura = LecturaMapper.jsonToEntity(lecturaLike);
-
-    if (hasNet) {
-      await remote.updateLectura(lecturaLike, token);
-      await local.markAsSynced(lectura.id);
-    } else {
-      await local.saveLectura(lectura);
-    }
-  }
-
-  @override
-  Future<List<Lectura>> searchLecturas(String query, String token) async {
-    final hasNet = await ConnectivityService.hasConnection();
-
-    if (hasNet) {
-      final lecturas = await remote.searchLecturas(query, token);
-      await local.saveLecturas(lecturas);
-      //final all = await local.getLecturas();
-      return lecturas;
-    } else {
-      final all = await local.getLecturas();
-      //print(all);
-      return all.where((l) => l.medidor.contains(query)).toList();
-    }
-  }
+       local = local ?? LecturasLocalDatasourceImpl();
 
   @override
   Future<Periodo?> getPeriodoActivo(String token) async {
     final hasNet = await ConnectivityService.hasConnection();
+    Periodo? periodo;
+
     if (hasNet) {
-      final periodo = await remote.getPeriodoActivo(token);
-      if (periodo != null) {
-        await local.savePeriodo(periodo);
-      } else {
-        // periodo remoto NO existe → limpiamos base
-        // await local.clearPeriodo();
-        return null;
+      try {
+        periodo = await remote.getPeriodoActivo(token);
+      } catch (_) {
+        periodo = null;
       }
     }
-    final data = await local.getPeriodo();
-    //print(data);
-    if (data == null) return null;
 
-    return PeriodoMapper.jsonTodb(data);
+    final periodolocal = await local.getPeriodo();
+
+    // CASE 1: backend devuelve null → período cerrado oficialmente
+    if (periodo == null) {
+      if (periodolocal != null) {
+        final updated = periodolocal.copyWith(cerrado: true);
+
+        await local.savePeriodo(updated);
+
+        // actualizar avance
+        return await _calcularAvance(updated);
+      }
+      return null;
+    }
+
+    // CASE 2: nuevo período
+    if (periodolocal == null) {
+      final nuevo = periodo.copyWith(cerrado: false, descargado: false);
+      await local.savePeriodo(nuevo);
+
+      return await _calcularAvance(nuevo);
+    }
+
+    // CASE 3: ID distinto → nuevo período
+    if (periodolocal.id != periodo.id) {
+      final nuevo = periodo.copyWith(cerrado: false, descargado: false);
+
+      await local.savePeriodo(nuevo);
+      //await local.clearMedidores();  // si lo ocupas habilítalo
+
+      return await _calcularAvance(nuevo);
+    }
+
+    // CASE 4: mismo período
+    final actualizado = periodolocal.copyWith(
+      name: periodo.name,
+      fecha: periodo.fecha,
+
+      // mantener flags locales
+      cerrado: periodolocal.cerrado,
+      descargado: periodolocal.descargado,
+    );
+
+    //await local.savePeriodo(actualizado);
+
+    return await _calcularAvance(actualizado);
   }
 
   @override
-  Future<Lectura?> searchLecturasByMedidor(String medidor, String token) async {
-    final hasNet = await ConnectivityService.hasConnection();
-    if (hasNet) {
-      final lectura = await remote.searchLecturasByMedidor(medidor, token);
-      if (lectura != null) await local.saveLectura(lectura);
-      return lectura;
-    } else {
-      final lecturas = await local.getLecturas();
-      try {
-        return lecturas.firstWhere((l) => l.medidor == medidor);
-      } catch (_) {
-        return null;
-      }
-    }
+  Future<List<Lectura>> searchLecturas(String query) async {
+    //final hasNet = await ConnectivityService.hasConnection();
+
+    final lecturas = await local.buscarPorCuenta(query);
+    //await local.saveLecturas(lecturas);
+    //final all = await local.getLecturas();
+    return lecturas;
   }
 
   @override
@@ -107,18 +89,137 @@ class LecturasRepositoryImpl extends LecturasRepository {
     String token,
   ) async {
     final data = await remote.descargarLecturasAsignadas(periodoId, token);
-    //print(data);
     final response = DescargaResponse.fromJson(data);
-
+    await local.eliminarData();
     await local.saveRutas(response.rutas);
     await local.saveNovedades(response.novedades);
     await local.saveLecturas(response.lecturas);
-
-    final todas = await local.getLecturas();
-    print("LECTURAS GUARDADAS:");
-    for (var l in todas) {
-      print("${l.id} - ${l.medidor} - ${l.lecturaAnterior}");
-    }
     return response;
+  }
+
+  @override
+  Future<Lectura?> getLecturaById(int id) {
+    return local.lecturaById(id);
+  }
+
+  @override
+  Future<void> updateLectura(
+    Map<String, dynamic> lecturaLike,
+    String token,
+  ) async {
+    try {
+      //final hasNet = await ConnectivityService.hasConnection();
+      //final lectura = LecturaMapper.jsonToEntity(lecturaLike);
+      await local.updateLectura(lecturaLike, lecturaLike['id']);
+
+      /*if (hasNet) {
+      await remote.updateLectura(lecturaLike, token);
+      await local.markAsSynced(lectura.id);
+    } else {
+      await local.saveLectura(lectura);
+    }*/
+    } catch (e) {
+      throw Exception('Error updating lectura: $e');
+    }
+  }
+
+  @override
+  Future<List<Lectura>> getLecturasPendiente() {
+    return local.getLecturasPendientes();
+  }
+
+  @override
+  Future<List<Lectura>> getLecturasRegistradas() {
+    return local.getLecturasRegistradas();
+  }
+
+  Future<void> updatePeriodo(Periodo periodo) async {
+    await local.savePeriodo(periodo);
+  }
+
+  Future<Periodo> _calcularAvance(Periodo periodo) async {
+    final total = await local.countTotal();
+    final leidos = await local.countLeidos();
+
+    final pendientes = total - leidos;
+    final porcentaje = total == 0 ? 0 : (leidos / total * 100);
+
+    final actualizado = periodo.copyWith(
+      totalMedidores: total,
+      medidoresLeidos: leidos,
+      pendientes: pendientes,
+      porcentajeAvance: porcentaje.toDouble(),
+    );
+
+    // Guarda el período actualizado en la base local
+    await local.savePeriodo(actualizado);
+
+    return actualizado;
+  }
+
+  Future<Periodo> calcularAvancePeriodo(Periodo periodo) async {
+    final total = await local.countTotal();
+    final leidos = await local.countLeidos();
+
+    final pendientes = total - leidos;
+    final porcentaje = total == 0 ? 0 : (leidos / total * 100);
+
+    final actualizado = periodo.copyWith(
+      totalMedidores: total,
+      medidoresLeidos: leidos,
+      pendientes: pendientes,
+      porcentajeAvance: porcentaje.toDouble(),
+    );
+
+    await local.savePeriodo(actualizado);
+
+    return actualizado;
+  }
+
+  Future<void> reseterLecturas(Periodo periodo) async {
+    await local.resetearLEcturas();
+    await calcularAvancePeriodo(periodo);
+  }
+
+  Future<int> sincronizarLecturas(String token) async {
+    final pendientes = await local.getLecturasPendiente();
+
+    if (pendientes.isEmpty) return 0;
+
+    int exitosas = 0;
+
+    for (final lectura in pendientes) {
+      try {
+        final lecturaLike = {
+          'id': lectura.id,
+          'lectura_actual': lectura.lecturaActual,
+          'descripcion': lectura.observacion,
+          //'imagenes': lectura.images ?? [],
+          'consumo': lectura.consumo,
+          'novedad_id': lectura.novedadId,
+          'fecha_lectura': lectura.fechaLectura,
+          'empleado_id': lectura.lectorId,
+          'latitud': lectura.latitud,
+          'longitud': lectura.longitud,
+        };
+        await remote.updateLectura(lecturaLike, token);
+        await local.lecturaSincronizada(lectura.id);
+        exitosas++;
+      } catch (_) {
+        // no marcamos error global, solo omitimos una lectura
+      }
+    }
+
+    return exitosas;
+  }
+
+  Future<String> exportarLecturas() async {
+    // Obtener JSON desde la base SQLite local
+    final json = await local.exportLecturasToJson();
+
+    // Guardar en carpeta Downloads (nuevo método)
+    final filePath = await local.saveJsonFileInDownloads(json);
+
+    return filePath;
   }
 }

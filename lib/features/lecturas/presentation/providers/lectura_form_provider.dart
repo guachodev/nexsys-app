@@ -4,12 +4,16 @@ import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart' hide Novedad;
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
-import 'package:nexsys_app/shared/shared.dart';
+import 'package:nexsys_app/shared/inputs/inputs.dart';
 
-final lecturaFormProvider = StateNotifierProvider.autoDispose
-    .family<LecturaFormNotifier, LecturaFormState, Lectura>((ref, lectura) {
+final lecturaFormProvider =
+    StateNotifierProvider.family<
+      LecturaFormNotifier,
+      LecturaFormState,
+      Lectura
+    >((ref, lectura) {
       final updateCallback = ref.watch(lecturasProvider.notifier).updateProduct;
-      final authState = ref.watch(authProvider);
+      final authState = ref.watch(authProvider); // tu valor por defecto
       return LecturaFormNotifier(
         lectura: lectura,
         onSubmitCallback: updateCallback,
@@ -27,19 +31,22 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
     this.onSubmitCallback,
     required Lectura lectura,
     this.userId,
+    int? defaultNovedadId,
   }) : super(
          LecturaFormState(
            id: lectura.id,
-           isPosting: false,
            lecturaAnterior: lectura.lecturaAnterior,
            medidor: lectura.medidor,
-           catastro: lectura.cuenta.toString(),
+           cuenta: lectura.cuenta.toString(),
            propietario: lectura.propietario,
            cedula: lectura.cedula,
+           consumo: 0,
            lecturaActual: LecturaActual.pure(
              lecturaAnterior: lectura.lecturaAnterior,
            ),
-           novedadId: Novedad.pure(),
+           novedadId: Novedad.dirty(25), // ✅ Aquí asignamos la novedad por defecto
+           observacion: '',
+           images: [],
          ),
        );
 
@@ -111,7 +118,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
         'longitud': position?.longitude,
       };
 
-      print("📍 Lectura con ubicación: $lecturaLike");
+      //debugPrint("📍 Lectura con ubicación: $lecturaLike");
       await onSubmitCallback!(lecturaLike);
       state = state.copyWith(isPosting: false);
       return true;
@@ -127,7 +134,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
       isPosting: false,
       lecturaAnterior: nuevaLectura.lecturaAnterior,
       medidor: nuevaLectura.medidor,
-      catastro: nuevaLectura.cuenta.toString(),
+      cuenta: nuevaLectura.cuenta.toString(),
       propietario: nuevaLectura.propietario,
       cedula: nuevaLectura.cedula,
       lecturaActual: LecturaActual.pure(
@@ -137,12 +144,29 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
     );
   }
 
+  void reset() {
+    state = LecturaFormState(
+      id: -1,
+      medidor: '',
+      cuenta: '',
+      propietario: '',
+      cedula: '',
+      lecturaAnterior: 0,
+      lecturaActual: LecturaActual.pure(lecturaAnterior: 0),
+      novedadId: Novedad.pure(),
+      observacion: '',
+      consumo: 0,
+      images: [],
+      isPosting: false,
+    );
+  }
+
   void onDescriptionChanged(String description) {
     state = state.copyWith(observacion: description);
   }
 
   void addLecturaImage(String path) {
-    final updatedList = [ path, ...state.images,];
+    final updatedList = [path, ...state.images];
     state = state.copyWith(images: updatedList);
   }
 
@@ -154,13 +178,24 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
   void clearAllImages() {
     state = state.copyWith(images: []);
   }
+
+  Future<void> setDefaultNovedadFromApi() async {
+    if (state.novedadId?.value != null) return;
+
+    try {
+      //final defaultNovedadId = await ();
+      state = state.copyWith(novedadId: Novedad.dirty(25));
+    } catch (e) {
+      // manejar error si la consulta falla
+    }
+  }
 }
 
 class LecturaFormState {
   final bool isFormValid;
   final int id;
   final String medidor;
-  final String catastro;
+  final String cuenta;
   final String propietario;
   final String cedula;
   final int lecturaAnterior;
@@ -175,7 +210,7 @@ class LecturaFormState {
     this.isFormValid = false,
     required this.id,
     required this.medidor,
-    required this.catastro,
+    required this.cuenta,
     required this.propietario,
     required this.cedula,
     required this.lecturaAnterior,
@@ -193,7 +228,7 @@ class LecturaFormState {
     bool? isFormValid,
     int? id,
     String? medidor,
-    String? catastro,
+    String? cuenta,
     String? propietario,
     String? cedula,
     int? lecturaAnterior,
@@ -208,7 +243,7 @@ class LecturaFormState {
       isFormValid: isFormValid ?? this.isFormValid,
       id: id ?? this.id,
       medidor: medidor ?? this.medidor,
-      catastro: catastro ?? this.catastro,
+      cuenta: cuenta ?? this.cuenta,
       propietario: propietario ?? this.propietario,
       cedula: cedula ?? this.cedula,
       lecturaAnterior: lecturaAnterior ?? this.lecturaAnterior,
@@ -223,6 +258,21 @@ class LecturaFormState {
 
   @override
   String toString() {
-    return 'Lectura(id: $id, medidor: $medidor, propietario: $propietario)';
+    return '''
+LecturaFormState(
+  isFormValid: $isFormValid,
+  id: $id,
+  medidor: $medidor,
+  cuenta: $cuenta,
+  propietario: $propietario,
+  cedula: $cedula,
+  lecturaAnterior: $lecturaAnterior,
+  lecturaActual: $lecturaActual,
+  observacion: $observacion,
+  consumo: $consumo,
+  novedadId: $novedadId,
+  images: $images,
+  isPosting: $isPosting
+)''';
   }
 }

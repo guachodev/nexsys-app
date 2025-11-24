@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/home/presentation/presentation.dart';
-import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 
 import 'router_notifier.dart';
@@ -29,20 +28,21 @@ final goRouterProvider = Provider((ref) {
         path: '/lecturas/search',
         builder: (context, state) => const SearchLecturaScreen(),
       ),
-      /* GoRoute(
-        path: '/lecturas/detalle/:id',
-        builder: (context, state) {
-          final id = state.pathParameters['id']!;
-          return LecturaDetalleScreen(medidorId: id);
-        },
-      ), */
       GoRoute(
-        path: '/lecturas/detalle', // /product/new
-        builder: (context, state) {
-          final lectura = state.extra as Lectura;
-          return LecturaScreen(lecturaInicial: lectura);
-        },
+        path: '/lecturas/registrados',
+        builder: (context, state) => const LecturasListScreen(),
       ),
+      GoRoute(
+        path: '/lecturas/sincronizar',
+        builder: (context, state) => const SincronizarScreen(),
+      ),
+      GoRoute(
+        path: '/lecturas/detalle/:id',
+        builder: (_, state) {
+          final id = int.parse(state.pathParameters['id']!);
+          return LecturaScreen(lecturaId: id);
+        },
+      )
     ],
 
     redirect: (context, state) {

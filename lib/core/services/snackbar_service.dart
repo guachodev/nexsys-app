@@ -63,4 +63,13 @@ class SnackbarService {
       icon: Icons.warning_amber_rounded,
     );
   }
+
+  static void info(BuildContext context, String message) {
+    show(
+      context,
+      message: message,
+      backgroundColor: Colors.blue.shade700,
+      icon: Icons.warning_amber_rounded,
+    );
+  }
 }

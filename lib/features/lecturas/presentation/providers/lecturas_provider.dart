@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:nexsys_app/core/errors/errors.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
@@ -27,58 +27,29 @@ class LecturasNotifier extends StateNotifier<LecturasState> {
       await lecturasRepository.updateLectura(productLike, token);
       return true;
     } catch (e) {
+      debugPrint('Error $e');
       return false;
     }
   }
 
-  Future loadNextPage() async {
+  Future<bool> resetearLecturas(Periodo periodo) async {
     try {
-      if (state.isLoading || state.isLastPage) return;
-
-      state = state.copyWith(isLoading: true);
-
-      final lecturas = await lecturasRepository.getLecturaAsignadasByPage(
-        limit: state.limit,
-        offset: state.offset,
-      );
-
-      if (lecturas.isEmpty) {
-        state = state.copyWith(isLoading: false, isLastPage: true);
-        return;
-      }
-
-      state = state.copyWith(
-        isLastPage: false,
-        isLoading: false,
-        offset: state.offset + 10,
-        lecturas: [...state.lecturas, ...lecturas],
-      );
-    } on CustomError catch (e) {
-      state = state.copyWith(
-        isLastPage: false,
-        isLoading: false,
-        errorMessage: e.message,
-      );
+      await lecturasRepository.reseterLecturas(periodo);
+      return true;
+    } catch (e) {
+      debugPrint('Error $e');
+      return false;
     }
   }
 
-  Future<List<Lectura>> searchMoviesByQuery(String query) async {
-    final List<Lectura> lecturas = await lecturasRepository.searchLecturas(
-      query,
-      token,
-    );
-    return lecturas;
-  }
-
-  Future<Lectura?> searchLecturaByMedidor(String medidor) async {
-    final List<Lectura> lecturas = await lecturasRepository.searchLecturas(
-      medidor,
-      token,
-    );
-
-    if (lecturas.isEmpty) return null;
-
-    return lecturas.first;
+  Future<String?> exportarLecturas() async {
+    try {
+      final path = await lecturasRepository.exportarLecturas();
+      return path;
+    } catch (e) {
+      debugPrint("Error al exportar $e");
+      return null;
+    }
   }
 }
 
