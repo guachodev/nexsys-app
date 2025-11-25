@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 import 'package:nexsys_app/shared/widgets/widgets.dart';
 
-class LecturasListScreen extends ConsumerStatefulWidget {
-  const LecturasListScreen({super.key});
+class LecturaRegistardaScreen extends ConsumerStatefulWidget {
+  const LecturaRegistardaScreen({super.key});
 
   @override
-  ConsumerState<LecturasListScreen> createState() => _LecturasListScreenState();
+  ConsumerState<LecturaRegistardaScreen> createState() =>
+      _LecturasListScreenState();
 }
 
-class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
+class _LecturasListScreenState extends ConsumerState<LecturaRegistardaScreen> {
   String searchQuery = "";
-  String filter = "todos"; // todos, registrados, sincronizados, pendientes
 
   @override
   void initState() {
@@ -21,13 +22,13 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
 
     // 🔹 Cargar lecturas automáticamente al entrar a la pantalla
     Future.microtask(() {
-      ref.read(lecturasLocalProvider.notifier).cargarLecturas();
+      ref.read(lecturasRegistradoslProvider.notifier).filtrarPorRegistrado(1);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final lecturas = ref.watch(lecturasLocalProvider);
+    final lecturas = ref.watch(lecturasRegistradoslProvider);
 
     final filtered = lecturas.where((l) {
       final matchesSearch =
@@ -35,123 +36,65 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
           l.medidor.contains(searchQuery) ||
           l.propietario.contains(searchQuery);
 
-      if (!matchesSearch) return false;
-
-      switch (filter) {
-        case "registrados":
-          return l.registrado;
-        case "pendientes":
-          return !l.registrado;
-        case "sincronizados":
-          return l.sincronizado;
-        default:
-          return true;
-      }
+      return matchesSearch;
     }).toList();
 
-    return RefreshIndicator(
-      onRefresh: () async =>
-          ref.read(lecturasLocalProvider.notifier).cargarLecturas(),
-      child: Scaffold(
-        appBar: BarApp(title: "Lecturas"),
-        body: Column(
-          children: [
-            const SizedBox(height: 10),
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: RefreshIndicator(
+        onRefresh: () async =>
+            ref.read(lecturasLocalProvider.notifier).filtrarPorRegistrado(1),
+        child: Scaffold(
+          appBar: BarApp(title: "Editar lecturas"),
+          body: Column(
+            children: [
+              const SizedBox(height: 10),
 
-            // 🔍 BUSCADOR
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                decoration: InputDecoration(
-                  hintText: "Buscar por cuenta, medidor o nombre...",
-                  prefixIcon: const Icon(Icons.search),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
+              // 🔍 BUSCADOR
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  decoration: InputDecoration(
+                    hintText: "Buscar por cuenta, medidor o nombre...",
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
                   ),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
+                  onChanged: (value) => setState(() => searchQuery = value),
                 ),
-                onChanged: (value) => setState(() => searchQuery = value),
               ),
-            ),
 
-            const SizedBox(height: 12),
-
-            // 🔹 FILTROS
-            _buildFilters(),
-
-            const SizedBox(height: 12),
-
-            // 🔸 TOTAL
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Resultados: ${filtered.length}",
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black54,
+              // 🔸 TOTAL
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    "Resultados: ${filtered.length}",
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black54,
+                    ),
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-            Expanded(
-              child: filtered.isEmpty
-                  ? _buildEmptyState()
-                  : _buildLecturasList(filtered),
-            ),
-          ],
+              Expanded(
+                child: filtered.isEmpty
+                    ? _buildEmptyState()
+                    : _buildLecturasList(filtered),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
-
-  // ---------------------------------------------------------------------------
-  // FILTROS MODERNOS
-  // ---------------------------------------------------------------------------
-
-  Widget _buildFilters() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _chip("Todos", "todos"),
-          _chip("Registrados", "registrados"),
-          _chip("Pendientes", "pendientes"),
-          _chip("Sincronizados", "sincronizados"),
-        ],
-      ),
-    );
-  }
-
-  Widget _chip(String label, String value) {
-    final selected = filter == value;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        checkmarkColor: Colors.white,
-        selectedColor: Colors.blue.shade700,
-        labelStyle: TextStyle(
-          color: selected ? Colors.white : Colors.black87,
-          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        onSelected: (_) => setState(() => filter = value),
-      ),
-    );
-  }
-
-  // ---------------------------------------------------------------------------
-  // LISTA MODERNA
-  // ---------------------------------------------------------------------------
 
   Widget _buildLecturasList(List<Lectura> lecturas) {
     return ListView.builder(
@@ -161,100 +104,104 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
         final l = lecturas[i];
 
         return Card(
-          elevation: 3,
+          color: Colors.white,
+          elevation: 1,
           margin: const EdgeInsets.only(bottom: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(18),
           ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.all(16),
-            leading: CircleAvatar(
-              radius: 26,
-              backgroundColor: Colors.blue.shade100,
-              child: Icon(
-                Icons.water_drop,
-                color: Colors.blue.shade800,
-                size: 28,
-              ),
-            ),
-            title: Text(
-              "Cuenta: ${l.cuenta}",
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
-            ),
-            subtitle: Padding(
-              padding: const EdgeInsets.only(top: 6),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(18),
+            onTap: () => context.push('/lectura/${l.id}'),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Medidor: ${l.medidor}"),
-                  Text("Propietario: ${l.propietario}"),
-                  Text("Lectura: ${l.lecturaActual}"),
+                  // ----------- HEADER -------------
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Cuenta:",
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.black54
+                              ),
+                            ),
+                            Text(
+                              "${l.cuenta}",
+                              style: TextStyle(
+                                fontSize: 18,
+                                color: Colors.blue.shade800,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // _statusChip(l.estado),
+                      CircleAvatar(
+                        radius: 24,
+                        backgroundColor: Colors.blue.shade50,
+                        child: Icon(
+                          Icons.chevron_right,
+                          size: 32,
+                          color: Colors.blue.shade500,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 2),
+
+                  // ----------- BODY DETAILS -------------
+                  _infoRow("Medidor", l.medidor),
+                  _infoRow("Propietario", l.propietario),
+                  _infoRow("Lectura", l.lecturaActual.toString()),
                 ],
               ),
             ),
-            trailing: _statusBadge(l),
-            onTap: () {
-              // ir a detalle o edición
-            },
           ),
         );
       },
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // ESTADO (registrado / sincronizado / pendiente)
-  // ---------------------------------------------------------------------------
-
-  Widget _statusBadge(Lectura l) {
-    late Color color;
-    late String text;
-    late IconData icon;
-
-    if (l.sincronizado) {
-      color = Colors.green;
-      text = "Sincronizado";
-      icon = Icons.cloud_done_rounded;
-    } else if (l.registrado) {
-      color = Colors.orange;
-      text = "Pendiente";
-      icon = Icons.sync_rounded;
-    } else {
-      color = Colors.blueGrey;
-      text = "Nuevo";
-      icon = Icons.edit_note_rounded;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
-        borderRadius: BorderRadius.circular(10),
-      ),
+  /// Row estilo detalle
+  Widget _infoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: 6),
           Text(
-            text,
-            style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            "$label: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(color: Colors.black87)),
           ),
         ],
       ),
     );
   }
 
-  // ---------------------------------------------------------------------------
-  // VISTA VACÍA
-  // ---------------------------------------------------------------------------
-
   Widget _buildEmptyState() {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off_rounded, size: 90, color: Colors.grey.shade400),
+          Icon(Icons.search_off_rounded, size: 90, color: Colors.blue.shade600),
           const SizedBox(height: 20),
           const Text(
             "No se encontraron lecturas",

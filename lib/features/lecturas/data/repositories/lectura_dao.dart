@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/cupertino.dart';
 import 'package:nexsys_app/core/database/database.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:sqflite/sqflite.dart';
@@ -80,7 +81,7 @@ class LecturaDao {
   static Future<Lectura?> getById(int id) async {
     final db = await DatabaseProvider.db;
     final res = await db.query('lecturas', where: 'id = ?', whereArgs: [id]);
-
+    debugPrint(res.first.toString());
     if (res.isEmpty) return null;
     return Lectura.fromMap(res.first);
   }

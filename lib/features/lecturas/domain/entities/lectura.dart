@@ -7,12 +7,12 @@ class Lectura {
   final String propietario;
   final String cedula;
   final int lecturaAnterior;
+  final int? novedadId;
   final int? lecturaActual;
   final String? observacion;
   final String? fechaLectura;
   final int? lectorId;
   final int? consumo;
-  final int? novedadId;
   final double? latitud;
   final double? longitud;
   final List<String> imagenes;
@@ -26,10 +26,10 @@ class Lectura {
     required this.propietario,
     required this.cedula,
     required this.lecturaAnterior,
+    this.novedadId,
     this.lecturaActual,
     this.observacion,
     this.consumo,
-    this.novedadId,
     this.latitud,
     this.longitud,
     this.imagenes = const [],
@@ -87,11 +87,11 @@ class Lectura {
       'cuenta': cuenta,
       'propietario': propietario,
       'cedula': cedula,
-      'lectura_anterior': lecturaAnterior,
-      'lectura_actual': lecturaActual,
+      'lecturaAnterior': lecturaAnterior, // ✔ corregido
+      'lecturaActual': lecturaActual, // ✔ corregido
       'observacion': observacion,
       'consumo': consumo,
-      'novedad_id': novedadId,
+      'novedadId': novedadId, // ✔ corregido
       'latitud': latitud,
       'longitud': longitud,
       'imagenes': jsonEncode(imagenes),
@@ -119,26 +119,39 @@ class Lectura {
   }
 
   factory Lectura.fromMap(Map<String, dynamic> map) {
+    List<String> imagenesList = [];
+
+    // decodificar imágenes
+    final rawImagenes = map['imagenes'];
+    if (rawImagenes != null) {
+      try {
+        final decoded = jsonDecode(rawImagenes);
+        if (decoded is List) {
+          imagenesList = List<String>.from(decoded);
+        }
+      } catch (_) {
+        imagenesList = [rawImagenes.toString()];
+      }
+    }
+
     return Lectura(
-      id: map['id'],
-      medidor: map['medidor'],
-      cuenta: map['cuenta'],
-      propietario: map['propietario'],
-      cedula: map['cedula'],
-      lecturaAnterior: map['lecturaAnterior'],
-      lecturaActual: map['lecturaActual'],
-      observacion: map['observacion'],
-      consumo: map['consumo'],
-      novedadId: map['novedadId'],
-      latitud: map['latitud']?.toDouble(),
-      longitud: map['longitud']?.toDouble(),
-      imagenes: map['imagenes'] != null
-          ? List<String>.from(jsonDecode(map['imagenes']))
-          : [],
+      id: map['id'] as int,
+      medidor: map['medidor'] as String,
+      cuenta: map['cuenta'] as int,
+      propietario: map['propietario'] as String,
+      cedula: map['cedula'] as String,
+      lecturaAnterior: map['lecturaAnterior'] as int, // ✔ correct key
+      lecturaActual: map['lecturaActual'] as int?, // ✔ correct key
+      observacion: map['observacion'] as String?,
+      consumo: map['consumo'] as int?,
+      novedadId: map['novedadId'] as int?, // ✔ correct key
+      latitud: (map['latitud'] as num?)?.toDouble(),
+      longitud: (map['longitud'] as num?)?.toDouble(),
+      fechaLectura: map['fechaLectura'] as String?, // ✔ correct
+      lectorId: map['lectorId'] as int?, // ✔ correct
       sincronizado: map['sincronizado'] == 1,
       registrado: map['registrado'] == 1,
-      fechaLectura: map['fechaLectura'],
-      lectorId: map['lectorId'],
+      imagenes: imagenesList,
     );
   }
 
@@ -150,6 +163,7 @@ class Lectura {
       propietario: json['propietario'],
       cedula: json['cedula'],
       lecturaAnterior: json['lectura_anterior'],
+      novedadId: json['novedadId'],
     );
   }
 }

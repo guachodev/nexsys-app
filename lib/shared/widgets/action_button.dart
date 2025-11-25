@@ -19,8 +19,8 @@ class ActionButton extends StatelessWidget {
       width: double.infinity,
       child: Material(
         borderRadius: BorderRadius.circular(10),
-        elevation: 1,
-        shadowColor: Colors.black.withValues(alpha: 0.2),
+        elevation: 2,
+        shadowColor: Colors.black.withValues(alpha: 0.58),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           splashColor: AppColors.primary.withValues(alpha: 0.1),
@@ -37,7 +37,7 @@ class ActionButton extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(icon, color: AppColors.primary.shade800, size: 24),
+                Icon(icon, color: AppColors.primary.shade700, size: 28),
                 const SizedBox(width: 10),
                 Text(
                   text,

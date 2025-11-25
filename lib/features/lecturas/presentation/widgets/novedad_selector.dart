@@ -36,10 +36,17 @@ class NovedadSelectorState extends State<NovedadSelector> {
     super.initState();
     // Inicializa el valor seleccionado
     motivoSeleccionado = widget.initialValue;
-    print(' Inicial: ${widget.initialValue?.id}');
+    //print(' Inicial: ${widget.initialValue?.id}');
     _controller = TextEditingController(
       text: widget.initialValue?.detalle ?? '',
     );
+
+    // ⬇ Ejecutar onChanged si vino initialValue
+    if (widget.initialValue != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.onChanged?.call(widget.initialValue!);
+      });
+    }
   }
 
   @override
@@ -128,7 +135,10 @@ class NovedadSelectorState extends State<NovedadSelector> {
                   // Search field
                   if (widget.isSearch!)
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 4,
+                        vertical: 8,
+                      ),
                       child: TextField(
                         decoration: const InputDecoration(
                           hintText: 'Buscar novedad...',

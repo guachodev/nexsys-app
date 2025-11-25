@@ -46,9 +46,9 @@ class LecturasScreen extends ConsumerWidget {
       child: Scaffold(
         appBar: BarApp(
           title: 'Lecturas de Consumo',
-          actions: const [
+          /* actions: const [
             IconButton(icon: Icon(Icons.help_outline), onPressed: null),
-          ],
+          ], */
         ),
         drawer: const CustomDrawer(),
         body: body,

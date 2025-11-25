@@ -80,9 +80,15 @@ class ContenidoPrincipal extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               ActionButton(
-                icon: Icons.history_rounded,
-                text: "Lecturas registradas",
+                icon: Icons.edit,
+                text: "Editar lecturas",
                 onTap: () => context.push('/lecturas/registrados'),
+              ),
+              const SizedBox(height: 10),
+              ActionButton(
+                icon: Icons.list,
+                text: "Lista de lecturas asignados",
+                onTap: () => context.push('/lecturas/lista'),
               ),
               const SizedBox(height: 10),
               /* ActionButton(

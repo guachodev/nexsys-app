@@ -2,9 +2,9 @@ import 'package:formz/formz.dart';
 
 enum NovedadError { empty }
 
-class Novedad extends FormzInput<int?, NovedadError> {
-  const Novedad.pure() : super.pure(null);
-  const Novedad.dirty([super.value]) : super.dirty();
+class NovedadInput extends FormzInput<int?, NovedadError> {
+  const NovedadInput.pure() : super.pure(null);
+  const NovedadInput.dirty([super.value]) : super.dirty();
 
   String? get errorMessage {
     if (isValid || isPure) return null;

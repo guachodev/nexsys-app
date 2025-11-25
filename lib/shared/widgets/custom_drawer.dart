@@ -14,7 +14,7 @@ class CustomDrawer extends ConsumerWidget {
     final currentRoute = ModalRoute.of(context)?.settings.name;
 
     final List<MenuItem> preferenceItems = [
-      MenuItem(icon: Icons.info, title: "Acerca de", link: ''),
+      MenuItem(icon: Icons.info_outline, title: "Acerca de", link: '/about', isPush: true),
     ];
 
     return Drawer(
@@ -177,17 +177,13 @@ class _LogoutButton extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
-                color: Colors.red,
+                //color: Colors.red,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Row(
                 children: [
                   // Ícono moderno dentro de un Chip
-                  Icon(
-                    Icons.logout_rounded,
-                    size: 22,
-                    color: Colors.white,
-                  ),
+                  Icon(Icons.logout_rounded, size: 25, color: Colors.red),
 
                   const SizedBox(width: 14),
 
@@ -195,9 +191,9 @@ class _LogoutButton extends ConsumerWidget {
                   Text(
                     "Cerrar sesión",
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: Colors.red,
                     ),
                   ),
                 ],
@@ -227,6 +223,10 @@ class _MenuItem extends StatelessWidget {
         child: InkWell(
           onTap: () {
             if (item.link.isNotEmpty) {
+              if (item.isPush!) {
+                context.push(item.link);
+                return;
+              }
               context.pushReplacement(item.link);
             }
           },
@@ -240,8 +240,8 @@ class _MenuItem extends StatelessWidget {
                   item.icon,
                   size: 30,
                   color: isSelected
-                      ? AppColors.primary.shade700
-                      : Colors.grey.shade800,
+                      ? AppColors.primary.shade500
+                      : Colors.black54,
                 ),
                 const SizedBox(width: 12),
                 // Título
@@ -254,7 +254,7 @@ class _MenuItem extends StatelessWidget {
                           ? FontWeight.w900
                           : FontWeight.normal,
                       color: isSelected
-                          ? AppColors.primary.shade700
+                          ? AppColors.primary.shade500
                           : Colors.grey.shade900,
                     ),
                   ),

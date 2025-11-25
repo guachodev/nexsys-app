@@ -300,7 +300,7 @@ class _FormView extends ConsumerWidget {
       orElse: () => Novedad(id: -1, detalle: 'Ninguna', isDefault: false),
     );*/
     final novedades = [
-     // {"id": null, "name": "Seleccionar...", "default": false},
+      // {"id": null, "name": "Seleccionar...", "default": false},
       {"id": 1, "name": "CC | CASA CERRADA", "default": false},
       {"id": 14, "name": "CM | CON MATERIALES", "default": false},
       {"id": 11, "name": "CO | CORTADO", "default": false},
