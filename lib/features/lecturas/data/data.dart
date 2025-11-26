@@ -5,3 +5,4 @@ export 'repositories/lectura_dao.dart';
 export 'repositories/lecturas_repository_impl.dart';
 export 'repositories/novedad_dao.dart';
 export 'repositories/periodo_dao.dart';
+export 'repositories/ruta_dao.dart';

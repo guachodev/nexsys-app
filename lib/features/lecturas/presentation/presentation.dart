@@ -7,6 +7,7 @@ export 'providers/local_provider.dart';
 export 'providers/local_registrados.provider.dart';
 export 'providers/novedad_provider.dart';
 export 'providers/periodo_provider.dart';
+export 'providers/rutas.provider.dart';
 export 'providers/search_lectura.provider.dart';
 export 'providers/search_lectura_qr_provider.dart';
 export 'providers/sincronizar.provider.dart';

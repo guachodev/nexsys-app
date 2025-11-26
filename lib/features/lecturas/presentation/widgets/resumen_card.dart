@@ -15,40 +15,70 @@ class ResumenCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('$total $leidos $pendientes $progreso');
     final color = pendientes > 0 ? AppColors.primary : Colors.green;
-
     return Card(
+      elevation: 1,
       color: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      shadowColor: color.withValues(alpha: 0.3),
+      shadowColor: Colors.black.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Resumen del Día",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: AppColors.primary,
-                ),
+            Text(
+              "Resumen de avance",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: color,
               ),
             ),
-            const SizedBox(height: 12),
+
+            const SizedBox(height: 4),
+
+            // ---------- MENSAJE SI YA COMPLETÓ ----------
+            if (progreso >= 100)
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 10,
+                  horizontal: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.celebration_rounded, color: Colors.amber.shade600, size: 32,),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        "¡Excelente trabajo! Has completado el 100% del avance.",
+                        style: TextStyle(
+                          color: Colors.green.shade800,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+            if (progreso >= 100) const SizedBox(height: 18),
+
+            // ---------- DATOS PRINCIPALES ----------
             Row(
               children: [
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Total asignados: $total'),
-                      Text('Leídos: $leidos'),
-                      Text('Pendientes: $pendientes'),
-                      const SizedBox(height: 10),
+                      _statLine("Total asignados", total.toString()),
+                      _statLine("Leídos", leidos.toString()),
+                      _statLine("Pendientes", pendientes.toString()),
+
+                      const SizedBox(height: 14),
                       LinearProgressIndicator(
                         value: progreso / 100,
                         minHeight: 10,
@@ -56,6 +86,7 @@ class ResumenCard extends StatelessWidget {
                         backgroundColor: Colors.grey.shade200,
                         color: color,
                       ),
+                      // ---------- BARRA DE PROGRESO MODERNA ----------
                     ],
                   ),
                 ),
@@ -64,8 +95,8 @@ class ResumenCard extends StatelessWidget {
                   alignment: Alignment.center,
                   children: [
                     SizedBox(
-                      width: 80,
-                      height: 80,
+                      width: 90,
+                      height: 90,
                       child: CircularProgressIndicator(
                         value: progreso / 100,
                         strokeWidth: 8,
@@ -74,10 +105,12 @@ class ResumenCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '${(progreso).toStringAsFixed(0)}%',
+                      progreso >= 100
+                          ? "${progreso.toStringAsFixed(0)}%"
+                          : "${progreso.toStringAsFixed(1)}%",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 18,
+                        fontSize: 16,
                       ),
                     ),
                   ],
@@ -89,4 +122,31 @@ class ResumenCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _statLine(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 4),
+    child: Row(
+      children: [
+        Text(
+          "$label:",
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: Colors.grey.shade600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontSize: 15,
+          ),
+        ),
+      ],
+    ),
+  );
 }

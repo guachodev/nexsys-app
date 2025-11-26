@@ -87,11 +87,11 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
             // 🔹 FILTROS
             _buildFilters(),
 
-           /// const SizedBox(height: 12),
+            /// const SizedBox(height: 12),
 
             // 🔸 TOTAL
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -168,7 +168,7 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(18),
-           // onTap: () => context.push('/lectura/${l.id}'),
+            // onTap: () => context.push('/lectura/${l.id}'),
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -221,7 +221,11 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
                   // ----------- BODY DETAILS -------------
                   _infoRow("Medidor", l.medidor),
                   _infoRow("Propietario", l.propietario),
-                  _infoRow("Lectura", l.lecturaActual.toString()),
+                  if (l.lecturaActual != null)
+                    _infoRow("Lectura", l.lecturaActual.toString()),
+
+                  _infoRow("x", l.latitud.toString()),
+                  _infoRow("y", l.longitud.toString()),
                 ],
               ),
             ),
@@ -266,7 +270,7 @@ class _LecturasListScreenState extends ConsumerState<LecturasListScreen> {
       color = Colors.orange;
       text = "No sincronizado";
       icon = Icons.sync_rounded;
-    }  else {
+    } else {
       color = Colors.blueGrey;
       text = "Sin lectura";
       icon = Icons.edit_note_rounded;

@@ -1,19 +1,19 @@
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
 abstract class LocalLecturasDatasource {
-  Future<void> savePeriodo(Periodo periodo);
+  Future<void> savePeriodo(Periodo periodo, int userId);
 
-  Future<Periodo?> getPeriodo();
+  Future<Periodo?> getPeriodo(int userId);
   Future<List<Lectura>> buscarPorCuenta(String numeroCuenta);
 
   // ─── RUTAS ────────────────────────────────────────────────────────────────
-  Future<void> saveRutas(List<Ruta> rutas);
+  Future<void> saveRutas(List<Ruta> rutas, int userId);
 
   // ─── NOVEDADES ────────────────────────────────────────────────────────────
   Future<void> saveNovedades(List<Novedad> novedades);
 
   // ─── LECTURAS ────────────────────────────────────────────────────────────────
-  Future<void> saveLecturas(List<Lectura> lecturas);
+  Future<void> saveLecturas(List<Lectura> lecturas, int userId);
 
   Future<Lectura?> lecturaById(int id);
 

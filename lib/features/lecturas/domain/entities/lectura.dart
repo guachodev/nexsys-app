@@ -7,6 +7,8 @@ class Lectura {
   final String propietario;
   final String cedula;
   final int lecturaAnterior;
+  final int rutaId;
+  final int promedioConsumo;
   final int? novedadId;
   final int? lecturaActual;
   final String? observacion;
@@ -26,6 +28,8 @@ class Lectura {
     required this.propietario,
     required this.cedula,
     required this.lecturaAnterior,
+    required this.rutaId,
+    required this.promedioConsumo,
     this.novedadId,
     this.lecturaActual,
     this.observacion,
@@ -57,6 +61,8 @@ class Lectura {
     bool? registrado,
     String? fechaLectura,
     int? lectorId,
+    int? rutaId,
+    int? promedioConsumo,
   }) {
     return Lectura(
       id: id ?? this.id,
@@ -76,6 +82,8 @@ class Lectura {
       registrado: registrado ?? this.registrado,
       fechaLectura: fechaLectura ?? this.fechaLectura,
       lectorId: lectorId ?? this.lectorId,
+      rutaId: rutaId ?? this.rutaId,
+      promedioConsumo: promedioConsumo ?? this.promedioConsumo,
     );
   }
 
@@ -99,6 +107,8 @@ class Lectura {
       'registrado': registrado ? 1 : 0,
       'fechaLectura': fechaLectura,
       'lectorId': lectorId,
+      'rutaId': rutaId,
+      'promedioConsumo': promedioConsumo,
     };
   }
 
@@ -152,6 +162,8 @@ class Lectura {
       sincronizado: map['sincronizado'] == 1,
       registrado: map['registrado'] == 1,
       imagenes: imagenesList,
+      rutaId: map['rutaId'],
+      promedioConsumo: map['promedioConsumo'],
     );
   }
 
@@ -164,6 +176,8 @@ class Lectura {
       cedula: json['cedula'],
       lecturaAnterior: json['lectura_anterior'],
       novedadId: json['novedadId'],
+      rutaId: json['ruta_id'],
+      promedioConsumo: json['proemdio'],
     );
   }
 }

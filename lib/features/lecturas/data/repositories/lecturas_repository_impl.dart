@@ -13,7 +13,7 @@ class LecturasRepositoryImpl extends LecturasRepository {
        local = local ?? LecturasLocalDatasourceImpl();
 
   @override
-  Future<Periodo?> getPeriodoActivo(String token) async {
+  Future<Periodo?> getPeriodoActivo(String token, int userId) async {
     final hasNet = await ConnectivityService.hasConnection();
     Periodo? periodo;
 
@@ -25,14 +25,14 @@ class LecturasRepositoryImpl extends LecturasRepository {
       }
     }
 
-    final periodolocal = await local.getPeriodo();
+    final periodolocal = await local.getPeriodo(userId);
 
     // CASE 1: backend devuelve null → período cerrado oficialmente
     if (periodo == null) {
       if (periodolocal != null) {
         final updated = periodolocal.copyWith(cerrado: true);
 
-        await local.savePeriodo(updated);
+        await local.savePeriodo(updated, userId);
 
         // actualizar avance
         return await _calcularAvance(updated);
@@ -42,17 +42,25 @@ class LecturasRepositoryImpl extends LecturasRepository {
 
     // CASE 2: nuevo período
     if (periodolocal == null) {
-      final nuevo = periodo.copyWith(cerrado: false, descargado: false);
-      await local.savePeriodo(nuevo);
+      final nuevo = periodo.copyWith(
+        cerrado: false,
+        descargado: false,
+        userId: userId,
+      );
+      await local.savePeriodo(nuevo, userId);
 
       return await _calcularAvance(nuevo);
     }
 
     // CASE 3: ID distinto → nuevo período
     if (periodolocal.id != periodo.id) {
-      final nuevo = periodo.copyWith(cerrado: false, descargado: false);
+      final nuevo = periodo.copyWith(
+        cerrado: false,
+        descargado: false,
+        userId: userId,
+      );
 
-      await local.savePeriodo(nuevo);
+      await local.savePeriodo(nuevo, userId);
       //await local.clearMedidores();  // si lo ocupas habilítalo
 
       return await _calcularAvance(nuevo);
@@ -68,7 +76,7 @@ class LecturasRepositoryImpl extends LecturasRepository {
       descargado: periodolocal.descargado,
     );
 
-    //await local.savePeriodo(actualizado);
+    await local.savePeriodo(actualizado, userId);
 
     return await _calcularAvance(actualizado);
   }
@@ -87,13 +95,14 @@ class LecturasRepositoryImpl extends LecturasRepository {
   Future<DescargaResponse> descargarLecturasAsignadas(
     String periodoId,
     String token,
+    int userId,
   ) async {
     final data = await remote.descargarLecturasAsignadas(periodoId, token);
     final response = DescargaResponse.fromJson(data);
-    await local.eliminarData();
-    await local.saveRutas(response.rutas);
+    await local.eliminarData(userId);
+    await local.saveRutas(response.rutas, userId);
     await local.saveNovedades(response.novedades);
-    await local.saveLecturas(response.lecturas);
+    await local.saveLecturas(response.lecturas, userId);
     return response;
   }
 
@@ -133,13 +142,13 @@ class LecturasRepositoryImpl extends LecturasRepository {
     return local.getLecturasRegistradas();
   }
 
-  Future<void> updatePeriodo(Periodo periodo) async {
-    await local.savePeriodo(periodo);
+  Future<void> updatePeriodo(Periodo periodo, int userId) async {
+    await local.savePeriodo(periodo, userId);
   }
 
   Future<Periodo> _calcularAvance(Periodo periodo) async {
-    final total = await local.countTotal();
-    final leidos = await local.countLeidos();
+    final total = await local.countTotal(periodo.userId!);
+    final leidos = await local.countLeidos(periodo.userId!);
 
     final pendientes = total - leidos;
     final porcentaje = total == 0 ? 0 : (leidos / total * 100);
@@ -152,14 +161,14 @@ class LecturasRepositoryImpl extends LecturasRepository {
     );
 
     // Guarda el período actualizado en la base local
-    await local.savePeriodo(actualizado);
+    //await local.savePeriodo(actualizado);
 
     return actualizado;
   }
 
   Future<Periodo> calcularAvancePeriodo(Periodo periodo) async {
-    final total = await local.countTotal();
-    final leidos = await local.countLeidos();
+    final total = await local.countTotal(periodo.userId!);
+    final leidos = await local.countLeidos(periodo.userId!);
 
     final pendientes = total - leidos;
     final porcentaje = total == 0 ? 0 : (leidos / total * 100);
@@ -171,7 +180,26 @@ class LecturasRepositoryImpl extends LecturasRepository {
       porcentajeAvance: porcentaje.toDouble(),
     );
 
-    await local.savePeriodo(actualizado);
+    //await local.savePeriodo(actualizado);
+
+    return actualizado;
+  }
+
+  Future<Periodo> calcularAvancePeriodoById(Periodo periodo, int rutaId) async {
+    final total = await local.countTotalByRuta(periodo.userId!, rutaId);
+    final leidos = await local.countLeidosByRuta(periodo.userId!, rutaId);
+
+    final pendientes = total - leidos;
+    final porcentaje = total == 0 ? 0 : (leidos / total * 100);
+
+    final actualizado = periodo.copyWith(
+      totalMedidores: total,
+      medidoresLeidos: leidos,
+      pendientes: pendientes,
+      porcentajeAvance: porcentaje.toDouble(),
+    );
+
+    //await local.savePeriodo(actualizado);
 
     return actualizado;
   }
@@ -221,5 +249,11 @@ class LecturasRepositoryImpl extends LecturasRepository {
     final filePath = await local.saveJsonFileInDownloads(json);
 
     return filePath;
+  }
+  
+  @override
+  Future<List<Lectura>> searchLecturasByRuta(String query, int rutaId) async {
+   final lecturas = await local.buscarPorCuentaByRutaId(query, rutaId);
+    return lecturas;
   }
 }

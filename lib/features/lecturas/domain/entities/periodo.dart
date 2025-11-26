@@ -4,6 +4,7 @@ class Periodo {
   final bool cerrado;
   final bool descargado;
   final String? fecha;
+  final int? userId;
 
   final int totalMedidores;
   final int medidoresLeidos;
@@ -20,6 +21,7 @@ class Periodo {
     this.medidoresLeidos = 0,
     this.pendientes = 0,
     this.porcentajeAvance = 0.0,
+    this.userId,
   });
 
   Periodo copyWith({
@@ -32,6 +34,7 @@ class Periodo {
     int? medidoresLeidos,
     int? pendientes,
     double? porcentajeAvance,
+    int? userId,
   }) {
     return Periodo(
       id: id ?? this.id,
@@ -43,6 +46,7 @@ class Periodo {
       medidoresLeidos: medidoresLeidos ?? this.medidoresLeidos,
       pendientes: pendientes ?? this.pendientes,
       porcentajeAvance: porcentajeAvance ?? this.porcentajeAvance,
+      userId: userId ?? this.userId,
     );
   }
 
@@ -51,5 +55,6 @@ class Periodo {
     name: map['name'],
     descargado: map['descargado'],
     cerrado: map['cerrado'],
+
   );
 }

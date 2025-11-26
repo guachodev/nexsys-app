@@ -22,12 +22,6 @@ class _SearchBarWithFiltersState extends ConsumerState<SearchBarWithFilters> {
     super.initState();
     _controller = TextEditingController();
     _focusNode = FocusNode();
-
-    _controller.addListener(() {
-      widget.ref
-          .read(searchLecturaProvider.notifier)
-          .updateQuery(_controller.text);
-    });
   }
 
   @override
@@ -35,17 +29,18 @@ class _SearchBarWithFiltersState extends ConsumerState<SearchBarWithFilters> {
     final searchState = widget.ref.watch(searchLecturaProvider);
 
     // Sincronizar el controller con el estado
-    if (searchState.query != _controller.text) {
-      _controller.value = TextEditingValue(
+    if (_controller.text != searchState.query) {
+      _controller.value = _controller.value.copyWith(
         text: searchState.query,
         selection: TextSelection.collapsed(offset: searchState.query.length),
+        composing: TextRange.empty,
       );
     }
 
     return Row(
       children: [
         Expanded(child: _buildSearchField(searchState)),
-       /*  const SizedBox(width: 8),
+        /*  const SizedBox(width: 8),
         FilterButton(selectedFilter: selectedFilter, onSelected: (filter) {
           setState(() => selectedFilter = filter);
         }), */
@@ -65,26 +60,25 @@ class _SearchBarWithFiltersState extends ConsumerState<SearchBarWithFilters> {
         prefixIcon: const Icon(Icons.search, color: Colors.grey),
         suffixIcon: searchState.query.isNotEmpty
             ? IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    _controller.clear();
-                    widget.ref
-                        .read(searchLecturaProvider.notifier)
-                        .updateQuery('');
-                    _focusNode.requestFocus();
-                  },
-                
+                icon: const Icon(Icons.clear),
+                onPressed: () {
+                  _controller.clear();
+                  widget.ref
+                      .read(searchLecturaProvider.notifier)
+                      .updateQuery('');
+                  _focusNode.requestFocus();
+                },
               )
             : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: Colors.grey.shade400, width: 1),
           borderRadius: BorderRadius.circular(8),
         ),
-        contentPadding:
-            const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 10,
+          horizontal: 12,
+        ),
       ),
     );
   }
@@ -108,4 +102,4 @@ class _SearchBarWithFiltersState extends ConsumerState<SearchBarWithFilters> {
   }
 }
 
-enum FilterType {  medidor, cedula, catastro }
+enum FilterType { medidor, cedula, catastro }

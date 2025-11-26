@@ -18,6 +18,8 @@ class LecturasDatasourceImpl extends LecturasDatasource {
 
     if (response.data.toString().isEmpty) return null;
 
+    print('Api => ${response.data}');
+
     final periodo = PeriodoMapper.jsonToEntity(response.data);
     return periodo;
   }

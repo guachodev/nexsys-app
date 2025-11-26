@@ -20,8 +20,8 @@ class Ruta {
   };
 
   factory Ruta.fromMap(Map<String, dynamic> map) => Ruta(
-    id: map['id'],
-    sectorId: map['sectorId'],
+    id: map['rutaId'],
+    sectorId: map['sector_id'],
     detalle: map['detalle'],
   );
 }

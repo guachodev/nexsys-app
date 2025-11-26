@@ -67,18 +67,21 @@ class DownloadCard extends ConsumerWidget {
 
                 Loader.openDowloadLecturas(context);
 
+                //await Future.delayed(const Duration(seconds: 5));
+
                 await ref
                     .read(descargaLecturasProvider.notifier)
                     .descargarLecturas(periodoId.toString());
 
                 Future.microtask(() {
+                  ref.read(rutasProvider.notifier).cargarRutas();
                   ref.read(periodoProvider.notifier).marcarDescargado();
                   //ref.read(periodoProvider.notifier).refreshAvance();
                 });
 
                 if (!context.mounted) return;
                 Loader.stopLoading(context);
-                Notifications.info(context, 'Se descargaron correctamente.');
+                Notifications.success(context, 'Se descargaron correctamente.');
               },
             ),
           ),

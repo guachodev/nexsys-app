@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nexsys_app/core/theme/theme.dart';
 
 class DownloadedInfo extends StatelessWidget {
   const DownloadedInfo({super.key});
@@ -7,17 +6,17 @@ class DownloadedInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.all(10),
+      margin: const EdgeInsets.only(bottom: 8, top: 8),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.primary),
+        color: Colors.indigo.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.indigo),
         boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8, offset: Offset(0, 4))],
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline, size: 30, color: AppColors.primary.shade400),
+          Icon(Icons.info_outline, size: 30, color: Colors.indigo.shade600),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(

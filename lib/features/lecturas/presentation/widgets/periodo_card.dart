@@ -13,13 +13,13 @@ class PeriodoCard extends StatelessWidget {
           colors: [AppColors.primary, AppColors.primary.shade600],
         ),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: [
+        /* boxShadow: [
           BoxShadow(
             color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 12,
             offset: const Offset(0, 6),
           ),
-        ],
+        ], */
       ),
       padding: const EdgeInsets.all(8),
       child: Row(

@@ -12,15 +12,20 @@ final periodoProvider = StateNotifierProvider<PeriodoNotifier, PeriodoState>((
   return PeriodoNotifier(
     lecturasRepository: lecturasRepository,
     token: authState.user!.token,
+    userId: authState.user!.id,
   );
 });
 
 class PeriodoNotifier extends StateNotifier<PeriodoState> {
   final LecturasRepositoryImpl lecturasRepository;
   final String token;
+  final int userId;
 
-  PeriodoNotifier({required this.lecturasRepository, required this.token})
-    : super(PeriodoState()) {
+  PeriodoNotifier({
+    required this.lecturasRepository,
+    required this.token,
+    required this.userId,
+  }) : super(PeriodoState()) {
     loadPeriodo();
   }
 
@@ -28,7 +33,7 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
     state = state.copyWith(status: SearchStatus.loading);
 
     try {
-      final periodo = await lecturasRepository.getPeriodoActivo(token);
+      final periodo = await lecturasRepository.getPeriodoActivo(token, userId);
 
       if (periodo == null) {
         state = state.copyWith(status: SearchStatus.empty);
@@ -46,9 +51,8 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
 
   Future<void> marcarDescargado() async {
     if (state.periodo == null) return;
-
     final updated = state.periodo!.copyWith(descargado: true);
-    await lecturasRepository.updatePeriodo(updated);
+    await lecturasRepository.updatePeriodo(updated, updated.userId!);
     state = state.copyWith(periodo: updated);
     refreshAvance();
   }
@@ -60,6 +64,19 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
     // calcular avance usando el repo
     final actualizado = await lecturasRepository.calcularAvancePeriodo(
       periodoActual,
+    );
+
+    state = state.copyWith(periodo: actualizado);
+  }
+
+  Future<void> filterByRuta(int rutaId) async {
+    final periodoActual = state.periodo;
+    if (periodoActual == null) return;
+
+    // calcular avance usando el repo
+    final actualizado = await lecturasRepository.calcularAvancePeriodoById(
+      periodoActual,
+      rutaId,
     );
 
     state = state.copyWith(periodo: actualizado);

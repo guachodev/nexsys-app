@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:nexsys_app/features/lecturas/data/data.dart';
-import 'package:nexsys_app/features/lecturas/data/repositories/ruta_dao.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -38,13 +37,13 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
   }
 
   @override
-  Future<void> savePeriodo(Periodo periodo) async {
-    await PeriodoDao.insertOrUpdatePeriodo(periodo);
+  Future<void> savePeriodo(Periodo periodo, int userId) async {
+    await PeriodoDao.insertOrUpdatePeriodo(periodo, userId);
   }
 
   @override
-  Future<Periodo?> getPeriodo() async {
-    return await PeriodoDao.getPeriodo();
+  Future<Periodo?> getPeriodo(int userId) async {
+    return await PeriodoDao.getPeriodo(userId);
   }
 
   @override
@@ -52,10 +51,14 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
     return await LecturaDao.buscarPorCuenta(numeroCuenta);
   }
 
+  Future<List<Lectura>> buscarPorCuentaByRutaId(String numeroCuenta, int rutaId) async {
+    return await LecturaDao.buscarPorCuentaByRutaId(numeroCuenta,rutaId);
+  }
+
   // ─── RUTAS ────────────────────────────────────────────────────────────────
   @override
-  Future<void> saveRutas(List<Ruta> rutas) async {
-    await RutaDao.insertOrUpdateRutas(rutas);
+  Future<void> saveRutas(List<Ruta> rutas, int userId) async {
+    await RutaDao.insertOrUpdateRutas(rutas, userId);
   }
 
   // ─── NOVEDADES ────────────────────────────────────────────────────────────
@@ -66,8 +69,8 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
 
   // ─── LECTURAS ────────────────────────────────────────────────────────────────
   @override
-  Future<void> saveLecturas(List<Lectura> lecturas) async {
-    await LecturaDao.insertOrUpdateLecturas(lecturas);
+  Future<void> saveLecturas(List<Lectura> lecturas, int userId) async {
+    await LecturaDao.insertOrUpdateLecturas(lecturas, userId);
   }
 
   @override
@@ -87,12 +90,20 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
     return await LecturaDao.getPendingSync();
   }
 
-  Future<int> countTotal() async {
-    return await LecturaDao.getTotalMedidores();
+  Future<int> countTotal(int userId) async {
+    return await LecturaDao.getTotalMedidores(userId);
   }
 
-  Future<int> countLeidos() async {
-    return await LecturaDao.getMedidoresLeidos();
+  Future<int> countLeidos(int userId) async {
+    return await LecturaDao.getMedidoresLeidos(userId);
+  }
+
+  Future<int> countTotalByRuta(int userId, int rutaId) async {
+    return await LecturaDao.getTotalMedidoresByRutaId(userId, rutaId);
+  }
+
+  Future<int> countLeidosByRuta(int userId, int rutaId) async {
+    return await LecturaDao.getMedidoresLeidosByRutaId(userId, rutaId);
   }
 
   @override
@@ -122,8 +133,8 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
     return await LecturaDao.exportLecturasToJson();
   }
 
-  Future<void> eliminarData() async {
-    return await LecturaDao.clearData();
+  Future<void> eliminarData(int userId) async {
+    return await LecturaDao.clearData(userId);
   }
 
   Future<String> saveJsonFileInDownloads(String jsonString) async {

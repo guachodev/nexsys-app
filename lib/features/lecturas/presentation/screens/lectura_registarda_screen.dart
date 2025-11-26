@@ -69,7 +69,10 @@ class _LecturasListScreenState extends ConsumerState<LecturaRegistardaScreen> {
 
               // 🔸 TOTAL
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 6,
+                ),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
@@ -103,74 +106,148 @@ class _LecturasListScreenState extends ConsumerState<LecturaRegistardaScreen> {
       itemBuilder: (_, i) {
         final l = lecturas[i];
 
-        return Card(
-          color: Colors.white,
-          elevation: 1,
+        return Container(
           margin: const EdgeInsets.only(bottom: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-          ),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(18),
-            onTap: () => context.push('/lectura/${l.id}'),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ----------- HEADER -------------
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Cuenta:",
-                              style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.black54
+          child: Material(
+            elevation: 3,
+            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () => context.push('/lectura/${l.id}'),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // ---------------- HEADER ----------------
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Cuenta",
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.grey.shade600,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "${l.cuenta}",
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.blue.shade800,
-                                fontWeight: FontWeight.w900,
+                              const SizedBox(height: 2),
+                              Text(
+                                l.cuenta.toString(),
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.blue.shade800,
+                                ),
                               ),
+                            ],
+                          ),
+                        ),
+
+                        // ---- Botón Editar moderno ----
+                        InkWell(
+                          onTap: () => context.push('/lectura/${l.id}/edit'),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                          ],
+                            decoration: BoxDecoration(
+                              color: Colors.blue.shade50,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.edit_outlined,
+                                  color: Colors.blue.shade600,
+                                  size: 20,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "Editar",
+                                  style: TextStyle(
+                                    color: Colors.blue.shade600,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
+                    ),
 
-                      // _statusChip(l.estado),
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.blue.shade50,
-                        child: Icon(
-                          Icons.chevron_right,
-                          size: 32,
-                          color: Colors.blue.shade500,
-                        ),
-                      ),
-                    ],
-                  ),
+                    const SizedBox(height: 16),
+                    Divider(color: Colors.grey.shade200),
 
-                  const SizedBox(height: 2),
+                    // ---------------- BODY DETAILS ----------------
+                    const SizedBox(height: 12),
 
-                  // ----------- BODY DETAILS -------------
-                  _infoRow("Medidor", l.medidor),
-                  _infoRow("Propietario", l.propietario),
-                  _infoRow("Lectura", l.lecturaActual.toString()),
-                ],
+                    _modernInfoRow(Icons.speed, "Medidor", l.medidor),
+                    _modernInfoRow(
+                      Icons.person_outline,
+                      "Propietario",
+                      l.propietario,
+                    ),
+                    _modernInfoRow(
+                      Icons.countertops_outlined,
+                      "Lectura",
+                      "${l.lecturaActual}",
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _modernInfoRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 20, color: Colors.blue.shade700),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade600,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

@@ -10,12 +10,82 @@ import '../widgets/contenido_principal.dart';
 class LecturasScreen extends ConsumerWidget {
   const LecturasScreen({super.key});
 
+  bool _isLoading(SearchStatus a, SearchStatus b) {
+    return a == SearchStatus.initial ||
+        a == SearchStatus.loading ||
+        b == SearchStatus.initial ||
+        b == SearchStatus.loading;
+  }
+
+  bool _hasError(SearchStatus a, SearchStatus b) {
+    return a == SearchStatus.error || b == SearchStatus.error;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final hasInternet = ref.watch(networkProvider).value ?? false;
+
     final periodoState = ref.watch(periodoProvider);
+    final rutasState = ref.watch(rutasProvider);
     Widget body;
-    switch (periodoState.status) {
+    // ------------------------------------
+    //   1. LOADING ÚNICO GLOBAL
+    // ------------------------------------
+    if (_isLoading(periodoState.status, rutasState.status)) {
+      body = const LoadingScreen();
+    }
+    // ------------------------------------
+    //   2. ERROR UNIFICADO
+    // ------------------------------------
+    else if (_hasError(periodoState.status, rutasState.status)) {
+      final msg =
+          periodoState.errorMessage ??
+          rutasState.errorMessage ??
+          "Ocurrió un error inesperado.";
+
+      body = _Error(
+        title: "¡Uy!",
+        message: msg,
+        onRetry: () {
+          ref.read(periodoProvider.notifier).loadPeriodo();
+          ref.read(rutasProvider.notifier).cargarRutas();
+        },
+      );
+    }
+    // ------------------------------------
+    //   3. NO HAY PERIODO
+    // ------------------------------------
+    else if (periodoState.status == SearchStatus.empty) {
+      body = Column(
+        children: [
+          const Center(child: Text('No hay periodo disponible.')),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              icon: const Icon(Icons.download),
+              label: const Text("Descargar"),
+              onPressed: () async {
+                ref.read(periodoProvider.notifier).loadPeriodo();
+              },
+            ),
+          ),
+        ],
+      );
+    }
+    // ------------------------------------
+    //   4. LISTO PARA MOSTRAR CONTENIDO
+    // ------------------------------------
+    else {
+      body = ContenidoPrincipal(
+        ref: ref,
+        periodoState: periodoState,
+        hasInternet: hasInternet,
+        rutasState: rutasState,
+      );
+    }
+
+    /* switch (periodoState.status) {
       case SearchStatus.initial:
       case SearchStatus.loading:
         body = const LoadingScreen();
@@ -28,7 +98,44 @@ class LecturasScreen extends ConsumerWidget {
         );
         break;
       case SearchStatus.empty:
-        body = const Center(child: Text('No hay periodo disponible.'));
+        body = Column(
+          children: [
+            const Center(child: Text('No hay periodo disponible.')),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.download),
+                label: const Text("Descargar"),
+                onPressed: () async {
+                  ref.read(periodoProvider.notifier).loadPeriodo();
+                  /* if (!hasInternet) {
+                  Loader.openInfoRed(
+                    context,
+                    "Para poder descargar las los medidores asignados, por favor conéctate a una red Wi-Fi o de datos móviles.",
+                  );
+                  return;
+                }
+
+                Loader.openDowloadLecturas(context);
+
+                await ref
+                    .read(descargaLecturasProvider.notifier)
+                    .descargarLecturas(periodoId.toString());
+
+                Future.microtask(() {
+                  ref.read(periodoProvider.notifier).marcarDescargado();
+                  //ref.read(periodoProvider.notifier).refreshAvance();
+                });
+
+                if (!context.mounted) return;
+                Loader.stopLoading(context);
+                Notifications.info(context, 'Se descargaron correctamente.'); */
+                },
+              ),
+            ),
+          ],
+        );
         break;
       case SearchStatus.error:
         //body = Center(child: Text('Error: ${periodoState.errorMessage}'));
@@ -41,6 +148,7 @@ class LecturasScreen extends ConsumerWidget {
         );
         break;
     }
+     */
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(

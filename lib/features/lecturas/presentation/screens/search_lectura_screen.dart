@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexsys_app/features/lecturas/domain/domain.dart';
+import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 import 'package:nexsys_app/shared/widgets/widgets.dart';
 
-import '../providers/search_lectura.provider.dart';
 import '../widgets/search_bar_with_filters .dart';
 import '../widgets/search_content.dart';
 
@@ -16,12 +17,12 @@ class SearchLecturaScreen extends ConsumerStatefulWidget {
 
 class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
   String searchQuery = "";
-  String filter = "todos"; // todos, registrados, sincronizados, pendientes
+  int selectedFilter = -1; // todos, registrados, sincronizados, pendientes
 
   @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchLecturaProvider);
-
+    final rutas = ref.watch(rutasProvider);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -33,9 +34,9 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
               children: [
                 SearchBarWithFilters(ref: ref),
                 // 🔹 FILTROS
-                //_buildFilters(),
+                _buildFilters(rutas.rutas),
 
-                /* const SizedBox(height: 8),
+                const SizedBox(height: 8),
 
                 // 🔸 TOTAL
                 Padding(
@@ -50,8 +51,7 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
                       ),
                     ),
                   ),
-                ), */
-
+                ),
                 const SizedBox(height: 8),
                 Expanded(child: SearchContent(searchState: searchState)),
               ],
@@ -66,25 +66,31 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
   // FILTROS MODERNOS
   // ---------------------------------------------------------------------------
 
-/*   Widget _buildFilters() {
+  Widget _buildFilters(List<Ruta> rutas) {
+    // Si no hay rutas o solo hay 1 → no mostrar nada
+    if (rutas.length <= 1) {
+      return const SizedBox.shrink();
+    }
+
     return Align(
       alignment: Alignment.centerLeft,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        //padding: const EdgeInsets.symmetric(horizontal: 0),
         padding: EdgeInsets.zero,
         child: Row(
           children: [
-            _chip("Todos", "todos"),
-            _chip("Registrados", "registrados"),
+            // _chip("Todas", -1),
+            ...rutas.map((r) {
+              return _chip(r.detalle, r.id);
+            }),
           ],
         ),
       ),
     );
-  } */
+  }
 
-  /* Widget _chip(String label, String value) {
-    final selected = filter == value;
+  Widget _chip(String label, int value) {
+    final bool selected = selectedFilter == value;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -97,9 +103,19 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
           color: selected ? Colors.white : Colors.black87,
           fontWeight: selected ? FontWeight.bold : FontWeight.w500,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-        onSelected: (_) => setState(() => filter = value),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        onSelected: (_) {
+          setState(() => selectedFilter = value);
+          ref.read(searchLecturaProvider.notifier).selectRuta(selectedFilter);
+          /*  if (selectedFilter == -1) {
+            ref.read(searchLecturaProvider.notifier).allFilter();
+          } else {
+            ref
+                .read(searchLecturaProvider.notifier)
+                .filterByRutaId(selectedFilter);
+          } */
+        },
       ),
     );
-  } */
+  }
 }

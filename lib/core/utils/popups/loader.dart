@@ -160,16 +160,23 @@ class Loader {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              /*  Lottie.asset('assets/animations/download.json',
-                  width: 150, height: 150, fit: BoxFit.fill), */
-              const SizedBox(height: 2),
+              const SizedBox(
+                height: 50,
+                width: 50,
+                child: CircularProgressIndicator(
+                  strokeWidth: 5,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                  backgroundColor: Color(0xFFEEEEEE),
+                ),
+              ),
+              const SizedBox(height: 25),
               const Text(
-                "Espera un momento por favor",
+                "Descargando lecturas",
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 4),
               const Text(
-                "Descargando lecturas...",
+                "Espera un momento por favor...",
                 style: TextStyle(fontSize: 16),
               ),
             ],

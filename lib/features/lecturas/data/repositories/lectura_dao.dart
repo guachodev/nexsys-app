@@ -6,13 +6,17 @@ import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:sqflite/sqflite.dart';
 
 class LecturaDao {
-  static Future<void> insertOrUpdateLecturas(List<Lectura> lecturas) async {
+  static Future<void> insertOrUpdateLecturas(
+    List<Lectura> lecturas,
+    int userId,
+  ) async {
     final db = await DatabaseProvider.db;
     final batch = db.batch();
 
     for (var lectura in lecturas) {
       batch.insert('lecturas', {
-        'id': lectura.id,
+        'lecturaId': lectura.id,
+        'usuarioId': userId,
         'medidor': lectura.medidor,
         'cuenta': lectura.cuenta,
         'cedula': lectura.cedula,
@@ -24,6 +28,8 @@ class LecturaDao {
         'imagenes': jsonEncode(lectura.imagenes), // guardado en CSV
         'latitud': lectura.latitud,
         'longitud': lectura.longitud,
+        'rutaId': lectura.rutaId,
+        'promedioConsumo': lectura.promedioConsumo,
         'sincronizado': 0,
         'registrado': 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
@@ -78,6 +84,20 @@ class LecturaDao {
     return result.map((e) => Lectura.fromMap(e)).toList();
   }
 
+  static Future<List<Lectura>> buscarPorCuentaByRutaId(
+    String numeroCuenta,
+    int rutaId,
+  ) async {
+    final db = await DatabaseProvider.db;
+    final result = await db.query(
+      'lecturas',
+      where: 'registrado=0 and rutaId = ? and cuenta LIKE ?',
+      whereArgs: [rutaId, '%$numeroCuenta%'], // permite búsqueda parcial
+    );
+
+    return result.map((e) => Lectura.fromMap(e)).toList();
+  }
+
   static Future<Lectura?> getById(int id) async {
     final db = await DatabaseProvider.db;
     final res = await db.query('lecturas', where: 'id = ?', whereArgs: [id]);
@@ -113,18 +133,25 @@ class LecturaDao {
     );
   }
 
-  static Future<List<Lectura>> buscarTodas() async {
-    final db = await DatabaseProvider.db;
-    final result = await db.query('lecturas');
-    return result.map((e) => Lectura.fromMap(e)).toList();
-  }
-
-  static Future<List<Lectura>> buscarPorRegistrado(int valor) async {
+  static Future<List<Lectura>> buscarTodas(int userId) async {
     final db = await DatabaseProvider.db;
     final result = await db.query(
       'lecturas',
-      where: 'registrado = ?',
-      whereArgs: [valor],
+      where: 'usuarioId = ?',
+      whereArgs: [userId],
+    );
+    return result.map((e) => Lectura.fromMap(e)).toList();
+  }
+
+  static Future<List<Lectura>> buscarPorRegistrado(
+    int valor,
+    int userId,
+  ) async {
+    final db = await DatabaseProvider.db;
+    final result = await db.query(
+      'lecturas',
+      where: 'registrado = ? and usuarioId = ?',
+      whereArgs: [valor, userId],
     );
     return result.map((e) => Lectura.fromMap(e)).toList();
   }
@@ -139,16 +166,38 @@ class LecturaDao {
     return result.map((e) => Lectura.fromMap(e)).toList();
   }
 
-  static Future<int> getTotalMedidores() async {
+  static Future<int> getTotalMedidores(int userId) async {
     final db = await DatabaseProvider.db;
-    final res = await db.rawQuery('SELECT COUNT(*) AS total FROM lecturas');
+    final res = await db.rawQuery(
+      'SELECT COUNT(*) AS total FROM lecturas WHERE usuarioId = ?',
+      [userId],
+    );
     return Sqflite.firstIntValue(res) ?? 0;
   }
 
-  static Future<int> getMedidoresLeidos() async {
+  static Future<int> getTotalMedidoresByRutaId(int userId, int rutaId) async {
     final db = await DatabaseProvider.db;
     final res = await db.rawQuery(
-      'SELECT COUNT(*) AS leidos FROM lecturas WHERE registrado = 1',
+      'SELECT COUNT(*) AS total FROM lecturas WHERE usuarioId = ? and rutaId = ?',
+      [userId, rutaId],
+    );
+    return Sqflite.firstIntValue(res) ?? 0;
+  }
+
+  static Future<int> getMedidoresLeidos(int userId) async {
+    final db = await DatabaseProvider.db;
+    final res = await db.rawQuery(
+      'SELECT COUNT(*) AS leidos FROM lecturas WHERE registrado = 1 AND usuarioId = ?',
+      [userId],
+    );
+    return Sqflite.firstIntValue(res) ?? 0;
+  }
+
+  static Future<int> getMedidoresLeidosByRutaId(int userId, int rutaId) async {
+    final db = await DatabaseProvider.db;
+    final res = await db.rawQuery(
+      'SELECT COUNT(*) AS leidos FROM lecturas WHERE registrado = 1 AND usuarioId = ? and rutaId = ?',
+      [userId, rutaId],
     );
     return Sqflite.firstIntValue(res) ?? 0;
   }
@@ -174,9 +223,9 @@ class LecturaDao {
     return jsonEncode(data);
   }
 
-  static Future<void> clearData() async {
+  static Future<void> clearData(int userId) async {
     final db = await DatabaseProvider.db;
-    await db.delete('lecturas');
-    await db.delete('ruta');
+    await db.delete('lecturas', where: 'usuarioId = ?', whereArgs: [userId]);
+    await db.delete('ruta', where: 'usuarioId = ?', whereArgs: [userId]);
   }
 }

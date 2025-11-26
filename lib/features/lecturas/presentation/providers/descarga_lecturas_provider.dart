@@ -12,16 +12,18 @@ final descargaLecturasProvider =
       return DescargaLecturasNotifier(
         lecturasRepository: lecturasRepository,
         token: authState.user!.token,
+        userId: authState.user!.id,
       );
     });
 
 class DescargaLecturasNotifier extends StateNotifier<DescargaLecturasState> {
   final LecturasRepositoryImpl lecturasRepository;
   final String token;
+  final int userId;
 
   DescargaLecturasNotifier({
     required this.lecturasRepository,
-    required this.token,
+    required this.token, required this.userId,
   }) : super(DescargaLecturasState());
 
   Future<void> descargarLecturas(String periodoId) async {
@@ -31,6 +33,7 @@ class DescargaLecturasNotifier extends StateNotifier<DescargaLecturasState> {
       await lecturasRepository.descargarLecturasAsignadas(
         periodoId,
         token,
+        userId
       );
 
      /*  print("RUTAS: ${data.rutas.length}");
@@ -39,7 +42,6 @@ class DescargaLecturasNotifier extends StateNotifier<DescargaLecturasState> {
 
       // ⬇ Aquí guardas en SQLite
       //await guardarEnDatabase(respuesta);
-      ///ref.read(periodoProvider.notifier).updateDowload();
       state = state.copyWith(loading: false);
     } catch (e) {
       state = state.copyWith(loading: false, error: e.toString());

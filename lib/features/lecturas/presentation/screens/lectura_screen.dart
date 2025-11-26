@@ -474,6 +474,7 @@ class _BotonRegistrar extends ConsumerWidget {
             formNotifier.reset();
             // Guardar / actualizar
             ref.read(searchLecturaProvider.notifier).deleteById(lectura.id);
+            //ref.read(searchLecturaProvider.notifier).reset();
             ref.read(periodoProvider.notifier).refreshAvance();
 
             // Mostrar pantalla de éxito dentro del mismo widget

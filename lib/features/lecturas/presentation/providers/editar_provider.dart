@@ -32,7 +32,7 @@ class ProductNotifier extends StateNotifier<ProductState> {
       propietario: '',
       cedula: '',
       lecturaAnterior: 0,
-      novedadId: -1,
+      novedadId: -1, rutaId: -1, promedioConsumo: -1,
     );
   }
 

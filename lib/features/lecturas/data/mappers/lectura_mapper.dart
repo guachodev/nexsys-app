@@ -11,6 +11,8 @@ class LecturaMapper {
       cedula: json["cedula"],
       lecturaAnterior: json["lectura_anterior"],
       observacion: '',
+      rutaId: json["ruta_id"],
+      promedioConsumo: json["proemdio"],
       //periodo: json["periodo"],
     );
   }
