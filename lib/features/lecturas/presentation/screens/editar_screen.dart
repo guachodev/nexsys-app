@@ -22,18 +22,21 @@ class EditarScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    print('Llega a mi constructor $productId');
     final productState = ref.watch(productProvider(productId));
 
-    ref.listen<ProductFormState>(productFormProvider(productState.lectura!), (
-      prev,
-      next,
-    ) {
-      if (next.isPosting && !(prev?.isPosting ?? false)) {
-        Loader.openFullLoading(context);
-      } else if (!next.isPosting && (prev?.isPosting ?? true)) {
-        Loader.stopLoading(context);
-      }
-    });
+    if (productState.lectura != null) {
+      ref.listen<ProductFormState>(productFormProvider(productState.lectura!), (
+        prev,
+        next,
+      ) {
+        if (next.isPosting && !(prev?.isPosting ?? false)) {
+          Loader.openFullLoading(context);
+        } else if (!next.isPosting && (prev?.isPosting ?? true)) {
+          Loader.stopLoading(context);
+        }
+      });
+    }
 
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
@@ -68,10 +71,12 @@ class EditarScreen extends ConsumerWidget {
           ],
         ),
 
-        body: productState.isLoading
+        body: productState.isLoading || productState.lectura == null
             ? _FullScreenLoader()
             : _ProductView(lectura: productState.lectura!),
-        floatingActionButton: _BotonSave(lectura: productState.lectura!),
+        floatingActionButton: productState.lectura == null
+            ? null
+            : _BotonSave(lectura: productState.lectura!),
       ),
     );
   }
@@ -102,7 +107,6 @@ class _BotonSave extends ConsumerWidget {
         ref.read(lecturasLocalProvider.notifier).cargarLecturas();
         SnackbarService.success(context, "Se actualizo correctamente.");
         context.pop();
-
       },
     );
   }

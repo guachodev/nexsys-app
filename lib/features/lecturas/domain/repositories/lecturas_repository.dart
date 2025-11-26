@@ -10,7 +10,7 @@ abstract class LecturasRepository {
     int userId,
   );
   Future<Lectura?> getLecturaById(int id);
-  Future<void> updateLectura(Map<String, dynamic> lecturaLike, String token);
+  Future<void> updateLectura(Map<String, dynamic> lecturaLike, String token, int userId);
   Future<List<Lectura>> getLecturasPendiente();
   Future<List<Lectura>> getLecturasRegistradas();
 }

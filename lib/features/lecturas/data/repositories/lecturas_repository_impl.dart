@@ -115,11 +115,12 @@ class LecturasRepositoryImpl extends LecturasRepository {
   Future<void> updateLectura(
     Map<String, dynamic> lecturaLike,
     String token,
+    int userId
   ) async {
     try {
       //final hasNet = await ConnectivityService.hasConnection();
       //final lectura = LecturaMapper.jsonToEntity(lecturaLike);
-      await local.updateLectura(lecturaLike, lecturaLike['id']);
+      await local.updateLectura(lecturaLike, lecturaLike['id'],userId);
 
       /*if (hasNet) {
       await remote.updateLectura(lecturaLike, token);

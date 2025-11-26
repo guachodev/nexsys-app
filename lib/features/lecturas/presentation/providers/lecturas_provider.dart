@@ -11,6 +11,7 @@ final lecturasProvider = StateNotifierProvider<LecturasNotifier, LecturasState>(
     return LecturasNotifier(
       lecturasRepository: lecturasRepository,
       token: authState.user!.token,
+      userId: authState.user!.id
     );
   },
 );
@@ -18,13 +19,17 @@ final lecturasProvider = StateNotifierProvider<LecturasNotifier, LecturasState>(
 class LecturasNotifier extends StateNotifier<LecturasState> {
   final LecturasRepositoryImpl lecturasRepository;
   final String token;
+  final int userId;
 
-  LecturasNotifier({required this.lecturasRepository, required this.token})
-    : super(LecturasState());
+  LecturasNotifier({
+    required this.lecturasRepository,
+    required this.token,
+    required this.userId,
+  }) : super(LecturasState());
 
   Future<bool> updateProduct(Map<String, dynamic> productLike) async {
     try {
-      await lecturasRepository.updateLectura(productLike, token);
+      await lecturasRepository.updateLectura(productLike, token, userId);
       return true;
     } catch (e) {
       debugPrint('Error $e');

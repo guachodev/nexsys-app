@@ -147,7 +147,7 @@ class _LecturaScreenState extends ConsumerState<LecturaScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-        appBar: BarApp(title: 'Registrar lectura'),
+        appBar: BarApp(title: 'Registrar lectura ${lectura.id}'),
         body: SafeArea(
           child: Stack(
             children: [

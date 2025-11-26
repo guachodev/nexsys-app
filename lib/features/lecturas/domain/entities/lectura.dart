@@ -83,7 +83,7 @@ class Lectura {
       fechaLectura: fechaLectura ?? this.fechaLectura,
       lectorId: lectorId ?? this.lectorId,
       rutaId: rutaId ?? this.rutaId,
-      promedioConsumo: promedioConsumo ?? this.promedioConsumo,
+      promedioConsumo: promedioConsumo ?? this.promedioConsumo, 
     );
   }
 
@@ -145,7 +145,7 @@ class Lectura {
     }
 
     return Lectura(
-      id: map['id'] as int,
+      id: map['lecturaId'] as int,
       medidor: map['medidor'] as String,
       cuenta: map['cuenta'] as int,
       propietario: map['propietario'] as String,
@@ -163,7 +163,7 @@ class Lectura {
       registrado: map['registrado'] == 1,
       imagenes: imagenesList,
       rutaId: map['rutaId'],
-      promedioConsumo: map['promedioConsumo'],
+      promedioConsumo: map['promedioConsumo'], 
     );
   }
 
@@ -177,7 +177,7 @@ class Lectura {
       lecturaAnterior: json['lectura_anterior'],
       novedadId: json['novedadId'],
       rutaId: json['ruta_id'],
-      promedioConsumo: json['proemdio'],
+      promedioConsumo: json['proemdio'], 
     );
   }
 }

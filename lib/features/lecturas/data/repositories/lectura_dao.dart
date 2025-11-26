@@ -100,18 +100,20 @@ class LecturaDao {
 
   static Future<Lectura?> getById(int id) async {
     final db = await DatabaseProvider.db;
-    final res = await db.query('lecturas', where: 'id = ?', whereArgs: [id]);
-    debugPrint(res.first.toString());
+    final res = await db.query('lecturas', where: 'lecturaId = ?', whereArgs: [id]);
     if (res.isEmpty) return null;
+    debugPrint(res.first.toString());
     return Lectura.fromMap(res.first);
   }
 
   static Future<void> updateLectura(
     Map<String, dynamic> lecturaLike,
     int lecturaId,
+    int userId,
   ) async {
     final db = await DatabaseProvider.db;
-
+    print(lecturaId);
+    print(userId);
     final data = {
       'lecturaActual': lecturaLike['lectura_actual'], // ✔ nombre correcto
       'observacion': lecturaLike['descripcion'], // ✔ mapeo correcto
@@ -128,8 +130,8 @@ class LecturaDao {
     await db.update(
       'lecturas',
       data,
-      where: 'id = ?',
-      whereArgs: [lecturaId], // importante
+      where: 'lecturaId = ? and usuarioId = ?',
+      whereArgs: [lecturaId, userId], // importante
     );
   }
 

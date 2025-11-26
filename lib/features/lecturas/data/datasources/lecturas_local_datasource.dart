@@ -82,8 +82,9 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
   Future<void> updateLectura(
     Map<String, dynamic> lecturaLike,
     int lecturaId,
+    int userId,
   ) async {
-    await LecturaDao.updateLectura(lecturaLike, lecturaId);
+    await LecturaDao.updateLectura(lecturaLike, lecturaId,userId);
   }
 
   Future<List<Lectura>> getLecturasPendientes() async {

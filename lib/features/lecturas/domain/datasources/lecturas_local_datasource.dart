@@ -17,7 +17,7 @@ abstract class LocalLecturasDatasource {
 
   Future<Lectura?> lecturaById(int id);
 
-  Future<void> updateLectura(Map<String, dynamic> lecturaLike, int lecturaId);
+  Future<void> updateLectura(Map<String, dynamic> lecturaLike, int lecturaId, int userId);
 
   Future<List<Lectura>> getLect();
   Future<List<Lectura>> getLecturasPendiente();
