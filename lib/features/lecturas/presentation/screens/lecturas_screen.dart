@@ -15,7 +15,6 @@ class LecturasScreen extends ConsumerStatefulWidget {
 }
 
 class _LecturasScreenState extends ConsumerState<LecturasScreen> {
-
   @override
   void initState() {
     super.initState();
@@ -77,21 +76,19 @@ class _LecturasScreenState extends ConsumerState<LecturasScreen> {
         subtitle: "Por favor, espere unos segundos",
       );
     }
-
     // 2️⃣ ERROR UNIFICADO
     else if (_hasError(
       periodoState.status,
       rutasState.status,
       novedadesState.status,
     )) {
-      final msg =
-          periodoState.errorMessage?.isNotEmpty == true
-              ? periodoState.errorMessage
-              : rutasState.errorMessage?.isNotEmpty == true
-                  ? rutasState.errorMessage
-                  : novedadesState.errorMessage?.isNotEmpty == true
-                      ? novedadesState.errorMessage
-                      : "Ocurrió un error inesperado.";
+      final msg = periodoState.errorMessage?.isNotEmpty == true
+          ? periodoState.errorMessage
+          : rutasState.errorMessage?.isNotEmpty == true
+          ? rutasState.errorMessage
+          : novedadesState.errorMessage?.isNotEmpty == true
+          ? novedadesState.errorMessage
+          : "Ocurrió un error inesperado.";
 
       body = ErrorState(
         subtitle: msg.toString(),
@@ -102,67 +99,22 @@ class _LecturasScreenState extends ConsumerState<LecturasScreen> {
         },
       );
     }
-
     // 3️⃣ NO HAY PERÍODO
     else if (periodoState.status == SearchStatus.empty) {
-      body = Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                width: 160,
-                height: 160,
-                decoration: BoxDecoration(
-                  color: Colors.black12,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text("IMAGE", style: TextStyle(fontSize: 18)),
-                ),
-              ),
-              const SizedBox(height: 30),
-              const Text(
-                "No hay período activo",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "Por favor, intenta nuevamente más tarde.",
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, color: Colors.black54),
-              ),
-              const SizedBox(height: 40),
-              SizedBox(
-                width: 180,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () =>
-                      ref.read(periodoProvider.notifier).loadPeriodo(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.deepPurple,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: const Text("Reintentar"),
-                ),
-              ),
-            ],
-          ),
-        ),
+      body = EmptyState(
+        icon: Icons.calendar_month_outlined,
+        title: 'No hay período activo',
+        subtitle: 'Por favor, intenta nuevamente más tarde.',
+        onRetry: () => ref.read(periodoProvider.notifier).loadPeriodo(),
       );
     }
-
     // 4️⃣ PERÍODO CERRADO
     else if (cerrado) {
       body = Padding(
         padding: const EdgeInsets.all(16),
         child: ErrorState(
           title: 'Período finalizado',
-          subtitle:
-              'El período ha sido cerrado y no permite modificaciones.',
+          subtitle: 'El período ha sido cerrado y no permite modificaciones.',
           icon: Icons.info_outline,
           onRetry: () {
             ref.read(periodoProvider.notifier).loadPeriodo();
@@ -172,7 +124,6 @@ class _LecturasScreenState extends ConsumerState<LecturasScreen> {
         ),
       );
     }
-
     // 5️⃣ CONTENIDO NORMAL
     else {
       body = ContenidoPrincipal(

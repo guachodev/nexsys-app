@@ -21,22 +21,22 @@ class LecturasRepositoryImpl extends LecturasRepository {
     Periodo? periodoLocal = await local.getPeriodo(userId);
 
     bool backendRespondio = false;
-
     // 1️⃣ Intentar obtener periodo remoto SOLO si hay internet
     if (hasNet) {
       try {
         periodoRemoto = await remote.getPeriodoActivo(token, userId);
         backendRespondio = true; // 👈 respuesta válida del backend
-        debugPrint('Remoto: ${periodoRemoto?.name}');
       } catch (e) {
         // ❌ Error real → NO cerrar periodo local
         debugPrint('Error backend: $e');
       }
     }
-
     // 2️⃣ Backend respondió y NO hay periodo activo → cerrar periodo local
     if (backendRespondio && periodoRemoto == null) {
-      if (periodoLocal != null && !periodoLocal.cerrado) {
+      if (periodoLocal == null) {
+        return null; // el notifier lo interpreta como EMPTY
+      }
+      if (!periodoLocal.cerrado) {
         final actualizado = periodoLocal.copyWith(cerrado: true);
         await local.savePeriodo(actualizado, userId);
         return await _calcularAvance(actualizado);

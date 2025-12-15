@@ -4,12 +4,13 @@ class EmptyState extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData icon;
-
+  final VoidCallback? onRetry;
   const EmptyState({
     super.key,
     this.title = "Sin datos disponibles",
     this.subtitle = "No encontramos información para mostrar aquí.",
     this.icon = Icons.inbox_outlined,
+    this.onRetry,
   });
 
   @override
@@ -34,6 +35,17 @@ class EmptyState extends StatelessWidget {
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
+          if (onRetry != null) ...[
+            const SizedBox(height: 40),
+            SizedBox(
+              width: 180,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: onRetry,
+                child: const Text("Reintentar"),
+              ),
+            ),
+          ],
         ],
       ),
     );

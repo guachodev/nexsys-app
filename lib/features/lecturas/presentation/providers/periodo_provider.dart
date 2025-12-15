@@ -40,7 +40,7 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
     try {
       final periodo = await lecturasRepository.getPeriodoActivo(token, userId);
       if (periodo == null) {
-        state.copyWith(status: SearchStatus.empty);
+        state = state.copyWith(status: SearchStatus.empty);
         return;
       }
 
