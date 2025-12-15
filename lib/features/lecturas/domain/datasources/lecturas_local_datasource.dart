@@ -4,7 +4,7 @@ abstract class LocalLecturasDatasource {
   Future<void> savePeriodo(Periodo periodo, int userId);
 
   Future<Periodo?> getPeriodo(int userId);
-  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta);
+  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta, int userId);
 
   // ─── RUTAS ────────────────────────────────────────────────────────────────
   Future<void> saveRutas(List<Ruta> rutas, int userId);
@@ -17,7 +17,7 @@ abstract class LocalLecturasDatasource {
 
   Future<Lectura?> lecturaById(int id);
 
-  Future<void> updateLectura(Map<String, dynamic> lecturaLike, int lecturaId, int userId);
+  Future<void> updateLectura(Map<String, dynamic> lecturaLike, int baseId);
 
   Future<List<Lectura>> getLect();
   Future<List<Lectura>> getLecturasPendiente();

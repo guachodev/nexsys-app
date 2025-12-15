@@ -2,8 +2,8 @@ import '../domain.dart';
 
 abstract class LecturasRepository {
   Future<Periodo?> getPeriodoActivo(String token, int userId);
-  Future<List<Lectura>> searchLecturas(String query);
-  Future<List<Lectura>> searchLecturasByRuta(String query, int rutaId);
+  Future<List<Lectura>> searchLecturas(String query,int userId );
+  Future<List<Lectura>> searchLecturasByRuta(String query, int rutaId, int userId);
   Future<DescargaResponse> descargarLecturasAsignadas(
     String periodoId,
     String token,

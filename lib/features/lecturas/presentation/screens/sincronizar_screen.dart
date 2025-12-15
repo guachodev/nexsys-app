@@ -1,7 +1,8 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexsys_app/core/constants/enums.dart';
 import 'package:nexsys_app/core/providers/providers.dart';
-import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/core/utils/utils.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
@@ -21,31 +22,37 @@ class _SincronizarScreenState extends ConsumerState<SincronizarScreen> {
 
     // 🔹 Cargar lecturas pendientes automáticamente al entrar a la pantalla
     Future.microtask(() {
-      ref.read(lecturasLocalProvider.notifier).cargarLecturas();
+      ref.read(lecturasLocalProvider.notifier).cargarLecturasNoSincronizados();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final hasInternet = ref.watch(networkProvider).value ?? false;
-    final lecturas = ref
-        .watch(lecturasLocalProvider)
+    final lecturasLocalState = ref.watch(lecturasLocalProvider);
+
+    final lecturas = lecturasLocalState.lecturas
         .where((e) => e.sincronizado == false && e.registrado)
         .toList();
 
     return Scaffold(
       appBar: const BarApp(title: 'Sincronizar Lectura pendientes'),
-      body: RefreshIndicator(
-        onRefresh: () async =>
-            ref.read(lecturasLocalProvider.notifier).cargarLecturas(),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: lecturas.isEmpty
-              ? _buildEmptyState()
-              : _buildListState(lecturas, hasInternet),
-        ),
-      ),
-      bottomNavigationBar: lecturas.isEmpty
+      body:
+          lecturasLocalState.status == SearchStatus.loading ||
+              lecturasLocalState.status == SearchStatus.initial
+          ? LoadingIndicator(subtitle: 'Cargando lectura pendientes espere un momento')
+          : RefreshIndicator(
+              onRefresh: () async => ref
+                  .read(lecturasLocalProvider.notifier)
+                  .cargarLecturasNoSincronizados(),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: lecturas.isEmpty
+                    ? _buildEmptyState()
+                    : _buildListState(lecturas, hasInternet),
+              ),
+            ),
+      bottomNavigationBar: lecturas.isEmpty || lecturasLocalState.status == SearchStatus.loading
           ? null
           : _buildBottomButton(context, lecturas, hasInternet),
     );
@@ -54,39 +61,49 @@ class _SincronizarScreenState extends ConsumerState<SincronizarScreen> {
   // 🔹 Vista cuando NO hay lecturas
   Widget _buildEmptyState() {
     return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.cloud_done_rounded, size: 90, color: Colors.green),
-          const SizedBox(height: 20),
-          const Text(
-            "Todo sincronizado",
-            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          const Text(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Tada(child: Icon(Icons.cloud_done_rounded, size: 90, color: Colors.green)),
+            const SizedBox(height: 20),
+            const Text(
+              "Todo sincronizado",
+              style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.black87,
+            ),
+            ),
+            const SizedBox(height: 10),
+            Text(
             "No tienes lecturas pendientes de sincronizar",
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 16, color: Colors.black54),
+            style: TextStyle(fontSize: 15, color: Colors.grey[600]),
           ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+            
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
+                onPressed: () {
+                  ref
+                      .read(lecturasLocalProvider.notifier)
+                      .cargarLecturasNoSincronizados();
+                },
+                child: const Text('Recargar'),
               ),
-              onPressed: () {
-                ref.read(lecturasLocalProvider.notifier).cargarLecturas();
-              },
-              child: const Text('Recargar'),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -145,7 +162,7 @@ class _SincronizarScreenState extends ConsumerState<SincronizarScreen> {
                   subtitle: Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      "Lectura actual: ${l.lecturaActual}\nMedidor: ${l.medidor}",
+                      "Lectura actual: ${l.lecturaActual}\nMedidor: ${l.medidor}\nId: ${l.id}",
                       style: const TextStyle(fontSize: 14),
                     ),
                   ),
@@ -202,17 +219,21 @@ class _SincronizarScreenState extends ConsumerState<SincronizarScreen> {
           final notifier = ref.read(sincronizacionProvider.notifier);
           final success = await notifier.sincronizar();
 
-          Navigator.pop(context); // cerrar loading
+          if (context.mounted) {
+            //Navigator.pop(context);
 
-          if (success) {
-            ref.read(lecturasLocalProvider.notifier).cargarLecturas();
-            SnackbarService.success(context, "Sincronización completada.");
-            Loader.stopLoading(context);
-          } else {
-            final error =
-                ref.read(sincronizacionProvider).error ?? "Error desconocido";
-            SnackbarService.error(context, "Error al sincronizar: $error");
-            Loader.stopLoading(context);
+            if (success) {
+              ref
+                  .read(lecturasLocalProvider.notifier)
+                  .cargarLecturasNoSincronizados();
+              Notifications.success(context, "Sincronización completada.");
+              Loader.stopLoading(context);
+            } else {
+              final error =
+                  ref.read(sincronizacionProvider).error ?? "Error desconocido";
+              Notifications.error(context, "Error al sincronizar: $error");
+              Loader.stopLoading(context);
+            }
           }
         }, // si no hay internet, botón deshabilitado
       ),

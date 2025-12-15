@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:nexsys_app/core/theme/theme.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
@@ -11,22 +12,69 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F3F3),
+      backgroundColor: const Color(0xFFF4F6F9),
       drawer: const CustomDrawer(),
-      appBar: BarApp(title: 'Home'),
-      body: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        children: [
-          _Header(name: authState.user?.fullName ?? 'Invitado'),
-          const SizedBox(height: 20),
-        ],
+      appBar: BarApp(title: 'Inicio'),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _Header(name: authState.user?.fullName ?? 'Invitado'),
+              const SizedBox(height: 10),
+
+              _CompanyHeader(),
+              const SizedBox(height: 10),
+              const _InfoCard(),
+              const SizedBox(height: 15),
+              Text(
+                'Accesos rápidos',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 15),
+              GridView.count(
+                crossAxisCount: 3,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                //childAspectRatio: 0.85,
+                children: const [
+                  _QuickAccessCard(
+                    icon: Icons.info_outline_rounded,
+                    title: 'Acerca de',
+                    subtitle: 'Información general',
+                    route: '/about',
+                  ),
+                  _QuickAccessCard(
+                    icon: Icons.person_outline_rounded,
+                    title: 'Cuenta',
+                    subtitle: 'Perfil y seguridad',
+                    route: '/cuenta',
+                  ),
+                  _QuickAccessCard(
+                    icon: Icons.bar_chart_rounded,
+                    title: 'Lecturas',
+                    subtitle: 'Registrar lecturas',
+                    route: '/lecturas',
+                  ),
+                ],
+              ),
+              const SizedBox(height: 40),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
+
 class _Header extends StatelessWidget {
   final String name;
   const _Header({required this.name});
@@ -64,7 +112,10 @@ class _Header extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: LinearGradient(
-                    colors: [AppColors.primary.shade200, AppColors.primary.shade200],
+                    colors: [
+                      AppColors.primary.shade200,
+                      AppColors.primary.shade200,
+                    ],
                   ),
                 ),
               ),
@@ -132,6 +183,176 @@ class _Header extends StatelessWidget {
 
           // Badge de estado
         ],
+      ),
+    );
+  }
+}
+
+class _CompanyHeader extends StatelessWidget {
+  const _CompanyHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      elevation: 4,
+      shadowColor: Colors.black.withValues(alpha: 0.15),
+      borderRadius: BorderRadius.circular(12),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        child: Row(
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 60,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'NEXSYS APP',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      fontSize: 18,
+                      color: AppColors.primary.shade800
+                    ),
+                  ),
+                  Text(
+                    'Sistema de gestión de lecturas',
+                    textAlign: TextAlign.right,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 14,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Row(
+            children: [
+              Icon(Icons.lightbulb_rounded, color: Colors.amber),
+              SizedBox(width: 8),
+              Text(
+                'Modo de trabajo',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Text(
+            '• Trabajando en modo local\n'
+            '• Datos almacenados en el dispositivo\n'
+            '• Sincroniza al recuperar conexión',
+            style: TextStyle(height: 1.5),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QuickAccessCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final String route;
+
+  const _QuickAccessCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.route,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      elevation: 2,
+      color: Colors.white,
+      shadowColor: Colors.black.withValues(alpha: 0.12),
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => context.push(route),
+        splashColor: AppColors.primary.withValues(alpha: 0.12),
+        highlightColor: AppColors.primary.withValues(alpha: 0.05),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: 10,
+            vertical: 14, // 👈 MÁS PEQUEÑO
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  icon,
+                  color: AppColors.primary,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+               /*const SizedBox(height: 4),
+              Text(
+                subtitle,
+                textAlign: TextAlign.center,
+                maxLines: 1, // ✅ CLAVE
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.grey.shade600,
+                ),
+              ), */
+            ],
+          ),
+        ),
       ),
     );
   }

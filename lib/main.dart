@@ -6,8 +6,8 @@ import 'package:nexsys_app/core/router/router.dart';
 import 'package:nexsys_app/core/theme/theme.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await Environment.initEnvironment();
-  // Inicializa la base de datos antes de correr la app
   await DatabaseProvider.db;
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -18,11 +18,11 @@ class MyApp extends ConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final appRouter = ref.watch(goRouterProvider);
+    final router = ref.watch(goRouterProvider);
     return MaterialApp.router(
-      title: 'Flutter Demo',
-      routerConfig: appRouter,
+      title: 'Nexsys App',
       theme: AppTheme.lightTheme,
+      routerConfig: router,
     );
   }
 }

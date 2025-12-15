@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 
@@ -10,6 +12,18 @@ class DatabaseProvider {
     return _db!;
   }
 
+  static String backupFilename() {
+    final now = DateTime.now();
+    final formatted =
+        "${now.year}${now.month.toString().padLeft(2, '0')}"
+        "${now.day.toString().padLeft(2, '0')}"
+        "${now.hour.toString().padLeft(2, '0')}"
+        "${now.minute.toString().padLeft(2, '0')}"
+        "${now.second.toString().padLeft(2, '0')}";
+
+    return "backup_nexsys_app_$formatted.db";
+  }
+
   static Future<Database> _initDB() async {
     final path = join(await getDatabasesPath(), 'nexsys_app.db');
     return await openDatabase(
@@ -18,6 +32,12 @@ class DatabaseProvider {
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
+  }
+
+  static Future<File> getDatabaseFile() async {
+    final dbDir = await getDatabasesPath();
+    final dbPath = join(dbDir, 'nexsys_app.db');
+    return File(dbPath);
   }
 
   static Future<void> _onCreate(Database db, int version) async {
@@ -30,6 +50,7 @@ class DatabaseProvider {
             cerrado INTEGER,
             descargado INTEGER,
             fecha TEXT,
+            descargable INTGER,
             PRIMARY KEY (periodoId, usuarioId)
           )
         ''');
@@ -60,10 +81,14 @@ class DatabaseProvider {
         medidor TEXT,
         cuenta INTEGER,
         propietario TEXT,
+        sector TEXT,
+        periodo TEXT,
+        direccion TEXT,
         cedula TEXT,
         lecturaAnterior INTEGER DEFAULT 0,
         lecturaActual INTEGER DEFAULT 0,
         promedioConsumo INTEGER DEFAULT 0,
+        orden INTEGER,
         fechaLectura TEXT,
         lectorId INTEGER,
         rutaId INTEGER,

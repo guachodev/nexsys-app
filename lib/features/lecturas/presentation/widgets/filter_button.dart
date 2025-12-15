@@ -18,13 +18,13 @@ class FilterButton extends StatelessWidget {
       onSelected: onSelected,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       itemBuilder: (_) => [
-        _filterOption(FilterType.medidor, 'Medidor', Icons.speed),
+        _filterOption(FilterType.medidor, 'Cuenta', Icons.speed),
         _filterOption(FilterType.cedula, 'Cédula', Icons.badge_outlined),
         _filterOption(FilterType.catastro, 'Catastro', Icons.map_outlined),
       ],
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.primary,
+          color: Colors.grey,
           borderRadius: BorderRadius.circular(8),
         ),
         padding: const EdgeInsets.all(10),

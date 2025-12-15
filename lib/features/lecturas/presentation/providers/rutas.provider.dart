@@ -28,11 +28,21 @@ class RutasNotifier extends StateNotifier<RutasState> {
       }
 
       // Crear la opción "Todas"
-      final todas = Ruta(id: -1, detalle: "Todas las rutas", sectorId: -1);
+      List<Ruta> rutasFinal;
+      Ruta? rutaSeleccionada;
+
+      if (result.length > 2) {
+        final todas = Ruta(id: -1, detalle: "Todas las rutas", sectorId: -1);
+        rutasFinal = [todas, ...result];
+        rutaSeleccionada = todas; // default
+      } else {
+        rutasFinal = result;
+        rutaSeleccionada = result.first; // o null, según tu lógica
+      }
 
       state = state.copyWith(
-        rutas: [todas, ...result],
-        rutaSeleccionada: todas, // ← DEFAULT
+        rutas: rutasFinal,
+        rutaSeleccionada: rutaSeleccionada,
         status: SearchStatus.loaded,
       );
     } catch (e) {

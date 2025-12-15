@@ -16,12 +16,12 @@ class DownloadedInfo extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(Icons.info_outline, size: 30, color: Colors.indigo.shade600),
+          Icon(Icons.info, size: 28, color: Colors.indigo.shade600),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
               "Medidores descargados localmente. \nPuedes trabajar sin conexión.",
-              style: TextStyle(color: Colors.black87),
+              style: TextStyle(color: Colors.indigo),
             ),
           ),
         ],

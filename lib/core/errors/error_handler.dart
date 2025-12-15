@@ -4,24 +4,24 @@ Never handleDioError(DioException e) {
   final status = e.response?.statusCode;
 
   if (status == 401) {
-    throw CustomError(e.response?.data['message'] ?? 'No autorizado');
+    throw CustomError(e.response?.data['message'] ?? 'Tu sesión ha expirado o el token es inválido.');
   }
 
   if (status == 400 || status == 404 || status == 409) {
-    throw CustomError(e.response?.data['message'] ?? 'Error en la petición');
+    throw CustomError(e.response?.data['message'] ?? 'La petición no es válida. Revisa los datos.');
   }
 
   if (e.type == DioExceptionType.connectionTimeout ||
       e.type == DioExceptionType.receiveTimeout ||
       e.type == DioExceptionType.sendTimeout) {
-    throw CustomError('Sin conexión a Internet');
+    throw CustomError('No se pudo conectar con el servidor. Verifica tu conexión.');
   }
 
   if (e.type == DioExceptionType.badResponse) {
-    throw CustomError('Error en el servidor');
+    throw CustomError('El servidor tuvo un problema. Intenta más tarde.');
   }
 
-  throw CustomError('Error inesperado');
+  throw CustomError('Ocurrió un problema inesperado. Intenta nuevamente.');
 }
 
 class CustomError implements Exception {

@@ -6,7 +6,7 @@ class UserMapper {
     email: json['user']['email'] ?? '',
     fullName: json['user']['name'] ?? '',
     rol: json['user']['rol'] ?? '',
-    empleadoId: 2,
+    empleadoId: json['user']['employee_id'],
     token: json['token'] ?? '',
     refreshToken: json['refreshToken'] ?? '',
   );

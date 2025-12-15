@@ -8,7 +8,7 @@ class CustomTextFormField extends StatelessWidget {
   final bool obscureText;
   final TextInputType? keyboardType;
   final int maxLines;
-  final String initialValue;
+  final String? initialValue; // <- ahora es nullable
   final Function(String)? onChanged;
   final Function(String)? onFieldSubmitted;
   final String? Function(String?)? validator;
@@ -18,6 +18,7 @@ class CustomTextFormField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final bool autofocus;
   final bool? floating;
+  final TextEditingController? controller;
 
   const CustomTextFormField({
     super.key,
@@ -27,7 +28,7 @@ class CustomTextFormField extends StatelessWidget {
     this.obscureText = false,
     this.keyboardType = TextInputType.text,
     this.maxLines = 1,
-    this.initialValue = '',
+    this.initialValue, // ← quitar default '' para permitir null
     this.onChanged,
     this.onFieldSubmitted,
     this.validator,
@@ -36,7 +37,8 @@ class CustomTextFormField extends StatelessWidget {
     this.maxLength,
     this.inputFormatters,
     this.autofocus = false,
-    this.floating=false,
+    this.floating = false,
+    this.controller,
   });
 
   @override
@@ -44,6 +46,8 @@ class CustomTextFormField extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
 
     return TextFormField(
+      controller: controller,
+      initialValue: controller == null ? initialValue : null, // ← FIX
       onChanged: onChanged,
       onFieldSubmitted: onFieldSubmitted,
       validator: validator,
@@ -52,26 +56,17 @@ class CustomTextFormField extends StatelessWidget {
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       maxLength: maxLength,
-      //style: const TextStyle( background: Colors.white ),
       maxLines: maxLines,
-      initialValue: initialValue,
       decoration: InputDecoration(
-        floatingLabelBehavior: maxLines > 1|| floating!
+        floatingLabelBehavior: maxLines > 1 || floating == true
             ? FloatingLabelBehavior.always
             : FloatingLabelBehavior.auto,
-        /* 
-        floatingLabelStyle: const TextStyle(
-          color: Colors.black,
-          fontWeight: FontWeight.bold,
-          fontSize: 15,
-        ), */
         label: label != null ? Text(label!) : null,
         hintText: hintText,
         errorText: errorMessage,
         focusColor: colors.primary,
         suffixIcon: suffixIcon,
         prefixIcon: prefixIcon,
-        // icon: Icon( Icons.supervised_user_circle_outlined, color: colors.primary, )
       ),
     );
   }

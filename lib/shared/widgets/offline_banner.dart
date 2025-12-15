@@ -3,11 +3,15 @@ import 'package:flutter/material.dart';
 class OfflineBanner extends StatelessWidget {
   final bool top;
   final bool bottom;
+  final String text;
+  final double fontSize;
 
   const OfflineBanner({
     super.key,
     this.top = false,
     this.bottom = false,
+    this.text = "Sin conexión a internet",
+    this.fontSize = 15,
   });
 
   @override
@@ -16,10 +20,7 @@ class OfflineBanner extends StatelessWidget {
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-      margin: EdgeInsets.only(
-        top: top ? 12 : 0,
-        bottom: bottom ? 12 : 0,
-      ),
+      margin: EdgeInsets.only(top: top ? 12 : 0, bottom: bottom ? 12 : 0),
       decoration: BoxDecoration(
         color: Colors.red.shade100.withValues(alpha: 0.85),
         borderRadius: BorderRadius.circular(12),
@@ -47,12 +48,12 @@ class OfflineBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 14),
-          const Expanded(
+          Expanded(
             child: Text(
-              "Sin conexión a internet",
+              text,
               style: TextStyle(
                 color: Colors.red,
-                fontSize: 15,
+                fontSize: fontSize,
                 fontWeight: FontWeight.w600,
                 letterSpacing: 0.3,
               ),

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/core/constants/enums.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
@@ -34,14 +35,14 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
 
     try {
       final periodo = await lecturasRepository.getPeriodoActivo(token, userId);
-
       if (periodo == null) {
-        state = state.copyWith(status: SearchStatus.empty);
+        state.copyWith(status: SearchStatus.empty);
         return;
       }
 
       state = state.copyWith(status: SearchStatus.loaded, periodo: periodo);
     } catch (e) {
+      debugPrint('Error periodo $e');
       state = state.copyWith(
         status: SearchStatus.error,
         errorMessage: e.toString(),
@@ -52,6 +53,14 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
   Future<void> marcarDescargado() async {
     if (state.periodo == null) return;
     final updated = state.periodo!.copyWith(descargado: true);
+    await lecturasRepository.updatePeriodo(updated, updated.userId!);
+    state = state.copyWith(periodo: updated);
+    refreshAvance();
+  }
+
+  Future<void> resetearDescargado() async {
+    if (state.periodo == null) return;
+    final updated = state.periodo!.copyWith(descargado: false);
     await lecturasRepository.updatePeriodo(updated, updated.userId!);
     state = state.copyWith(periodo: updated);
     refreshAvance();

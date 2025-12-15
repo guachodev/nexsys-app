@@ -20,7 +20,7 @@ class LecturaItem extends ConsumerWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 12),
       child: InkWell(
-        onTap: () => context.push('/lecturas/detalle/${ lectura.id }'),
+        onTap: () => context.push('/lectura/${ lectura.id }'),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -148,8 +148,8 @@ class LecturaItem extends ConsumerWidget {
                       children: [
                         _BuildInfoItem(title: 'Cedula', value: lectura.cedula),
                         _BuildInfoItem(
-                          title: 'Catastro',
-                          value: lectura.cuenta.toString(),
+                          title: 'Promedio m3',
+                          value: lectura.promedioConsumo.toString(),
                         ),
                       ],
                     ),

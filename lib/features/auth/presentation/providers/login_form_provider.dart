@@ -11,7 +11,7 @@ final loginFormProvider =
     });
 
 class LoginFormNotifier extends StateNotifier<LoginFormState> {
-  final Function(String, String, bool) loginUserCallback;
+  final Function(String, String) loginUserCallback;
 
   LoginFormNotifier({required this.loginUserCallback})
     : super(LoginFormState());
@@ -36,10 +36,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
     state = state.copyWith(isObscureText: !state.isObscureText);
   }
 
-  void onTapOffline() {
-    state = state.copyWith(isOffline: !state.isOffline);
-  }
-
+  
   Future<void> onFormSubmit() async {
     _touchEveryField();
 
@@ -48,8 +45,7 @@ class LoginFormNotifier extends StateNotifier<LoginFormState> {
 
     await loginUserCallback(
       state.username.value,
-      state.password.value,
-      state.isOffline,
+      state.password.value
     );
 
     state = state.copyWith(isPosting: false);
@@ -72,7 +68,6 @@ class LoginFormState {
   final bool isFormPosted;
   final bool isValid;
   final bool isObscureText;
-  final bool isOffline;
   final Username username;
   final Password password;
 
@@ -81,7 +76,6 @@ class LoginFormState {
     this.isFormPosted = false,
     this.isValid = false,
     this.isObscureText = true,
-    this.isOffline = false,
     this.username = const Username.pure(),
     this.password = const Password.pure(),
   });
@@ -91,7 +85,6 @@ class LoginFormState {
     bool? isFormPosted,
     bool? isValid,
     bool? isObscureText,
-    bool? isOffline,
     Username? username,
     Password? password,
   }) => LoginFormState(
@@ -99,7 +92,6 @@ class LoginFormState {
     isFormPosted: isFormPosted ?? this.isFormPosted,
     isValid: isValid ?? this.isValid,
     isObscureText: isObscureText ?? this.isObscureText,
-    isOffline: isOffline ?? this.isOffline,
     username: username ?? this.username,
     password: password ?? this.password,
   );
@@ -107,12 +99,12 @@ class LoginFormState {
   @override
   String toString() {
     return '''
-  LoginFormState:
-    isPosting: $isPosting
-    isFormPosted: $isFormPosted
-    isValid: $isValid
-    email: $username
-    password: $password
+    LoginFormState:
+      isPosting: $isPosting
+      isFormPosted: $isFormPosted
+      isValid: $isValid
+      email: $username
+      password: $password
 ''';
   }
 }

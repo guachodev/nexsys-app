@@ -1,23 +1,28 @@
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/core/errors/errors.dart';
+import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 
 final searchLecturaQrProvider =
     StateNotifierProvider<SearchLecturaQrNotifier, SearchLecturaQrState>((ref) {
       final repo = LecturasRepositoryImpl();
-      return SearchLecturaQrNotifier(repo);
+
+      final authState = ref.watch(authProvider);
+      return SearchLecturaQrNotifier(repo: repo, userId: authState.user!.id);
     });
 
 class SearchLecturaQrNotifier extends StateNotifier<SearchLecturaQrState> {
   final LecturasRepositoryImpl repo;
-  SearchLecturaQrNotifier(this.repo) : super(SearchLecturaQrState.initial());
+  final int userId;
+  SearchLecturaQrNotifier({required this.repo, required this.userId})
+    : super(SearchLecturaQrState.initial());
 
   Future<void> searchByQr(String medidor) async {
     state = state.copyWith(status: SearchLecturaQrStatus.loading);
     try {
       //await Future.delayed(Duration(seconds: 5));
-      final result = await repo.searchLecturas(medidor);
+      final result = await repo.searchLecturas(medidor,userId);
       if (result.isEmpty) {
         state = state.copyWith(
           status: SearchLecturaQrStatus.error,

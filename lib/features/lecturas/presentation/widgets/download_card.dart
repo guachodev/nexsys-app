@@ -3,8 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nexsys_app/core/utils/utils.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 
-import '../providers/descarga_lecturas_provider.dart';
-
 class DownloadCard extends ConsumerWidget {
   final WidgetRef ref;
   final int periodoId;
@@ -66,8 +64,6 @@ class DownloadCard extends ConsumerWidget {
                 }
 
                 Loader.openDowloadLecturas(context);
-
-                //await Future.delayed(const Duration(seconds: 5));
 
                 await ref
                     .read(descargaLecturasProvider.notifier)

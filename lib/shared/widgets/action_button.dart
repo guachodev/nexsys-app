@@ -35,17 +35,26 @@ class ActionButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Row(
-              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Icon(icon, color: AppColors.primary.shade700, size: 28),
-                const SizedBox(width: 10),
-                Text(
-                  text,
-                  style: const TextStyle(
-                    color: Colors.black87,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                Row(
+                  children: [
+                    Icon(icon, color: AppColors.primary.shade700, size: 28),
+                    const SizedBox(width: 10),
+                    Text(
+                      text,
+                      style: const TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.black45,
+                  size: 28,
                 ),
               ],
             ),

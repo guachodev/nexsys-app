@@ -47,12 +47,16 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
   }
 
   @override
-  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta) async {
-    return await LecturaDao.buscarPorCuenta(numeroCuenta);
+  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta,int userId) async {
+    return await LecturaDao.buscarPorCuenta(numeroCuenta, userId);
   }
 
-  Future<List<Lectura>> buscarPorCuentaByRutaId(String numeroCuenta, int rutaId) async {
-    return await LecturaDao.buscarPorCuentaByRutaId(numeroCuenta,rutaId);
+  Future<List<Lectura>> buscarPorCuentaByRutaId(
+    String numeroCuenta,
+    int rutaId,
+    int userId
+  ) async {
+    return await LecturaDao.buscarPorCuentaByRutaId(numeroCuenta, rutaId, userId);
   }
 
   // ─── RUTAS ────────────────────────────────────────────────────────────────
@@ -78,13 +82,44 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
     return await LecturaDao.getById(id);
   }
 
+  Future<Lectura?> lecturaOrden(int userId, int rutaId) async {
+    return await LecturaDao.getLecturaOrden(userId, rutaId);
+  }
+
+  Future<int?> lecturaIdOrdenNext(int userId, int rutaId) async {
+    return await LecturaDao.getLecturaIdOrdenNext(userId, rutaId);
+  }
+
   @override
   Future<void> updateLectura(
     Map<String, dynamic> lecturaLike,
-    int lecturaId,
-    int userId,
+   int localId,
   ) async {
-    await LecturaDao.updateLectura(lecturaLike, lecturaId,userId);
+    await LecturaDao.updateLectura(lecturaLike, localId);
+  }
+
+  Future<void> insertImageIfNotExists(
+    int lecturaId,
+    int usuarioId,
+    String path,
+  ) async {
+    await LecturaDao.insertImage(
+      lecturaId: lecturaId,
+      usuarioId: usuarioId,
+      path: path,
+    );
+  }
+
+  Future<List<LecturaImage>> getImagenesPendientes(int lecturaId) async {
+    return await LecturaDao.getImagenesPendientes(lecturaId);
+  }
+
+  Future<void> marcarLecturaComoError(int lecturaId) async {
+    await LecturaDao.marcarLecturaComoError(lecturaId);
+  }
+
+  Future<void> marcarImagenSincronizada(int imagenId, int remoteId) async {
+    await LecturaDao.marcarImagenSincronizada(imagenId, remoteId);
   }
 
   Future<List<Lectura>> getLecturasPendientes() async {

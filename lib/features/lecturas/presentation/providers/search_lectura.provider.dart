@@ -14,15 +14,20 @@ final searchLecturaProvider =
       return SearchLecturaNotifier(
         lecturasRepository: lecturasRepository,
         token: authState.user!.token,
+        userId: authState.user!.id,
       );
     });
 
 class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
   final LecturasRepository lecturasRepository;
   final String token;
+  final int userId;
   Timer? _debounceTimer;
-  SearchLecturaNotifier({required this.lecturasRepository, required this.token})
-    : super(SearchLecturaState());
+  SearchLecturaNotifier({
+    required this.lecturasRepository,
+    required this.token,
+    required this.userId,
+  }) : super(SearchLecturaState());
 
   @override
   void dispose() {
@@ -64,7 +69,7 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
     return next;
   }
 
-  void updateQuery(String value) {
+  Future<void> updateQuery(String value) async {
     // Cancelar cualquier búsqueda pendiente
     _debounceTimer?.cancel();
 
@@ -104,16 +109,16 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
         result = await lecturasRepository.searchLecturasByRuta(
           state.query,
           state.selectedRutaId!,
+          userId,
         );
       } else {
-        result = await lecturasRepository.searchLecturas(state.query);
+        result = await lecturasRepository.searchLecturas(state.query, userId);
       }
 
       if (result.isEmpty) {
         state = state.copyWith(status: SearchStatus.empty, lecturas: []);
         return;
       }
-
       state = state.copyWith(status: SearchStatus.loaded, lecturas: result);
     } on CustomError catch (e) {
       if (query != state.query) return;

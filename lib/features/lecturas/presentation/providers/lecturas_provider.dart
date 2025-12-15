@@ -3,15 +3,18 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
+import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 
 final lecturasProvider = StateNotifierProvider<LecturasNotifier, LecturasState>(
   (ref) {
     final lecturasRepository = LecturasRepositoryImpl();
     final authState = ref.watch(authProvider);
+    final ruta = ref.watch(rutasProvider).rutaSeleccionada;
     return LecturasNotifier(
       lecturasRepository: lecturasRepository,
       token: authState.user!.token,
-      userId: authState.user!.id
+      userId: authState.user!.id,
+      rutaId: ruta!.id,
     );
   },
 );
@@ -20,11 +23,13 @@ class LecturasNotifier extends StateNotifier<LecturasState> {
   final LecturasRepositoryImpl lecturasRepository;
   final String token;
   final int userId;
+  final int rutaId;
 
   LecturasNotifier({
     required this.lecturasRepository,
     required this.token,
     required this.userId,
+    required this.rutaId,
   }) : super(LecturasState());
 
   Future<bool> updateProduct(Map<String, dynamic> productLike) async {
@@ -55,6 +60,11 @@ class LecturasNotifier extends StateNotifier<LecturasState> {
       debugPrint("Error al exportar $e");
       return null;
     }
+  }
+
+  Future<Lectura?> nextLectura() async {
+      return await lecturasRepository.getLecturaOrden(userId, rutaId);
+      
   }
 }
 

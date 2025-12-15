@@ -4,6 +4,7 @@ import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 import 'package:nexsys_app/shared/widgets/widgets.dart';
 
+import '../widgets/filters_chip_list.dart';
 import '../widgets/search_bar_with_filters .dart';
 import '../widgets/search_content.dart';
 
@@ -17,7 +18,7 @@ class SearchLecturaScreen extends ConsumerStatefulWidget {
 
 class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
   String searchQuery = "";
-  int selectedFilter = -1; // todos, registrados, sincronizados, pendientes
+  int selectedFilter = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +54,7 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Expanded(child: SearchContent(searchState: searchState)),
+                Expanded(child: SearchContent(searchState: searchState,)),
               ],
             ),
           ),
@@ -68,11 +69,11 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
 
   Widget _buildFilters(List<Ruta> rutas) {
     // Si no hay rutas o solo hay 1 → no mostrar nada
-    if (rutas.length <= 1) {
+    /*  if (rutas.length <= 1) {
       return const SizedBox.shrink();
-    }
+    } */
 
-    return Align(
+    /* return Align(
       alignment: Alignment.centerLeft,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
@@ -86,10 +87,21 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
           ],
         ),
       ),
+    ); */
+
+    return FiltersChipList(
+      items: rutas,
+      selectedId: selectedFilter,
+      labelBuilder: (r) => r.detalle,
+      valueBuilder: (r) => r.id,
+      onSelected: (id) {
+        setState(() => selectedFilter = id);
+        ref.read(searchLecturaProvider.notifier).selectRuta(id);
+      },
     );
   }
 
-  Widget _chip(String label, int value) {
+  /* Widget _chip(String label, int value) {
     final bool selected = selectedFilter == value;
 
     return Padding(
@@ -97,6 +109,7 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
       child: ChoiceChip(
         label: Text(label),
         selected: selected,
+        backgroundColor: Colors.white,
         selectedColor: Colors.blue.shade700,
         checkmarkColor: Colors.white,
         labelStyle: TextStyle(
@@ -117,5 +130,5 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
         },
       ),
     );
-  }
+  } */
 }

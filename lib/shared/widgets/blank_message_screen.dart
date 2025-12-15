@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/theme.dart';
@@ -21,7 +22,7 @@ class BlankMessageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -54,7 +55,7 @@ class BlankMessageScreen extends StatelessWidget {
           ),
         ],
       ),
-      child: Icon(icon, size: 70, color: AppColors.primary),
+      child: Tada(child: Icon(icon, size: 100, color: AppColors.primary)),
     );
   }
 
@@ -63,9 +64,9 @@ class BlankMessageScreen extends StatelessWidget {
       title,
       textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-        color: Colors.black87,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -0.2,
+        fontSize: 22,
+        fontWeight: FontWeight.bold,
+        color: Colors.black54,
       ),
     );
   }
@@ -74,9 +75,7 @@ class BlankMessageScreen extends StatelessWidget {
     return Text(
       description,
       textAlign: TextAlign.center,
-      style: Theme.of(
-        context,
-      ).textTheme.bodyLarge?.copyWith(color: Colors.black87, height: 1.4),
+      style: TextStyle(fontSize: 16, color: Colors.black54),
     );
   }
 

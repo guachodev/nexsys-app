@@ -2,6 +2,7 @@ import 'dart:convert';
 
 class Lectura {
   final int id;
+  final int? baseId;
   final String medidor;
   final int cuenta;
   final String propietario;
@@ -9,6 +10,9 @@ class Lectura {
   final int lecturaAnterior;
   final int rutaId;
   final int promedioConsumo;
+  final String sector;
+  final String periodo;
+  final String? direccion;
   final int? novedadId;
   final int? lecturaActual;
   final String? observacion;
@@ -17,6 +21,7 @@ class Lectura {
   final int? consumo;
   final double? latitud;
   final double? longitud;
+  final int? orden;
   final List<String> imagenes;
   final bool sincronizado;
   final bool registrado;
@@ -30,6 +35,7 @@ class Lectura {
     required this.lecturaAnterior,
     required this.rutaId,
     required this.promedioConsumo,
+    required this.sector,
     this.novedadId,
     this.lecturaActual,
     this.observacion,
@@ -41,6 +47,10 @@ class Lectura {
     this.fechaLectura,
     this.lectorId,
     this.registrado = false,
+    this.orden,
+    this.direccion,
+    this.baseId,
+    required this.periodo,
   });
 
   Lectura copyWith({
@@ -63,6 +73,11 @@ class Lectura {
     int? lectorId,
     int? rutaId,
     int? promedioConsumo,
+    int? orden,
+    int? baseId,
+    String? sector,
+    String? direccion,
+    String? periodo,
   }) {
     return Lectura(
       id: id ?? this.id,
@@ -83,7 +98,12 @@ class Lectura {
       fechaLectura: fechaLectura ?? this.fechaLectura,
       lectorId: lectorId ?? this.lectorId,
       rutaId: rutaId ?? this.rutaId,
-      promedioConsumo: promedioConsumo ?? this.promedioConsumo, 
+      promedioConsumo: promedioConsumo ?? this.promedioConsumo,
+      sector: sector ?? this.sector,
+      direccion: direccion ?? this.direccion,
+      orden: orden ?? this.orden,
+      baseId: baseId ?? this.baseId,
+      periodo: periodo ?? this.periodo,
     );
   }
 
@@ -109,6 +129,11 @@ class Lectura {
       'lectorId': lectorId,
       'rutaId': rutaId,
       'promedioConsumo': promedioConsumo,
+      'sector': sector,
+      'periodo': periodo,
+      'direccion': direccion,
+      'orden': orden,
+      'baseId': baseId,
     };
   }
 
@@ -163,7 +188,11 @@ class Lectura {
       registrado: map['registrado'] == 1,
       imagenes: imagenesList,
       rutaId: map['rutaId'],
-      promedioConsumo: map['promedioConsumo'], 
+      promedioConsumo: map['promedioConsumo'] as int,
+      sector: map['sector'],
+      direccion: map['direccion'] as String?,
+      orden: map['orden'] as int?,
+      baseId: map['id'] as int, periodo: map['periodo'],
     );
   }
 
@@ -177,7 +206,10 @@ class Lectura {
       lecturaAnterior: json['lectura_anterior'],
       novedadId: json['novedadId'],
       rutaId: json['ruta_id'],
-      promedioConsumo: json['proemdio'], 
+      promedioConsumo: json['promedio'],
+      sector: json['sector'],
+      direccion: json['direccion'],
+      orden: json['orden'], periodo: json['periodo'],
     );
   }
 }

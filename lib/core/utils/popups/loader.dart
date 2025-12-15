@@ -3,48 +3,72 @@ import 'package:nexsys_app/core/theme/theme.dart';
 //import 'package:lottie/lottie.dart';
 
 class Loader {
-  static void openLoadingDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierColor: Color(0xFF1C252E).withValues(alpha: .8),
-      builder: (_) => Dialog(
+ static void openLoadingDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierColor: Colors.black.withValues(alpha: .6),
+    builder: (_) {
+      final theme = Theme.of(context);
+      return Dialog(
         backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const SizedBox(
-                height: 50,
-                width: 50,
+              // Loader animado
+              SizedBox(
+                height: 60,
+                width: 60,
                 child: CircularProgressIndicator(
                   strokeWidth: 5,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
-                  backgroundColor: Color(0xFFEEEEEE),
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    theme.colorScheme.primary,
+                  ),
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
                 ),
               ),
-              const SizedBox(height: 25),
-              const Text(
-                "Espera un momento por favor",
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                "Estamos verificando tus datos...",
-                style: TextStyle(
-                  fontSize: 15,
-                  //color: Color.fromARGB(255, 88, 88, 88),
-                  fontWeight: FontWeight.w600,
+
+              const SizedBox(height: 24),
+
+              // Mensaje principal
+              Text(
+                "Iniciando sesión...",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
+              ),
+
+              const SizedBox(height: 8),
+
+              // Mensaje secundario
+              Text(
+                "Estamos conectando con el servidor,\nesto tomará solo unos segundos.",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Barra de progreso opcional
+              LinearProgressIndicator(
+                minHeight: 4,
+                color: theme.colorScheme.primary,
+                backgroundColor: theme.colorScheme.surfaceContainerHighest,
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   static void openLoading(BuildContext context, String title, String detail) {
     showDialog(
@@ -192,14 +216,15 @@ class Loader {
       barrierDismissible: false,
       barrierColor: Color.fromARGB(255, 10, 10, 10).withValues(alpha: .8),
       builder: (BuildContext context) {
+        final theme = Theme.of(context);
         return Dialog(
-          backgroundColor: Colors.white,
+          backgroundColor: theme.colorScheme.surface,
           insetPadding: const EdgeInsets.symmetric(horizontal: 32),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
           child: Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(24),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -211,8 +236,8 @@ class Loader {
                     shape: BoxShape.circle,
                   ),
                   child: Icon(
-                    Icons.info,
-                    color: Colors.blue.shade600,
+                    Icons.wifi_off,
+                    color: theme.colorScheme.primary,
                     size: 42,
                   ),
                 ),
@@ -231,27 +256,12 @@ class Loader {
                 ),
 
                 const SizedBox(height: 28),
-
-                // Botones modernos M3
-                Row(
-                  children: [
-                    Expanded(
-                      child: FilledButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text(
-                          "Aceptar",
-                          style: TextStyle(fontSize: 15),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                  ],
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonal(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text("Aceptar", style: TextStyle(fontWeight: FontWeight.w600),),
+                  ),
                 ),
               ],
             ),

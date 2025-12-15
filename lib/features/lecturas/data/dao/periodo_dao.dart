@@ -14,6 +14,7 @@ class PeriodoDao {
       'fecha': periodo.fecha,
       'descargado': periodo.descargado ? 1 : 0,
       'cerrado': periodo.cerrado ? 1 : 0,
+      'descargable': periodo.descargable ? 1 : 0,
     }, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
@@ -34,6 +35,7 @@ class PeriodoDao {
       descargado: row['descargado'] == 1,
       cerrado: row['cerrado'] == 1,
       userId: row['usuarioId'] as int,
+      descargable: row['descargable'] == 1,
     );
   }
 }

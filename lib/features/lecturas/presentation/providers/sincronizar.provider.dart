@@ -41,6 +41,7 @@ class SincronizacionNotifier extends StateNotifier<SincronizacionState> {
     _setLoading();
 
     try {
+      //await Future.delayed(Duration(seconds: 5));
       final count = await repository.sincronizarLecturas(token);
       _setSuccess(count);
       return true;

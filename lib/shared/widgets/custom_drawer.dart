@@ -14,7 +14,12 @@ class CustomDrawer extends ConsumerWidget {
     final currentRoute = ModalRoute.of(context)?.settings.name;
 
     final List<MenuItem> preferenceItems = [
-      MenuItem(icon: Icons.info_outline, title: "Acerca de", link: '/about', isPush: true),
+      MenuItem(
+        icon: Icons.info_outline,
+        title: "Acerca de",
+        link: '/about',
+        isPush: true,
+      ),
     ];
 
     return Drawer(
@@ -143,9 +148,9 @@ class _LogoutButton extends ConsumerWidget {
                           ),
                           elevation: 0,
                         ),
-                        onPressed: () {
+                        onPressed: () async {
                           Navigator.pop(context);
-                          ref.read(authProvider.notifier).logout();
+                          await ref.read(authProvider.notifier).logout();
                         },
                         child: const Text(
                           "Cerrar sesión",

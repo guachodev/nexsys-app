@@ -13,7 +13,10 @@ class LecturaMapper {
       observacion: '',
       rutaId: json["ruta_id"],
       promedioConsumo: json["proemdio"],
-      //periodo: json["periodo"],
+      sector: json["sector"],
+      direccion: json["direccion"],
+      orden: json["orden"],
+      periodo: json["periodo"],
     );
   }
 }

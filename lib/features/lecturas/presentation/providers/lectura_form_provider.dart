@@ -1,54 +1,72 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
 import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
-import 'package:nexsys_app/features/lecturas/domain/domain.dart' hide Novedad;
-import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
+import 'package:nexsys_app/features/lecturas/data/dao/lectura_dao.dart';
+import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/shared/inputs/inputs.dart';
 
-final lecturaFormProvider =
-    StateNotifierProvider.family<
-      LecturaFormNotifier,
-      LecturaFormState,
-      Lectura
-    >((ref, lectura) {
+import 'lecturas_provider.dart';
+
+final lecturaFormProvider = StateNotifierProvider.autoDispose
+    .family<LecturaFormNotifier, LecturaFormState, Lectura>((ref, lectura) {
       final updateCallback = ref.watch(lecturasProvider.notifier).updateProduct;
-      final authState = ref.watch(authProvider); // tu valor por defecto
+      final auth = ref.watch(authProvider).user!;
       return LecturaFormNotifier(
         lectura: lectura,
+        responsableId: auth.empleadoId,
         onSubmitCallback: updateCallback,
-        userId: authState.user?.empleadoId,
       );
     });
 
 class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
   final Future<bool> Function(Map<String, dynamic> lecturaLike)?
   onSubmitCallback;
-
-  final int? userId;
+  final int responsableId;
 
   LecturaFormNotifier({
-    this.onSubmitCallback,
     required Lectura lectura,
-    this.userId,
-    int? defaultNovedadId,
+    required this.responsableId,
+    this.onSubmitCallback,
   }) : super(
          LecturaFormState(
            id: lectura.id,
-           lecturaAnterior: lectura.lecturaAnterior,
            medidor: lectura.medidor,
            cuenta: lectura.cuenta.toString(),
            propietario: lectura.propietario,
            cedula: lectura.cedula,
-           consumo: 0,
-           lecturaActual: LecturaActual.pure(
-             lecturaAnterior: lectura.lecturaAnterior,
-           ),
-           novedadId: NovedadInput.dirty(25), // ✅ Aquí asignamos la novedad por defecto
-           observacion: '',
-           images: [],
+           lecturaAnterior: lectura.lecturaAnterior,
+           consumo: lectura.consumo ?? 0,
+           lecturaActual: lectura.lecturaActual != null
+               ? LecturaActual.dirty(
+                   lectura.lecturaActual!,
+                   lecturaAnterior: lectura.lecturaAnterior,
+                 )
+               : LecturaActual.pure(lecturaAnterior: lectura.lecturaAnterior),
+           imagenes: lectura.imagenes,
+           novedadId: NovedadInput.dirty(lectura.novedadId),
+           baseId: lectura.baseId!,
+           observacion: lectura.observacion,
+           rutaId: lectura.rutaId,
+           sector: lectura.sector,
+           periodo: lectura.periodo,
          ),
        );
+
+  void onNovedadChanged(int? value) {
+    final newNovedad = NovedadInput.dirty(value);
+    state = state.copyWith(
+      novedadId: newNovedad,
+      isFormValid: Formz.validate([newNovedad, state.lecturaActual]),
+    );
+  }
+
+  void updateProductImage(String path) {
+    state = state.copyWith(imagenes: [...state.imagenes, path]);
+  }
 
   void _touchedEverything() {
     final lecturaActualTouched = LecturaActual.dirty(
@@ -76,57 +94,90 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
         ? value - state.lecturaAnterior
         : 0;
 
+    // ✔ Novedad segura para validación
+    final novedadForValidation =
+        state.novedadId ?? const NovedadInput.pure(null);
+
     state = state.copyWith(
       lecturaActual: newLecturaActual,
       consumo: consumo,
-      isFormValid: Formz.validate([
-        newLecturaActual,
-        if (state.novedadId != null) state.novedadId!,
-      ]),
+      isFormValid: Formz.validate([newLecturaActual, novedadForValidation]),
     );
   }
 
-  void onNovedadChanged(int? value) {
-    final newNovedad = NovedadInput.dirty(value);
-    state = state.copyWith(
-      novedadId: newNovedad,
-      isFormValid: Formz.validate([newNovedad, state.lecturaActual]),
-    );
-  }
-
-  Future<bool> onFormSubmit() async {
+  Future<bool> onFormSubmit(bool? editado) async {
     _touchedEverything();
 
     if (!state.isFormValid) return false;
     if (onSubmitCallback == null) return false;
 
+    state = state.copyWith(isPosting: true);
     try {
-      state = state.copyWith(isPosting: true);
-      // 🔍 Obtener geolocalización actual
-      final position = await LocationService.getCurrentPosition();
-
-      final lecturaLike = {
+      final Map<String, dynamic> lecturaLike = {
         'id': state.id,
+        'baseId': state.baseId,
         'lectura_actual': state.lecturaActual.value,
         'descripcion': state.observacion,
-        'imagenes': state.images,
+        'imagenes': state.imagenes,
         'consumo': state.consumo,
         'novedad_id': state.novedadId?.value,
-        'fecha_lectura': DateTime.now().toString(),
-        'empleado_id': userId,
-        'latitud': position?.latitude,
-        'longitud': position?.longitude,
-        'images': state.images
+        'empleado_id': responsableId,
+        'rutaId': state.rutaId,
+        'sector': state.sector,
+        'periodo': state.periodo,
+        'editado': editado,
       };
 
-      //debugPrint("📍 Lectura con ubicación: $lecturaLike");
+      // 📍 Solo si NO es edición
+      if (editado != true) {
+        final position = await LocationService.getCurrentPosition();
+        lecturaLike.addAll({
+          'fecha_lectura': DateTime.now().toIso8601String(),
+          'latitud': position?.latitude,
+          'longitud': position?.longitude,
+        });
+      }
+
+      debugPrint("📍 Lectura enviada: $lecturaLike");
+
       await onSubmitCallback!(lecturaLike);
-      state = state.copyWith(isPosting: false);
+
+      //state = state.copyWith(isPosting: false);
       return true;
     } catch (_) {
       state = state.copyWith(isPosting: false);
       return false;
     }
+  }
+
+  void stop() {
+    state = state.copyWith(isPosting: false);
+  }
+
+  void onDescriptionChanged(String description) {
+    state = state.copyWith(observacion: description);
+  }
+
+  void addLecturaImage(String path) {
+    final updatedList = [path, ...state.imagenes];
+    state = state.copyWith(imagenes: updatedList);
+  }
+
+  Future<void> removeLecturaImage(String path, bool deleteFromDb) async {
+    if (deleteFromDb) {
+      await LecturaDao.deleteByPath(path);
+      final file = File(path);
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+
+    final updatedList = state.imagenes.where((img) => img != path).toList();
+    state = state.copyWith(imagenes: updatedList);
+  }
+
+  void clearAllImages() {
+    state = state.copyWith(imagenes: []);
   }
 
   void loadNewLectura(Lectura nuevaLectura, int? novedadId) {
@@ -141,71 +192,37 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
       lecturaActual: LecturaActual.pure(
         lecturaAnterior: nuevaLectura.lecturaAnterior,
       ),
-      novedadId: NovedadInput.dirty(novedadId),
-    );
-  }
-
-  void reset() {
-    state = LecturaFormState(
-      id: -1,
-      medidor: '',
-      cuenta: '',
-      propietario: '',
-      cedula: '',
-      lecturaAnterior: 0,
-      lecturaActual: LecturaActual.pure(lecturaAnterior: 0),
-      novedadId: NovedadInput.pure(),
+      novedadId: NovedadInput.dirty(novedadId ?? nuevaLectura.novedadId),
+      baseId: nuevaLectura.baseId!,
+      imagenes: nuevaLectura.imagenes,
       observacion: '',
       consumo: 0,
-      images: [],
-      isPosting: false,
+      isFormValid: false,
+      rutaId: -1,
+      sector: '',
+      periodo: '',
     );
-  }
-
-  void onDescriptionChanged(String description) {
-    state = state.copyWith(observacion: description);
-  }
-
-  void addLecturaImage(String path) {
-    final updatedList = [path, ...state.images];
-    state = state.copyWith(images: updatedList);
-  }
-
-  void removeLecturaImage(String path) {
-    final updatedList = state.images.where((img) => img != path).toList();
-    state = state.copyWith(images: updatedList);
-  }
-
-  void clearAllImages() {
-    state = state.copyWith(images: []);
-  }
-
-  Future<void> setDefaultNovedadFromApi() async {
-    if (state.novedadId?.value != null) return;
-
-    try {
-      //final defaultNovedadId = await ();
-      state = state.copyWith(novedadId: NovedadInput.dirty(25));
-    } catch (e) {
-      // manejar error si la consulta falla
-    }
   }
 }
 
 class LecturaFormState {
   final bool isFormValid;
   final int id;
+  final int baseId;
+  final int rutaId;
   final String medidor;
   final String cuenta;
   final String propietario;
   final String cedula;
+  final String sector;
+  final String periodo;
   final int lecturaAnterior;
   final LecturaActual lecturaActual;
   final String? observacion;
   final int consumo;
   final NovedadInput? novedadId;
-  final List<String> images;
   final bool isPosting;
+  final List<String> imagenes;
 
   LecturaFormState({
     this.isFormValid = false,
@@ -215,19 +232,23 @@ class LecturaFormState {
     required this.propietario,
     required this.cedula,
     required this.lecturaAnterior,
-    this.lecturaActual = const LecturaActual.pure(),
     this.novedadId,
+    this.lecturaActual = const LecturaActual.pure(),
     this.observacion,
     this.consumo = 0,
-    this.images = const [],
+    this.imagenes = const [],
     this.isPosting = false,
-  }) {
-    //lecturaActual = LecturaActual.pure();
-  }
+    required this.baseId,
+    required this.rutaId,
+    required this.sector,
+    required this.periodo,
+  });
 
   LecturaFormState copyWith({
     bool? isFormValid,
     int? id,
+    int? baseId,
+    int? rutaId,
     String? medidor,
     String? cuenta,
     String? propietario,
@@ -237,8 +258,10 @@ class LecturaFormState {
     String? observacion,
     int? consumo,
     NovedadInput? novedadId,
-    List<String>? images,
+    List<String>? imagenes,
     bool? isPosting,
+    String? sector,
+    String? periodo,
   }) {
     return LecturaFormState(
       isFormValid: isFormValid ?? this.isFormValid,
@@ -252,28 +275,12 @@ class LecturaFormState {
       observacion: observacion ?? this.observacion,
       consumo: consumo ?? this.consumo,
       novedadId: novedadId ?? this.novedadId,
-      images: images ?? this.images,
+      imagenes: imagenes ?? this.imagenes,
       isPosting: isPosting ?? this.isPosting,
+      baseId: baseId ?? this.baseId,
+      rutaId: rutaId ?? this.rutaId,
+      sector: sector ?? this.sector,
+      periodo: periodo ?? this.periodo,
     );
-  }
-
-  @override
-  String toString() {
-    return '''
-LecturaFormState(
-  isFormValid: $isFormValid,
-  id: $id,
-  medidor: $medidor,
-  cuenta: $cuenta,
-  propietario: $propietario,
-  cedula: $cedula,
-  lecturaAnterior: $lecturaAnterior,
-  lecturaActual: $lecturaActual,
-  observacion: $observacion,
-  consumo: $consumo,
-  novedadId: $novedadId,
-  images: $images,
-  isPosting: $isPosting
-)''';
   }
 }

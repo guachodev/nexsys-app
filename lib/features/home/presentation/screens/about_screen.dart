@@ -32,6 +32,7 @@ class _AboutPageState extends State<AboutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: BarApp(
         title: "Acerca de la aplicación",
       ),
@@ -110,14 +111,14 @@ class _AboutPageState extends State<AboutScreen> {
           const SizedBox(height: 20),
 
           // Botón para ver licencias Flutter
-          ElevatedButton(
+         /*  ElevatedButton(
             onPressed: () => showLicensePage(
               context: context,
               applicationName: appName,
               applicationVersion: "$version ($buildNumber)",
             ),
             child: const Text("Ver licencias de software"),
-          ),
+          ), */
 
           const SizedBox(height: 30),
 

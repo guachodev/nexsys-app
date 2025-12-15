@@ -5,7 +5,7 @@ import 'package:nexsys_app/features/auth/data/data.dart';
 import 'package:nexsys_app/features/auth/domain/domain.dart';
 
 class AuthDataSourceImpl extends AuthDataSource {
-  final dio = Dio(BaseOptions(baseUrl: Environment.apiUrl));
+  final dio = Dio(BaseOptions(baseUrl: Environment.apiUrl,connectTimeout: const Duration(seconds: 10),));
 
   @override
   Future<User> checkAuthStatus(String token) async {
@@ -13,11 +13,9 @@ class AuthDataSourceImpl extends AuthDataSource {
       dio.interceptors.add(
         InterceptorsWrapper(
           onRequest: (options, handler) {
-            print('[REQUEST] => ${options.method} ${options.path}');
             return handler.next(options);
           },
           onError: (e, handler) {
-            print('[ERROR] => ${e.message}');
             return handler.next(e);
           },
         ),
@@ -46,8 +44,7 @@ class AuthDataSourceImpl extends AuthDataSource {
         data: {'username': username, 'password': password},
       );
 
-      final user = UserMapper.userJsonToEntity(response.data);
-      return user;
+      return UserMapper.userJsonToEntity(response.data);
     } on DioException catch (e) {
       handleDioError(e);
     }

@@ -8,6 +8,7 @@ class PeriodoMapper {
       descargado: json["descargado"] == json,
       cerrado: json["cerrado"] == json,
       fecha: json["fecha"],
+      descargable: json["descargable"],
     );
   }
 
@@ -19,6 +20,7 @@ class PeriodoMapper {
       cerrado: json["cerrado"] == json,
       fecha: json["fecha"],
       userId: json["usuarioId"],
+      descargable: json["descargable"],
     );
   }
 }

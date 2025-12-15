@@ -1,8 +1,12 @@
-export 'providers/editar_form_provider.dart';
+/* export 'providers/editar_form_provider.dart';
 export 'providers/editar_provider.dart';
+export 'screens/editar_screen.dart';
+ */
+export 'providers/descarga_lecturas_provider.dart';
 export 'providers/lectura_form_provider.dart';
 export 'providers/lectura_provider.dart';
 export 'providers/lecturas_provider.dart';
+export 'providers/lecturas_repository_provider.dart';
 export 'providers/local_provider.dart';
 export 'providers/local_registrados.provider.dart';
 export 'providers/novedad_provider.dart';
@@ -11,10 +15,9 @@ export 'providers/rutas.provider.dart';
 export 'providers/search_lectura.provider.dart';
 export 'providers/search_lectura_qr_provider.dart';
 export 'providers/sincronizar.provider.dart';
-export 'screens/editar_screen.dart';
 export 'screens/lectura_registarda_screen.dart';
 export 'screens/lectura_screen.dart';
+export 'screens/lecturas_lista_screen.dart';
 export 'screens/lecturas_screen.dart';
-export 'screens/lista_lectura_screen.dart';
 export 'screens/search_lectura_screen.dart';
 export 'screens/sincronizar_screen.dart';

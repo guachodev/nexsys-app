@@ -36,19 +36,21 @@ class _SearchBarWithFiltersState extends ConsumerState<SearchBarWithFilters> {
         composing: TextRange.empty,
       );
     }
-
     return Row(
       children: [
         Expanded(child: _buildSearchField(searchState)),
-        /*  const SizedBox(width: 8),
-        FilterButton(selectedFilter: selectedFilter, onSelected: (filter) {
-          setState(() => selectedFilter = filter);
-        }), */
+        /* const SizedBox(width: 8),
+        FilterButton(
+          selectedFilter: selectedFilter,
+          onSelected: (filter) {
+            setState(() => selectedFilter = filter);
+          },
+        ), */
       ],
     );
   }
 
-  Widget _buildSearchField(SearchLecturaState searchState) {
+  Widget _buildSearchField(SearchLecturaState  searchState) {
     return TextField(
       controller: _controller,
       focusNode: _focusNode,
@@ -86,7 +88,7 @@ class _SearchBarWithFiltersState extends ConsumerState<SearchBarWithFilters> {
   String _hintText(FilterType filter) {
     switch (filter) {
       case FilterType.medidor:
-        return 'Buscar por número de cuenta...';
+        return 'Buscar por número de cuenta y medidor...';
       case FilterType.cedula:
         return 'Buscar por cédula...';
       case FilterType.catastro:

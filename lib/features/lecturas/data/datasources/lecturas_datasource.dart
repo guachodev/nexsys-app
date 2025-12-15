@@ -3,30 +3,36 @@ import 'package:flutter/cupertino.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/core/errors/errors.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
+import 'package:path/path.dart' as p;
 
 import '../mappers/periodo_mapper.dart';
 
 class LecturasDatasourceImpl extends LecturasDatasource {
-  final dio = Dio(BaseOptions(baseUrl: Environment.apiUrl));
+  final dio = Dio(
+    BaseOptions(
+      baseUrl: Environment.apiUrl,
+      connectTimeout: const Duration(seconds: 10),
+    ),
+  );
 
   @override
   Future<Periodo?> getPeriodoActivo(String token) async {
-    final response = await dio.get(
-      '/lectura/periodo',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
+    try {
+      final response = await dio.get(
+        '/lectura/periodo',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
 
-    if (response.data.toString().isEmpty) return null;
+      if (response.data.toString().isEmpty) return null;
 
-    print('Api => ${response.data}');
-
-    final periodo = PeriodoMapper.jsonToEntity(response.data);
-    return periodo;
+      return PeriodoMapper.jsonToEntity(response.data);
+    } on DioException catch (e) {
+      handleDioError(e);
+    }
   }
 
   @override
   Future<List<Lectura>> searchLecturas(String query) {
-    // TODO: implement searchLecturas
     throw UnimplementedError();
   }
 
@@ -35,11 +41,15 @@ class LecturasDatasourceImpl extends LecturasDatasource {
     String periodoId,
     String token,
   ) async {
-    final response = await dio.get(
-      '/lectura/descargar/$periodoId',
-      options: Options(headers: {'Authorization': 'Bearer $token'}),
-    );
-    return response.data;
+    try {
+      final response = await dio.get(
+        '/lectura/descargar/$periodoId',
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+      return response.data;
+    } on DioException catch (e) {
+      handleDioError(e);
+    }
   }
 
   Future<void> updateLectura(
@@ -58,10 +68,43 @@ class LecturasDatasourceImpl extends LecturasDatasource {
         ),
       );
     } on DioException catch (e) {
-      //throw _handleError(e);
-      throw CustomError('Error dio: ${e.toString()}');
-    } catch (e) {
-      throw CustomError('Error inesperado: ${e.toString()}');
+      handleDioError(e);
     }
+  }
+
+  Future<int?> uploadLecturaImage({
+    required int lecturaId,
+    required String localPath,
+    required String token,
+    required String sector,
+    required String periodo,
+  }) async {
+    try {
+      final formData = FormData.fromMap({
+        "file": await MultipartFile.fromFile(localPath),
+        "periodo": periodo,
+        "ruta": sector,
+        "nombre": p.basename(localPath),
+      });
+
+      final response = await dio.post(
+        "/lectura/$lecturaId/imagen",
+        data: formData,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "multipart/form-data",
+          },
+        ),
+      );
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final remoteId = response.data["remote_id"];
+        return remoteId;
+      }
+    } catch (e) {
+      debugPrint("❌ Error subiendo imagen $localPath → $e");
+    }
+
+    return null;
   }
 }

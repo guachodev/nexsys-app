@@ -3,7 +3,7 @@ import 'package:formz/formz.dart';
 enum NovedadError { empty }
 
 class NovedadInput extends FormzInput<int?, NovedadError> {
-  const NovedadInput.pure() : super.pure(null);
+  const NovedadInput.pure(int? value) : super.pure(null);
   const NovedadInput.dirty([super.value]) : super.dirty();
 
   String? get errorMessage {
