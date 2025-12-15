@@ -68,6 +68,7 @@ class DatabaseProvider {
           rutaId INTEGER,
           usuarioId INTEGER,
           sector_id INTEGER,
+          cerrado INTEGER,
           detalle TEXT,
           PRIMARY KEY (rutaId, usuarioId)
         );

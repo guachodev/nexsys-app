@@ -8,12 +8,12 @@ class Notifications {
     Color backgroundColor = Colors.black87,
     Color textColor = Colors.white,
     IconData icon = Icons.info_outline,
-    Duration duration = const Duration(seconds: 4),
+    Duration duration = const Duration(seconds: 3),
   }) {
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        //duration: duration,
+        duration: duration,
         behavior: SnackBarBehavior.floating,
         backgroundColor: backgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/core/constants/enums.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
@@ -14,6 +15,7 @@ final periodoProvider = StateNotifierProvider<PeriodoNotifier, PeriodoState>((
     lecturasRepository: lecturasRepository,
     token: authState.user!.token,
     userId: authState.user!.id,
+    ref: ref,
   );
 });
 
@@ -21,13 +23,15 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
   final LecturasRepositoryImpl lecturasRepository;
   final String token;
   final int userId;
+  final Ref ref;
 
   PeriodoNotifier({
     required this.lecturasRepository,
     required this.token,
     required this.userId,
+    required this.ref,
   }) : super(PeriodoState()) {
-    loadPeriodo();
+    //loadPeriodo();
   }
 
   Future<void> loadPeriodo() async {
@@ -39,6 +43,9 @@ class PeriodoNotifier extends StateNotifier<PeriodoState> {
         state.copyWith(status: SearchStatus.empty);
         return;
       }
+
+      // 🔄 refrescar rutas desde BD
+      //ref.read(rutasProvider.notifier).cargarRutas();
 
       state = state.copyWith(status: SearchStatus.loaded, periodo: periodo);
     } catch (e) {

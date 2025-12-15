@@ -24,3 +24,13 @@ class PeriodoMapper {
     );
   }
 }
+
+class RutaCerradaMapper {
+  static RutaCerrada jsonToEntity(Map<String, dynamic> json) {
+    return RutaCerrada(
+      id: json["id"],
+      cerrado: json["cerrado"] ?? false,
+    );
+  }
+}
+

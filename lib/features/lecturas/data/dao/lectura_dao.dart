@@ -116,6 +116,39 @@ class LecturaDao {
     return result.map((e) => Lectura.fromMap(e)).toList();
   }
 
+  static Future<List<Lectura>> buscarPorCuentaByRutas(
+    String numeroCuenta,
+    List<int> rutaIds,
+    int userId,
+  ) async {
+    final db = await DatabaseProvider.db;
+
+    // 🔒 Seguridad: si no hay rutas → no buscar
+    if (rutaIds.isEmpty) return [];
+
+    // Crear placeholders dinámicos (?, ?, ?)
+    final placeholders = List.filled(rutaIds.length, '?').join(',');
+
+    final result = await db.query(
+      'lecturas',
+      where:
+          '''
+      registrado = 0
+      AND usuarioId = ?
+      AND rutaId IN ($placeholders)
+      AND (cuenta LIKE ? OR medidor LIKE ?)
+    ''',
+      whereArgs: [
+        userId,
+        ...rutaIds, // 👈 se expande aquí
+        '%$numeroCuenta%',
+        '%$numeroCuenta%',
+      ],
+    );
+
+    return result.map((e) => Lectura.fromMap(e)).toList();
+  }
+
   static Future<Lectura?> getById(int id) async {
     final db = await DatabaseProvider.db;
     final res = await db.query(

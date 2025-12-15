@@ -13,6 +13,7 @@ class RutaDao {
         'usuarioId': userId,
         'sector_id': r.sectorId,
         'detalle': r.detalle,
+        'cerrado': 0,
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     }
 
@@ -21,7 +22,26 @@ class RutaDao {
 
   static Future<List<Ruta>> getAll(int userId) async {
     final db = await DatabaseProvider.db;
-    final result = await db.query('ruta', where: 'usuarioId = ?',whereArgs: [userId]);
+    final result = await db.query(
+      'ruta',
+      where: 'usuarioId = ?',
+      whereArgs: [userId],
+    );
     return result.map((e) => Ruta.fromMap(e)).toList();
+  }
+
+  static Future<int> marcarRutaCerrada({
+    required int rutaId,
+    required int userId,
+    required bool cerrado,
+  }) async {
+    final db = await DatabaseProvider.db;
+
+    return await db.update(
+      'ruta',
+      {'cerrado': cerrado ? 0 : 1},
+      where: 'rutaId = ? AND usuarioId = ?',
+      whereArgs: [rutaId, userId],
+    );
   }
 }

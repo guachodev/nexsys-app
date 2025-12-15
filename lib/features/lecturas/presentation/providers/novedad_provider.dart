@@ -10,7 +10,7 @@ final novedadesProvider =
 
 class NovedadesNotifier extends StateNotifier<NovedadState> {
   NovedadesNotifier() : super(NovedadState()) {
-    loadNovedades();
+    //loadNovedades();
   }
 
   Future<void> loadNovedades() async {

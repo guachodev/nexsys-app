@@ -111,7 +111,15 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
           state.selectedRutaId!,
           userId,
         );
+      } else if (state.selectedRutaIds.isNotEmpty) {
+        // 🔹 Varias rutas (Todas abiertas)
+        result = await lecturasRepository.searchLecturasByRutas(
+          state.query,
+          state.selectedRutaIds,
+          userId,
+        );
       } else {
+        // 🔹 Fallback (no debería usarse normalmente)
         result = await lecturasRepository.searchLecturas(state.query, userId);
       }
 
@@ -128,6 +136,17 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
       );
     }
   }
+
+  void selectRutas(List<int> rutaIds) {
+    state = state.copyWith(selectedRutaId: null, selectedRutaIds: rutaIds);
+
+    if (state.query.trim().isEmpty) {
+      state = state.copyWith(status: SearchStatus.initial, lecturas: []);
+      return;
+    }
+
+    searchMoviesByQuery(state.query);
+  }
 }
 
 class SearchLecturaState {
@@ -136,6 +155,8 @@ class SearchLecturaState {
   final List<Lectura> lecturas;
   final String? errorMessage;
   final int? selectedRutaId;
+  // 🆕 NUEVO: rutas múltiples (para "Todas")
+  final List<int> selectedRutaIds;
 
   const SearchLecturaState({
     this.status = SearchStatus.initial,
@@ -143,6 +164,7 @@ class SearchLecturaState {
     this.lecturas = const [],
     this.errorMessage,
     this.selectedRutaId,
+    this.selectedRutaIds = const [],
   });
 
   SearchLecturaState copyWith({
@@ -151,6 +173,7 @@ class SearchLecturaState {
     List<Lectura>? lecturas,
     String? errorMessage,
     int? selectedRutaId,
+    List<int>? selectedRutaIds,
   }) {
     return SearchLecturaState(
       status: status ?? this.status,
@@ -158,6 +181,7 @@ class SearchLecturaState {
       lecturas: lecturas ?? this.lecturas,
       errorMessage: errorMessage,
       selectedRutaId: selectedRutaId ?? this.selectedRutaId,
+      selectedRutaIds: selectedRutaIds ?? this.selectedRutaIds,
     );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nexsys_app/core/theme/theme.dart';
 
-import 'search_bar_with_filters .dart';
+import 'search_bar_with_filters.dart';
 
 class FilterButton extends StatelessWidget {
   final FilterType selectedFilter;

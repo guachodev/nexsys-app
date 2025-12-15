@@ -77,8 +77,8 @@ class _LecturasListaScreenState extends ConsumerState<LecturasListaScreen> {
         onRefresh: () async =>
             ref.read(lecturasLocalProvider.notifier).cargarLecturas(),
         child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Lista de Lecturas"),
+          appBar: BarApp(
+            title: "Lista de Lecturas",
             actions: [
               ?tieneUnaRuta
                   ? null
@@ -89,70 +89,77 @@ class _LecturasListaScreenState extends ConsumerState<LecturasListaScreen> {
             ],
           ),
 
-          body: lecturasState.status == SearchStatus.loading ||
-              lecturasState.status == SearchStatus.initial
-          ? LoadingIndicator(subtitle: 'Cargando lecturas espere un momento')
-          :Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Buscar por cuenta, medidor...",
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
+          body:
+              lecturasState.status == SearchStatus.loading ||
+                  lecturasState.status == SearchStatus.initial
+              ? LoadingIndicator(
+                  subtitle: 'Cargando lecturas espere un momento',
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
                   ),
-                  onChanged: (value) => setState(() => searchQuery = value),
-                ),
-
-                // -------------------------------------------------------
-                // FILTROS DE ESTADO
-                // -------------------------------------------------------
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _chip("Todos", "todos"),
-                      _chip("Registrados", "registrados"),
-                      _chip("Pendientes", "pendientes"),
-                      _chip("Sincronizados", "sincronizados"),
+                      TextField(
+                        decoration: InputDecoration(
+                          hintText: "Buscar por cuenta, medidor...",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onChanged: (value) =>
+                            setState(() => searchQuery = value),
+                      ),
+
+                      // -------------------------------------------------------
+                      // FILTROS DE ESTADO
+                      // -------------------------------------------------------
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: [
+                            _chip("Todos", "todos"),
+                            _chip("Registrados", "registrados"),
+                            _chip("Pendientes", "pendientes"),
+                            _chip("Sincronizados", "sincronizados"),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 2),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            "Resultados: ${filtered.length}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
+                          ),
+                          Text(
+                            selectedRutaName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Expanded(
+                        child: filtered.isEmpty
+                            ? _buildEmptyState()
+                            : _buildLecturasList(filtered),
+                      ),
                     ],
                   ),
                 ),
-
-                const SizedBox(height: 2),
-
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Resultados: ${filtered.length}",
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
-                    Text(
-                      selectedRutaName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black54,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Expanded(
-                  child: filtered.isEmpty
-                      ? _buildEmptyState()
-                      : _buildLecturasList(filtered),
-                ),
-              ],
-            ),
-          ),
         ),
       ),
     );

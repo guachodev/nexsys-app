@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
 import 'package:nexsys_app/core/errors/errors.dart';
+import 'package:nexsys_app/features/lecturas/data/data.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:path/path.dart' as p;
 
@@ -16,7 +17,7 @@ class LecturasDatasourceImpl extends LecturasDatasource {
   );
 
   @override
-  Future<Periodo?> getPeriodoActivo(String token) async {
+  Future<Periodo?> getPeriodoActivo(String token, int userId) async {
     try {
       final response = await dio.get(
         '/lectura/periodo',
@@ -24,10 +25,26 @@ class LecturasDatasourceImpl extends LecturasDatasource {
       );
 
       if (response.data.toString().isEmpty) return null;
-
+      await syncRutasDesdePeriodo(response.data, userId);
       return PeriodoMapper.jsonToEntity(response.data);
     } on DioException catch (e) {
       handleDioError(e);
+    }
+  }
+
+  Future<void> syncRutasDesdePeriodo(
+    Map<String, dynamic> json,
+    int userId,
+  ) async {
+    final List rutas = json["rutas"] ?? [];
+
+    for (final r in rutas) {
+      final ruta = RutaCerradaMapper.jsonToEntity(r);
+      await RutaDao.marcarRutaCerrada(
+        rutaId: ruta.id,
+        userId: userId,
+        cerrado: ruta.cerrado,
+      );
     }
   }
 

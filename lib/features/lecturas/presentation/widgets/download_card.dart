@@ -71,6 +71,7 @@ class DownloadCard extends ConsumerWidget {
 
                 Future.microtask(() {
                   ref.read(rutasProvider.notifier).cargarRutas();
+                  ref.read(novedadesProvider.notifier).loadNovedades();
                   ref.read(periodoProvider.notifier).marcarDescargado();
                   //ref.read(periodoProvider.notifier).refreshAvance();
                 });

@@ -47,16 +47,28 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
   }
 
   @override
-  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta,int userId) async {
+  Future<List<Lectura>> buscarPorCuenta(String numeroCuenta, int userId) async {
     return await LecturaDao.buscarPorCuenta(numeroCuenta, userId);
   }
 
   Future<List<Lectura>> buscarPorCuentaByRutaId(
     String numeroCuenta,
     int rutaId,
-    int userId
+    int userId,
   ) async {
-    return await LecturaDao.buscarPorCuentaByRutaId(numeroCuenta, rutaId, userId);
+    return await LecturaDao.buscarPorCuentaByRutaId(
+      numeroCuenta,
+      rutaId,
+      userId,
+    );
+  }
+
+  Future<List<Lectura>> buscarPorCuentaByRutasId(
+    String query,
+    List<int> rutasIds,
+    int userId,
+  ) async {
+    return await LecturaDao.buscarPorCuentaByRutas(query, rutasIds, userId);
   }
 
   // ─── RUTAS ────────────────────────────────────────────────────────────────
@@ -93,7 +105,7 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
   @override
   Future<void> updateLectura(
     Map<String, dynamic> lecturaLike,
-   int localId,
+    int localId,
   ) async {
     await LecturaDao.updateLectura(lecturaLike, localId);
   }

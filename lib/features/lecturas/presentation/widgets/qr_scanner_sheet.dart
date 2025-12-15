@@ -31,6 +31,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
   @override
   void initState() {
     super.initState();
+    _audioPlayer.setReleaseMode(ReleaseMode.stop);
     _audioPlayer.setSourceAsset('sounds/beep.mp3');
   }
 
@@ -49,7 +50,11 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
 
     _isProcessing = true;
     await _controller.stop();
-    await _audioPlayer.resume();
+    
+    // 🔊 SONIDO SIEMPRE
+    await _audioPlayer.stop();
+    await _audioPlayer.play(AssetSource('sounds/beep.mp3'));
+
     HapticFeedback.lightImpact();
 
     final code = barcode.rawValue!;
@@ -64,7 +69,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
         context,
         'Medidor encontrado: ${state.lectura!.id}',
       );
-      context.push('/lecturas/detalle/${state.lectura?.id}');
+      context.push('/lectura/${state.lectura?.id}');
     } else if (state.status == SearchLecturaQrStatus.error) {
       Notifications.error(context, state.message);
 
@@ -87,6 +92,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
   @override
   Widget build(BuildContext context) {
     final qrState = ref.watch(searchLecturaQrProvider);
+    final mesagge = qrState.message;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -147,7 +153,9 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
                   child: Container(
-                    color: _qrNotFound ? Colors.grey.withValues(alpha: .2) : Colors.black.withValues(alpha: .5),
+                    color: _qrNotFound
+                        ? Colors.grey.withValues(alpha: .2)
+                        : Colors.black.withValues(alpha: .5),
                     padding: const EdgeInsets.all(16),
                     child: _qrNotFound
                         /// ❌ Panel de error
@@ -163,8 +171,8 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
                                 ),
                               ),
                               const SizedBox(height: 8),
-                              const Text(
-                                "No se encontró un medidor con este código. Intenta nuevamente.",
+                              Text(
+                                mesagge,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: Colors.white70,
@@ -197,7 +205,7 @@ class _QrScannerSheetState extends ConsumerState<QrScannerSheet>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                "Enfoca el código de barras",
+                                "Enfoca el código de barras o QR",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.bold,

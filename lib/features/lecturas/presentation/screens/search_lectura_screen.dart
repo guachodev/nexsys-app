@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:nexsys_app/core/utils/utils.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 import 'package:nexsys_app/shared/widgets/widgets.dart';
 
 import '../widgets/filters_chip_list.dart';
-import '../widgets/search_bar_with_filters .dart';
+import '../widgets/search_bar_with_filters.dart';
 import '../widgets/search_content.dart';
 
 class SearchLecturaScreen extends ConsumerStatefulWidget {
@@ -21,9 +22,27 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
   int selectedFilter = -1;
 
   @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() {
+      final rutasState = ref.read(rutasProvider);
+   
+      if (!rutasState.tieneRutasAbiertas) {
+        
+        Notifications.error(
+          context,
+          "No existen rutas abiertas para realizar búsquedas y registrar lecturas.",
+        );
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final searchState = ref.watch(searchLecturaProvider);
-    final rutas = ref.watch(rutasProvider);
+    final rutasState = ref.watch(rutasProvider);
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -35,7 +54,7 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
               children: [
                 SearchBarWithFilters(ref: ref),
                 // 🔹 FILTROS
-                _buildFilters(rutas.rutas),
+                _buildFilters(rutasState.rutas),
 
                 const SizedBox(height: 8),
 
@@ -54,7 +73,7 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Expanded(child: SearchContent(searchState: searchState,)),
+                Expanded(child: SearchContent(searchState: searchState)),
               ],
             ),
           ),
@@ -95,40 +114,39 @@ class _LecturasListScreenState extends ConsumerState<SearchLecturaScreen> {
       labelBuilder: (r) => r.detalle,
       valueBuilder: (r) => r.id,
       onSelected: (id) {
+        final rutasState = ref.read(rutasProvider);
+
+        // 🔒 Caso: Todas las rutas
+        if (id == -1) {
+          if (!rutasState.tieneRutasAbiertas) {
+            Notifications.warning(
+              context,
+              "No hay rutas abiertas disponibles.",
+            );
+            return;
+          }
+
+          setState(() => selectedFilter = -1);
+          ref
+              .read(searchLecturaProvider.notifier)
+              .selectRutas(rutasState.rutasAbiertas.map((r) => r.id).toList());
+          return;
+        }
+
+        // 🔒 Ruta cerrada
+        final ruta = rutas.firstWhere((r) => r.id == id);
+        if (ruta.cerrado) {
+          Notifications.error(
+            context,
+            "No se puede buscar en una ruta cerrada.",
+          );
+          return;
+        }
+
+        // ✅ Ruta válida
         setState(() => selectedFilter = id);
         ref.read(searchLecturaProvider.notifier).selectRuta(id);
       },
     );
   }
-
-  /* Widget _chip(String label, int value) {
-    final bool selected = selectedFilter == value;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: selected,
-        backgroundColor: Colors.white,
-        selectedColor: Colors.blue.shade700,
-        checkmarkColor: Colors.white,
-        labelStyle: TextStyle(
-          color: selected ? Colors.white : Colors.black87,
-          fontWeight: selected ? FontWeight.bold : FontWeight.w500,
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        onSelected: (_) {
-          setState(() => selectedFilter = value);
-          ref.read(searchLecturaProvider.notifier).selectRuta(selectedFilter);
-          /*  if (selectedFilter == -1) {
-            ref.read(searchLecturaProvider.notifier).allFilter();
-          } else {
-            ref
-                .read(searchLecturaProvider.notifier)
-                .filterByRutaId(selectedFilter);
-          } */
-        },
-      ),
-    );
-  } */
 }

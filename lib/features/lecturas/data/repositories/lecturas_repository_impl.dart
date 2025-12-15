@@ -20,29 +20,51 @@ class LecturasRepositoryImpl extends LecturasRepository {
     Periodo? periodoRemoto;
     Periodo? periodoLocal = await local.getPeriodo(userId);
 
-    // 1️⃣ Intentar obtener periodo remoto solo si hay internet
+    bool backendRespondio = false;
+
+    // 1️⃣ Intentar obtener periodo remoto SOLO si hay internet
     if (hasNet) {
       try {
-        periodoRemoto = await remote.getPeriodoActivo(token);
+        periodoRemoto = await remote.getPeriodoActivo(token, userId);
+        backendRespondio = true; // 👈 respuesta válida del backend
+        debugPrint('Remoto: ${periodoRemoto?.name}');
       } catch (e) {
-         return null;
-        //throw Exception('Error cargar periodo api:');
+        // ❌ Error real → NO cerrar periodo local
+        debugPrint('Error backend: $e');
       }
     }
 
-    // 2️⃣ Si no hay periodo remoto → el backend cerró oficialmente
-    if (periodoRemoto == null) {
-      if (periodoLocal != null) {
+    // 2️⃣ Backend respondió y NO hay periodo activo → cerrar periodo local
+    if (backendRespondio && periodoRemoto == null) {
+      if (periodoLocal != null && !periodoLocal.cerrado) {
         final actualizado = periodoLocal.copyWith(cerrado: true);
         await local.savePeriodo(actualizado, userId);
-
         return await _calcularAvance(actualizado);
+      }
+      return periodoLocal;
+    }
+
+    // 3️⃣ No hay backend o no respondió → trabajar offline
+    if (!backendRespondio) {
+      if (periodoLocal != null) {
+        return await _calcularAvance(periodoLocal);
       }
       return null;
     }
 
-    // 3️⃣ Si no existe periodo local → es primera vez
+    // 4️⃣ Primera vez (no hay periodo local)
     if (periodoLocal == null) {
+      final nuevo = periodoRemoto!.copyWith(
+        userId: userId,
+        cerrado: false,
+        descargado: false,
+      );
+      await local.savePeriodo(nuevo, userId);
+      return await _calcularAvance(nuevo);
+    }
+
+    // 5️⃣ Backend trae un periodo distinto → periodo nuevo
+    if (periodoLocal.id != periodoRemoto!.id) {
       final nuevo = periodoRemoto.copyWith(
         userId: userId,
         cerrado: false,
@@ -52,38 +74,31 @@ class LecturasRepositoryImpl extends LecturasRepository {
       return await _calcularAvance(nuevo);
     }
 
-    // 4️⃣ El backend trae un periodo distinto → periodo nuevo
-    if (periodoLocal.id != periodoRemoto.id) {
-      final nuevo = periodoRemoto.copyWith(
-        userId: userId,
-        cerrado: false,
-        descargado: false,
-      );
-      await local.savePeriodo(nuevo, userId);
-      // await local.clearMedidores(); // según tu flujo
-
-      return await _calcularAvance(nuevo);
-    }
-
-    // 5️⃣ Mismo periodo → solo actualizar metadatos desde backend
+    // 6️⃣ Mismo periodo → sincronizar metadatos
     final actualizado = periodoLocal.copyWith(
       name: periodoRemoto.name,
       fecha: periodoRemoto.fecha,
-
-      // Mantener flags locales
-      cerrado: periodoLocal.cerrado,
-      descargado: periodoLocal.descargado,
       descargable: periodoRemoto.descargable,
+      cerrado: false,
+      descargado: periodoLocal.descargado,
     );
 
     await local.savePeriodo(actualizado, userId);
-
     return await _calcularAvance(actualizado);
   }
 
   @override
   Future<List<Lectura>> searchLecturas(String query, int userId) async {
     return await local.buscarPorCuenta(query, userId);
+  }
+
+  @override
+  Future<List<Lectura>> searchLecturasByRutas(
+    String query,
+    List<int> rutasIds,
+    int userId,
+  ) async {
+    return local.buscarPorCuentaByRutasId(query, rutasIds, userId);
   }
 
   @override

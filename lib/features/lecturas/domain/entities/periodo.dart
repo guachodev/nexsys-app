@@ -62,3 +62,10 @@ class Periodo {
     descargable: map['descargable'],
   );
 }
+
+class RutaCerrada {
+  final int id;
+  final bool cerrado;
+
+  RutaCerrada({required this.id, required this.cerrado});
+}

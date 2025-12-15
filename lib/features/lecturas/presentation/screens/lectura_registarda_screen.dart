@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
+import 'package:nexsys_app/core/utils/utils.dart';
 import 'package:nexsys_app/features/lecturas/domain/domain.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
 import 'package:nexsys_app/shared/widgets/widgets.dart';
@@ -56,104 +57,118 @@ class _LecturasListScreenState extends ConsumerState<LecturaRegistardaScreen> {
             ref.read(lecturasLocalProvider.notifier).filtrarPorRegistrado(1),
         child: Scaffold(
           appBar: BarApp(title: "Editar lecturas"),
-          body:  lecturasState.status == SearchStatus.loading ||
-              lecturasState.status == SearchStatus.initial
-          ? LoadingIndicator(subtitle: 'Cargando lecturas espere un momento')
-          :Column(
-            children: [
-              const SizedBox(height: 10),
+          body:
+              lecturasState.status == SearchStatus.loading ||
+                  lecturasState.status == SearchStatus.initial
+              ? LoadingIndicator(
+                  subtitle: 'Cargando lecturas espere un momento',
+                )
+              : Column(
+                  children: [
+                    const SizedBox(height: 10),
 
-              // 🔍 BUSCADOR
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: "Buscar por cuenta, medidor o nombre...",
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(14),
+                    // 🔍 BUSCADOR
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: TextField(
+                        decoration: InputDecoration(
+                          hintText: "Buscar por cuenta, medidor o nombre...",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        onChanged: (value) =>
+                            setState(() => searchQuery = value),
+                      ),
                     ),
-                  ),
-                  onChanged: (value) => setState(() => searchQuery = value),
-                ),
-              ),
-              _buildFilters(rutasState.rutas),
-              // 🔸 TOTAL
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 2,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Resultados: ${filtered.length}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black54,
+                    _buildFilters(rutasState.rutas),
+                    // 🔸 TOTAL
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 2,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Resultados: ${filtered.length}",
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+
+                    //const SizedBox(height: 4),
+                    Expanded(
+                      child: filtered.isEmpty
+                          ? _buildEmptyState()
+                          : _buildLecturasList(filtered),
+                    ),
+                  ],
                 ),
-              ),
-
-              //const SizedBox(height: 4),
-
-              Expanded(
-                child: filtered.isEmpty
-                    ? _buildEmptyState()
-                    : _buildLecturasList(filtered),
-              ),
-            ],
-          ),
         ),
       ),
     );
   }
 
   Widget _buildLecturasList(List<Lectura> lecturas) {
+    final rutasState = ref.read(rutasProvider);
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: lecturas.length,
       itemBuilder: (_, i) {
         final l = lecturas[i];
+        final cerrada = _rutaEstaCerrada(l.rutaId, rutasState);
 
-        return Card(
-          //elevation: 1,
-          color: Colors.white,
-          //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            onTap: () =>
-                context.push('/lectura/${l.id}', extra: LecturaModo.editar),
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Colors.blue.shade100,
-                child: Icon(Icons.water_drop, color: Colors.blue.shade600),
-              ),
-              title: Text(
-                "Cuenta: ${l.cuenta}",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+        return Opacity(
+          opacity: cerrada ? 0.5 : 1,
+          child: Card(
+            //elevation: 1,
+            color: Colors.white,
+            //shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () {
+                if (_rutaEstaCerrada(l.rutaId, rutasState)) {
+                  Notifications.error(
+                    context,
+                    "No se puede editar la lectura porque la ruta está cerrada.",
+                  );
+                  return;
+                }
+                context.push('/lectura/${l.id}', extra: LecturaModo.editar);
+              },
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: Colors.blue.shade100,
+                  child: Icon(Icons.water_drop, color: Colors.blue.shade600),
                 ),
-              ),
-              subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: Text(
-                  "Lectura actual: ${l.lecturaActual}\nMedidor: ${l.medidor}\nPropietario: ${l.propietario}",
-                  style: const TextStyle(fontSize: 14),
+                title: Text(
+                  "Cuenta: ${l.cuenta}",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
-              ),
-              trailing: const Icon(
-                Icons.chevron_right_rounded,
-                color: Colors.black45,
-                size: 28,
+                subtitle: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    "Lectura actual: ${l.lecturaActual}\nMedidor: ${l.medidor}\nPropietario: ${l.propietario}",
+                    style: const TextStyle(fontSize: 14),
+                  ),
+                ),
+                trailing: const Icon(
+                  Icons.chevron_right_rounded,
+                  color: Colors.black45,
+                  size: 28,
+                ),
               ),
             ),
           ),
         );
-
-        
       },
     );
   }
@@ -172,6 +187,14 @@ class _LecturasListScreenState extends ConsumerState<LecturaRegistardaScreen> {
         },
       ),
     );
+  }
+
+  bool _rutaEstaCerrada(int rutaId, RutasState rutasState) {
+    final ruta = rutasState.rutas.firstWhere(
+      (r) => r.id == rutaId,
+      orElse: () => Ruta(id: -999, detalle: '', sectorId: -1, cerrado: false),
+    );
+    return ruta.cerrado;
   }
 
   Widget _buildEmptyState() {

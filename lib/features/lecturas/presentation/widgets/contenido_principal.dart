@@ -1,9 +1,7 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nexsys_app/core/constants/constants.dart';
-import 'package:nexsys_app/core/database/database.dart';
 import 'package:nexsys_app/core/theme/theme.dart';
 import 'package:nexsys_app/core/utils/utils.dart';
 import 'package:nexsys_app/features/lecturas/presentation/presentation.dart';
@@ -32,6 +30,8 @@ class ContenidoPrincipal extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final descargado = periodoState.periodo?.descargado ?? false;
     final tieneAsignado = periodoState.periodo?.descargable ?? false;
+    final rutasBloqueadas =
+        rutasState.todasRutasCerradas || rutasState.unicaRutaCerrada;
     // Puede descargar solo si tiene asignado Y no está descargado
     final bool puedeDescargar = tieneAsignado && !descargado;
     return RefreshIndicator(
@@ -91,6 +91,11 @@ class ContenidoPrincipal extends ConsumerWidget {
                         _showDone(context);
                         return;
                       }
+
+                      if (rutasBloqueadas) {
+                        _showRutaCerrada(context);
+                        return;
+                      }
                       ref.read(searchLecturaProvider.notifier).reset();
                       context.push('/lecturas/search');
                     },
@@ -105,13 +110,20 @@ class ContenidoPrincipal extends ConsumerWidget {
                         _showDone(context);
                         return;
                       }
-                      if (rutasState.rutaSeleccionada!.id == -1) {
-                        Notifications.warning(
+
+                      if (rutasBloqueadas) {
+                        _showRutaCerrada(context);
+                        return;
+                      }
+
+                      if (!rutasState.rutaActivaAbierta) {
+                        Notifications.error(
                           context,
-                          "Seleccione la ruta en la que realizará las lecturas para continuar.",
+                          "Seleccione la ruta activa en la que realizará las lecturas para continua.",
                         );
                         return;
                       }
+
                       //ref.read(searchLecturaProvider.notifier).reset();
                       context.push('/lectura/ruta', extra: LecturaModo.ruta);
                     },
@@ -126,7 +138,13 @@ class ContenidoPrincipal extends ConsumerWidget {
                   ActionButton(
                     icon: Icons.edit,
                     text: "Editar lecturas",
-                    onTap: () => context.push('/lecturas/registrados'),
+                    onTap: () {
+                      if (rutasBloqueadas) {
+                        _showRutaCerrada(context);
+                        return;
+                      }
+                      context.push('/lecturas/registrados');
+                    },
                   ),
                   const SizedBox(height: 10),
                   ActionButton(
@@ -134,9 +152,9 @@ class ContenidoPrincipal extends ConsumerWidget {
                     text: "Lista de lecturas asignados",
                     onTap: () => context.push('/lecturas/lista'),
                   ),
-                  /* const SizedBox(height: 10),
+                  const SizedBox(height: 10),
 
-                  ActionButton(
+                  /* ActionButton(
                     icon: Icons.history_rounded,
                     text: "Resetear lecturas",
                     onTap: () {
@@ -146,10 +164,10 @@ class ContenidoPrincipal extends ConsumerWidget {
                         "Se resetearon las lecturas.",
                       );
                     },
-                  ), */
-                  const SizedBox(height: 10),
+                  ),
+                  const SizedBox(height: 10), */
 
-                  ActionButton(
+                  /* ActionButton(
                     icon: Icons.backup_rounded,
                     text: "Backup Base de datos",
                     onTap: () async {
@@ -190,7 +208,7 @@ class ContenidoPrincipal extends ConsumerWidget {
                         "Backup guardado correctamente",
                       );
                     },
-                  ),
+                  ), */
                 ],
               ),
           ],
@@ -205,6 +223,14 @@ class ContenidoPrincipal extends ConsumerWidget {
       icon: Icons.check_circle,
       title: '¡Completado!',
       message: 'Todas las lecturas han sido registradas correctamente.',
+    );
+  }
+
+  void _showRutaCerrada(BuildContext context) {
+    Notifications.error(
+      context,
+      "Todas las rutas asignadas se encuentran cerradas. "
+      "No es posible registrar, buscar ni editar lecturas.",
     );
   }
 }
@@ -343,7 +369,6 @@ class _Rutas extends ConsumerWidget {
     // Caso: Solo una ruta → Mostrar etiqueta
     if (rutasState.rutas.length == 1) {
       final ruta = rutasState.rutas.first;
-
       return Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
@@ -365,10 +390,10 @@ class _Rutas extends ConsumerWidget {
                 ),
               ),
             ),
-            Icon(
+            /* Icon(
               Icons.chevron_right_rounded,
               color: AppColors.primary.shade700,
-            ),
+            ), */
           ],
         ),
       );

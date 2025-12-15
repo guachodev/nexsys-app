@@ -13,7 +13,7 @@ class RutasNotifier extends StateNotifier<RutasState> {
   final int userId;
 
   RutasNotifier({required this.userId}) : super(RutasState()) {
-    cargarRutas();
+    //cargarRutas();
   }
 
   Future<void> cargarRutas() async {
@@ -32,7 +32,12 @@ class RutasNotifier extends StateNotifier<RutasState> {
       Ruta? rutaSeleccionada;
 
       if (result.length > 2) {
-        final todas = Ruta(id: -1, detalle: "Todas las rutas", sectorId: -1);
+        final todas = Ruta(
+          id: -1,
+          detalle: "Todas las rutas",
+          sectorId: -1,
+          cerrado: false,
+        );
         rutasFinal = [todas, ...result];
         rutaSeleccionada = todas; // default
       } else {
@@ -85,4 +90,37 @@ class RutasState {
       rutaSeleccionada: rutaSeleccionada ?? this.rutaSeleccionada,
     );
   }
+}
+
+extension RutasGuards on RutasState {
+  /// Ruta seleccionada válida y abierta
+  bool get rutaActivaAbierta =>
+      rutaSeleccionada != null &&
+      rutaSeleccionada!.id != -1 &&
+      !rutaSeleccionada!.cerrado;
+
+  /// ¿Tiene al menos una ruta abierta?
+  bool get tieneAlgunaRutaAbierta => rutas.any((r) => !r.cerrado);
+
+  /// ¿Todas las rutas están cerradas?
+  bool get todasRutasCerradas =>
+      rutas.isNotEmpty && rutas.every((r) => r.cerrado);
+
+  /// Solo una ruta y está cerrada
+  bool get unicaRutaCerrada => rutas.length == 1 && rutas.first.cerrado;
+
+  /// Rutas reales (sin "Todas")
+  List<Ruta> get rutasReales => rutas.where((r) => r.id != -1).toList();
+
+  /// Rutas abiertas
+  List<Ruta> get rutasAbiertas => rutasReales.where((r) => !r.cerrado).toList();
+
+  /// ¿Existen rutas abiertas?
+  bool get tieneRutasAbiertas => rutasAbiertas.isNotEmpty;
+
+  /// ¿La ruta seleccionada está cerrada?
+  bool get rutaSeleccionadaCerrada =>
+      rutaSeleccionada != null &&
+      rutaSeleccionada!.id != -1 &&
+      rutaSeleccionada!.cerrado;
 }
