@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:formz/formz.dart';
 import 'package:nexsys_app/core/services/services.dart';
@@ -53,6 +52,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
            rutaId: lectura.rutaId,
            sector: lectura.sector,
            periodo: lectura.periodo,
+           fechaLectura: lectura.fechaLectura,
          ),
        );
 
@@ -126,6 +126,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
         'sector': state.sector,
         'periodo': state.periodo,
         'editado': editado,
+        'fecha_lectura': state.fechaLectura,
       };
 
       // 📍 Solo si NO es edición
@@ -138,7 +139,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
         });
       }
 
-      debugPrint("📍 Lectura enviada: $lecturaLike");
+      // debugPrint("📍 Lectura enviada: $lecturaLike");
 
       await onSubmitCallback!(lecturaLike);
 
@@ -201,6 +202,7 @@ class LecturaFormNotifier extends StateNotifier<LecturaFormState> {
       rutaId: -1,
       sector: '',
       periodo: '',
+      fechaLectura: nuevaLectura.fechaLectura,
     );
   }
 }
@@ -219,6 +221,7 @@ class LecturaFormState {
   final int lecturaAnterior;
   final LecturaActual lecturaActual;
   final String? observacion;
+  final String? fechaLectura;
   final int consumo;
   final NovedadInput? novedadId;
   final bool isPosting;
@@ -242,6 +245,7 @@ class LecturaFormState {
     required this.rutaId,
     required this.sector,
     required this.periodo,
+    this.fechaLectura,
   });
 
   LecturaFormState copyWith({
@@ -262,6 +266,7 @@ class LecturaFormState {
     bool? isPosting,
     String? sector,
     String? periodo,
+    String? fechaLectura,
   }) {
     return LecturaFormState(
       isFormValid: isFormValid ?? this.isFormValid,
@@ -281,6 +286,7 @@ class LecturaFormState {
       rutaId: rutaId ?? this.rutaId,
       sector: sector ?? this.sector,
       periodo: periodo ?? this.periodo,
+      fechaLectura: fechaLectura ?? this.fechaLectura,
     );
   }
 }

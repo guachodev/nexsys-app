@@ -84,7 +84,7 @@ class SearchLecturaNotifier extends StateNotifier<SearchLecturaState> {
     }
 
     _debounceTimer = Timer(
-      const Duration(milliseconds: 500),
+      const Duration(milliseconds: 800),
       () => searchMoviesByQuery(value),
     );
   }

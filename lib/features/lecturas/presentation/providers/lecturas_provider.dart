@@ -52,6 +52,16 @@ class LecturasNotifier extends StateNotifier<LecturasState> {
     }
   }
 
+  Future<bool> recoverAndGetPendingSync() async {
+    try {
+      await lecturasRepository.recoverAndGetPendingSync(userId);
+      return true;
+    } catch (e) {
+      debugPrint('Error $e');
+      return false;
+    }
+  }
+
   Future<String?> exportarLecturas() async {
     try {
       final path = await lecturasRepository.exportarLecturas();
@@ -63,8 +73,7 @@ class LecturasNotifier extends StateNotifier<LecturasState> {
   }
 
   Future<Lectura?> nextLectura() async {
-      return await lecturasRepository.getLecturaOrden(userId, rutaId);
-      
+    return await lecturasRepository.getLecturaOrden(userId, rutaId);
   }
 }
 

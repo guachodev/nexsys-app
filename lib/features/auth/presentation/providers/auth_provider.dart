@@ -95,6 +95,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(authStatus: AuthStatus.notAuthenticated, user: null);
     //ref.read(sessionNotifierProvider).setAuthenticated(false);
   }
+
+  bool isAdmin(){
+    return state.user?.id == 0;
+  }
 }
 
 class AuthState {

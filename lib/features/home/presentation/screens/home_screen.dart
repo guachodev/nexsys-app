@@ -12,6 +12,7 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
+    final bool isAdmin = authState.user?.id==0; 
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -45,7 +46,7 @@ class HomeScreen extends ConsumerWidget {
                 crossAxisSpacing: 10,
                 mainAxisSpacing: 10,
                 //childAspectRatio: 0.85,
-                children: const [
+                children:  [
                   _QuickAccessCard(
                     icon: Icons.info_outline_rounded,
                     title: 'Acerca de',
@@ -63,6 +64,13 @@ class HomeScreen extends ConsumerWidget {
                     title: 'Lecturas',
                     subtitle: 'Registrar lecturas',
                     route: '/lecturas',
+                  ),
+                  if(isAdmin)
+                  _QuickAccessCard(
+                    icon: Icons.storage,
+                    title: 'Almacenamiento',
+                    subtitle: 'Registrar lecturas',
+                    route: '/admin/local',
                   ),
                 ],
               ),

@@ -60,7 +60,7 @@ class LecturaDao {
     final db = await DatabaseProvider.db;
     final result = await db.query(
       'lecturas',
-      where: 'registrado = 1 and sincronizado = ?',
+      where: 'registrado IN (1, -1) and sincronizado = ?',
       whereArgs: [0],
     );
 
@@ -321,6 +321,27 @@ class LecturaDao {
     return Sqflite.firstIntValue(res) ?? 0;
   }
 
+  static Future<int> getOrdenByLectura({
+    required int lecturaId,
+    required int userId,
+    required int rutaId,
+  }) async {
+    final db = await DatabaseProvider.db;
+
+    final res = await db.rawQuery(
+      '''
+    SELECT COALESCE(orden, 0) 
+    FROM lecturas 
+    WHERE lecturaId = ? 
+      AND usuarioId = ? 
+      AND rutaId = ?
+    ''',
+      [lecturaId, userId, rutaId],
+    );
+
+    return Sqflite.firstIntValue(res) ?? 0;
+  }
+
   static Future<int> getMedidoresLeidosByRutaId(int userId, int rutaId) async {
     final db = await DatabaseProvider.db;
     final res = await db.rawQuery(
@@ -428,6 +449,23 @@ class LecturaDao {
       },
       where: "lecturaId = ?",
       whereArgs: [lecturaId],
+    );
+  }
+
+  static Future<int> recoverAndGetPendingSync(int userId) async {
+    final db = await DatabaseProvider.db;
+
+    // 1️⃣ Recuperar lecturas tomadas que estaban en error (-1)
+    return await db.update(
+      'lecturas',
+      {'registrado': 1, 'sincronizado': 0},
+      where: '''
+    fechaLectura IS NOT NULL
+    AND fechaLectura <> ''
+    AND registrado = ?
+    AND usuarioId = ?
+  ''',
+      whereArgs: [-1, userId],
     );
   }
 

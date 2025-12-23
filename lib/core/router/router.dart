@@ -37,6 +37,12 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/lecturas',
         builder: (context, state) => const LecturasScreen(),
       ),
+      GoRoute(path: '/admin/local',
+      builder: (context, state)=> const LocalAdminScreen()
+      ),
+      GoRoute(path: '/admin/local/images',
+      builder: (context, state)=> const LocalImagesScreen()
+      ),
       GoRoute(
         path: '/lecturas/search',
         builder: (context, state) => const SearchLecturaScreen(),

@@ -153,7 +153,30 @@ class ContenidoPrincipal extends ConsumerWidget {
                     onTap: () => context.push('/lecturas/lista'),
                   ),
                   const SizedBox(height: 10),
+                  /*ActionButton(
+                    icon: Icons.rotate_90_degrees_cw_outlined,
+                    text: "Recuperar lecturas",
+                    onTap: () async {
+                      final success = await ref
+                          .read(lecturasProvider.notifier)
+                          .recoverAndGetPendingSync();
 
+                      if (!context.mounted) return;
+
+                      if (success) {
+                        Notifications.success(
+                          context,
+                          "Lecturas recuperadas correctamente.",
+                        );
+                      } else {
+                        Notifications.error(
+                          context,
+                          "Error al recuperar lecturas.",
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 10),*/
                   /* ActionButton(
                     icon: Icons.history_rounded,
                     text: "Resetear lecturas",
@@ -166,8 +189,7 @@ class ContenidoPrincipal extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 10), */
-
-                  /* ActionButton(
+                  /*ActionButton(
                     icon: Icons.backup_rounded,
                     text: "Backup Base de datos",
                     onTap: () async {
@@ -208,7 +230,7 @@ class ContenidoPrincipal extends ConsumerWidget {
                         "Backup guardado correctamente",
                       );
                     },
-                  ), */
+                  ),*/
                 ],
               ),
           ],

@@ -126,6 +126,18 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
     return await LecturaDao.getImagenesPendientes(lecturaId);
   }
 
+  Future<int> getOrdenByLectura(
+    int lecturaId,
+    int usuarioId,
+    int rutaId,
+  ) async {
+    return await LecturaDao.getOrdenByLectura(
+      lecturaId: lecturaId,
+      userId: usuarioId,
+      rutaId: rutaId,
+    );
+  }
+
   Future<void> marcarLecturaComoError(int lecturaId) async {
     await LecturaDao.marcarLecturaComoError(lecturaId);
   }
@@ -171,6 +183,10 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
 
   Future<void> resetearLEcturas() async {
     return await LecturaDao.resetLecturas();
+  }
+
+  Future<int> recoverAndGetPendingSync(int userId) async {
+    return await LecturaDao.recoverAndGetPendingSync(userId);
   }
 
   Future<void> lecturaSincronizada(int lecturaId) async {

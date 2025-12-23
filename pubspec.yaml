@@ -29,6 +29,7 @@ environment:
 # versions available, run `flutter pub outdated`.
 dependencies:
   animate_do: ^4.2.0
+  archive: ^4.0.7
   audioplayers: ^6.5.1
   connectivity_plus: ^7.0.0
   cupertino_icons: ^1.0.8

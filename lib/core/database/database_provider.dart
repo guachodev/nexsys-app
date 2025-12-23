@@ -21,7 +21,7 @@ class DatabaseProvider {
         "${now.minute.toString().padLeft(2, '0')}"
         "${now.second.toString().padLeft(2, '0')}";
 
-    return "backup_nexsys_app_$formatted.db";
+    return "backup_nexsysapp_$formatted.db";
   }
 
   static Future<Database> _initDB() async {
@@ -38,6 +38,18 @@ class DatabaseProvider {
     final dbDir = await getDatabasesPath();
     final dbPath = join(dbDir, 'nexsys_app.db');
     return File(dbPath);
+  }
+
+  static Future<void> clearAllTables() async {
+    final db = await DatabaseProvider.db;
+
+    await db.transaction((txn) async {
+      await txn.delete('lectura_images');
+      await txn.delete('lecturas');
+      await txn.delete('ruta');
+      await txn.delete('periodo');
+      await txn.delete('novedad');
+    });
   }
 
   static Future<void> _onCreate(Database db, int version) async {

@@ -238,6 +238,8 @@ class _ProductView extends ConsumerWidget {
                         label: "Propietario:",
                         value: lectura.propietario,
                       ),
+                      if (lectura.direccion != null)
+                        InfoRow(label: "Dirección:", value: lectura.direccion!),
                     ],
                   ),
                 ),
@@ -435,7 +437,7 @@ class _BotonSave extends ConsumerWidget {
         } else if (modo == LecturaModo.editar) {
           Notifications.success(context, "Se actualizó correctamente.");
           ref.read(periodoProvider.notifier).refreshAvance();
-          ref.read(lecturasLocalProvider.notifier).filtrarPorRegistrado(1);
+          ref.read(lecturasRegistradoslProvider.notifier).filtrarPorRegistrado(1);
           formNotifier.stop();
           context.pop();
         } else if (modo == LecturaModo.ruta) {
@@ -513,13 +515,13 @@ class _ImagenesLectura extends ConsumerWidget {
               "Tomar foto",
               style: TextStyle(color: AppColors.primary),
             ),
-            style: OutlinedButton.styleFrom(
+            /* style: OutlinedButton.styleFrom(
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8), // Radio del botón
               ),
               side: const BorderSide(color: AppColors.primary),
               padding: const EdgeInsets.symmetric(vertical: 6),
-            ),
+            ), */
           ),
         ),
         const SizedBox(height: 4),

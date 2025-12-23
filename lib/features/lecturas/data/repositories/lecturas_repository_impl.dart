@@ -143,6 +143,7 @@ class LecturasRepositoryImpl extends LecturasRepository {
       final hasNet = await ConnectivityService.hasConnection();
       final int lecturaId = lecturaLike['id'];
       final int baseId = lecturaLike['baseId'];
+      final int rutaId = lecturaLike['rutaId'];
 
       // 1️⃣ Guardar SIEMPRE en local
       await local.updateLectura(lecturaLike, baseId);
@@ -157,8 +158,17 @@ class LecturasRepositoryImpl extends LecturasRepository {
       // 3️⃣ Sincronizar si hay internet
       if (!hasNet) return;
 
+      // 4️⃣ Preparar payload según tipo
+      late final Map<String, dynamic> payload;
+
+      // 🆕 Enviar orden generado en local
+      final newOrden = await local.getOrdenByLectura(lecturaId, userId, rutaId);
+      payload = {...lecturaLike, 'orden': newOrden};
+
+      print(payload);
+
       // 3.1️⃣ Sincronizar lectura
-      await remote.updateLectura(lecturaLike, token);
+      await remote.updateLectura(payload, token);
 
       // 3.2️⃣ Sincronizar imágenes
       if (imagenes.isNotEmpty) {
@@ -173,7 +183,7 @@ class LecturasRepositoryImpl extends LecturasRepository {
       // 3.3️⃣ Marcar como sincronizada SOLO si todo salió bien
       await local.lecturaSincronizada(baseId);
     } catch (e, stack) {
-      debugPrint('❌ Error updateLectura: $e');
+      debugPrint('❌ Error updateLectura: ${e.toString()}');
       debugPrintStack(stackTrace: stack);
       rethrow;
     }
@@ -256,6 +266,10 @@ class LecturasRepositoryImpl extends LecturasRepository {
     await calcularAvancePeriodo(periodo);
   }
 
+  Future<int> recoverAndGetPendingSync(int userId) async {
+    return await local.recoverAndGetPendingSync(userId);
+  }
+
   Future<int> sincronizarLecturas(String token) async {
     final pendientes = await local.getLecturasPendiente();
 
@@ -275,6 +289,7 @@ class LecturasRepositoryImpl extends LecturasRepository {
           'empleado_id': lectura.lectorId,
           'latitud': lectura.latitud,
           'longitud': lectura.longitud,
+          //'orden': lectura.orden,
         };
 
         // 1️⃣ Sincronizar lectura
@@ -293,7 +308,7 @@ class LecturasRepositoryImpl extends LecturasRepository {
         exitosas++;
       } catch (e) {
         debugPrint("❌ Error sincronizando lectura ${lectura.id}: $e");
-        await local.marcarLecturaComoError(lectura.id);
+        //await local.marcarLecturaComoError(lectura.id);
       }
     }
 

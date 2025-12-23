@@ -75,7 +75,7 @@ class LecturasDatasourceImpl extends LecturasDatasource {
   ) async {
     try {
       final int? lecturaId = lecturaLike['id'];
-      debugPrint('Updating lectura ID: $lecturaId with data: $lecturaLike');
+      //debugPrint('Updating lectura ID: $lecturaId with data: $lecturaLike');
       await dio.request(
         '/lectura/$lecturaId',
         data: lecturaLike,
