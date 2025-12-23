@@ -270,6 +270,10 @@ class LecturasRepositoryImpl extends LecturasRepository {
     return await local.recoverAndGetPendingSync(userId);
   }
 
+Future<int> recoverAndGetPendingSyncAll() async {
+    return await local.recoverAndGetPendingSyncAll();
+  }
+
   Future<int> sincronizarLecturas(String token) async {
     final pendientes = await local.getLecturasPendiente();
 

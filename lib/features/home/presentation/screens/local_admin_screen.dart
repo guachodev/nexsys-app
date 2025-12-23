@@ -52,7 +52,7 @@ class LocalAdminScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
 
                 Text(
-                  "Estás a punto de borrar toda la información local del dispositivo, incluyendo lecturas pendientes e imágenes almacenadas.",
+                  "Estás a punto de borrar toda la información local del dispositivo, incluyendo lecturas e imágenes almacenadas.",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
                 ),

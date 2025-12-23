@@ -189,6 +189,10 @@ class LecturasLocalDatasourceImpl extends LocalLecturasDatasource {
     return await LecturaDao.recoverAndGetPendingSync(userId);
   }
 
+  Future<int> recoverAndGetPendingSyncAll() async {
+    return await LecturaDao.recoverAndGetPendingSyncAll();
+  }
+
   Future<void> lecturaSincronizada(int lecturaId) async {
     return await LecturaDao.marcarSincronizada(lecturaId);
   }

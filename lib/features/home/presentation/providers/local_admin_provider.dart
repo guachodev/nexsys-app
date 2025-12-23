@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:nexsys_app/core/database/database.dart';
+import 'package:nexsys_app/core/services/services.dart';
 import 'package:nexsys_app/features/auth/presentation/presentation.dart';
 import 'package:nexsys_app/features/lecturas/data/data.dart';
 
@@ -125,6 +126,7 @@ class LocalAdminNotifier extends StateNotifier<LocalAdminState> {
 
     try {
       await DatabaseProvider.clearAllTables();
+      await ImageService.clearAllImages();
 
       state = state.copyWith(
         message: LocalAdminMessage(

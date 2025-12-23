@@ -469,6 +469,22 @@ class LecturaDao {
     );
   }
 
+  static Future<int> recoverAndGetPendingSyncAll() async {
+    final db = await DatabaseProvider.db;
+
+    // 1️⃣ Recuperar lecturas tomadas que estaban en error (-1)
+    return await db.update(
+      'lecturas',
+      {'registrado': 1, 'sincronizado': 0},
+      where: '''
+    fechaLectura IS NOT NULL
+    AND fechaLectura <> ''
+    AND registrado = ?
+  ''',
+      whereArgs: [-1],
+    );
+  }
+
   static Future<int> getLastOrderForMonth(int userId, int rutaId) async {
     final db = await DatabaseProvider.db;
 

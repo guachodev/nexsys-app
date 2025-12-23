@@ -62,13 +62,18 @@ class LocalImagesScreen extends ConsumerWidget {
             },
           ),
         ], */
+        //Center(child: Text('No hay imágenes'))
       ),
       body: imagesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (images) {
           if (images.isEmpty) {
-            return const Center(child: Text('No hay imágenes'));
+            return const EmptyState(
+              title: 'No hay imágenes',
+              icon: Icons.image_search_rounded,
+              subtitle: 'No se encontraron imagenes locales',
+            );
           }
 
           return GridView.builder(
