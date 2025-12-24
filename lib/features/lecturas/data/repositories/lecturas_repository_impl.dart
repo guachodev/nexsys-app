@@ -274,6 +274,10 @@ Future<int> recoverAndGetPendingSyncAll() async {
     return await local.recoverAndGetPendingSyncAll();
   }
 
+  Future<int> recoverAndGetRegisterSync() async {
+    return await local.recoverAndGetRegisterSync();
+  }
+
   Future<int> sincronizarLecturas(String token) async {
     final pendientes = await local.getLecturasPendiente();
 
@@ -293,7 +297,7 @@ Future<int> recoverAndGetPendingSyncAll() async {
           'empleado_id': lectura.lectorId,
           'latitud': lectura.latitud,
           'longitud': lectura.longitud,
-          //'orden': lectura.orden,
+          'orden': lectura.orden,
         };
 
         // 1️⃣ Sincronizar lectura

@@ -155,6 +155,16 @@ class LocalAdminScreen extends ConsumerWidget {
                 .read(localAdminProvider.notifier)
                 .recoverAndGetPendingSync(),
           ),
+          const SizedBox(height: 12),
+          EnterpriseActionButton(
+            icon: Icons.history_rounded,
+            title: 'Cambiar lectura a registrado',
+            subtitle: 'Reinicia el estado a registrado cuando sea -1',
+            color: Colors.pink,
+            onTap: () => ref
+                .read(localAdminProvider.notifier)
+                .recoverAndGetRegisterSync(),
+          ),
 
           /* EnterpriseActionButton(
             icon: Icons.history_rounded,

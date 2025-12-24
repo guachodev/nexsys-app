@@ -102,7 +102,7 @@ class LocalAdminNotifier extends StateNotifier<LocalAdminState> {
   Future<void> recoverAndGetPendingSync() async {
     state = state.copyWith(isLoading: true);
     try {
-      final total = await lecturasRepository.recoverAndGetPendingSync(userId);
+      final total = await lecturasRepository.recoverAndGetPendingSyncAll();
       state = state.copyWith(
         message: LocalAdminMessage(
           '$total - Lecturas recuperadas correctamente.',
@@ -113,6 +113,28 @@ class LocalAdminNotifier extends StateNotifier<LocalAdminState> {
       state = state.copyWith(
         message: LocalAdminMessage(
           'Error al recuperar lecturas.',
+          LocalAdminMessageType.error,
+        ),
+      );
+    } finally {
+      state = state.copyWith(isLoading: false);
+    }
+  }
+
+   Future<void> recoverAndGetRegisterSync() async {
+    state = state.copyWith(isLoading: true);
+    try {
+      final total = await lecturasRepository.recoverAndGetRegisterSync();
+      state = state.copyWith(
+        message: LocalAdminMessage(
+          '$total - Lecturas cambiados correctamente.',
+          LocalAdminMessageType.success,
+        ),
+      );
+    } catch (e) {
+      state = state.copyWith(
+        message: LocalAdminMessage(
+          'Error al cambiar a registrado las lecturas.',
           LocalAdminMessageType.error,
         ),
       );
